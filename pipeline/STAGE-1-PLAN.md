@@ -1,8 +1,8 @@
 # 第 1 阶段规划：把测评重构为「证明补全」测评
 
 - 日期：2026-08-17
-- 状态：执行中（1.1 已完成 2026-08-18；1.2–1.4 待做）
-- 进度：1.1 ✅（`experiment-design.md` §1 任务定义/研究问题/成功标准已重写，三句话口径落盘）；1.2 / 1.3 / 1.4 待做
+- 状态：执行中（1.1–1.4 已完成 2026-08-18；仅剩样题自测验收）
+- 进度：1.1 ✅（`experiment-design.md` §1 重写）；1.2 ✅（`prompt-terra-problem-curator.md` v2 ＋ `problems/stage1-samples/` 三题）；1.3 ✅（`prompt-gpt56sol-reviewer.md` v2 ＋ `pipeline/rubric-samples/` 校准样稿与应用记录）；1.4 ✅（`pipeline/writer-v04-direction.md`）；样题自测（窄缝定档）待做
 - 细化：`TECH-ROADMAP.md` 的阶段 1
 - 前提共识：见 `DESIGN-REFLECTION.md`；终极任务模板 = 桌面 `seidel_conjecture_distilled_work_charter.md`
 

@@ -1,0 +1,193 @@
+# 样题包 S01：Erdős–Ginzburg–Ziv 定理（去答案化蒸馏）
+# v2 schema；STAGE-1 1.2 产物。status=candidate（未入队、未经预测试定档）
+package_id: P-S01_egz-v2
+status: candidate
+split: dev
+probe_only: false
+created_by: terra
+created_at: 2026-08-18
+frozen_at: null
+
+narrow_slot_calibration:
+  expected_standalone_solvability: low
+  rationale: |
+    定理陈述知名度中等（组合数论经典结果），写手若记得名字可能记得结论但极少背下完整证明。
+    素数情形需要"指示函数 x^(p-1) 编码 + 计数定理"的双多项式构造，合成情形需要反复提取 p-块的
+    计数论证——这两处都不是能从定理陈述直接读出的套路。给 D1（计数定理）与脊柱后闭合路径变短，
+    预计带包可补（judge C>=3 待实测）。
+  pretest_protocol: |
+    阶段2: ① 裸题探针(仅 statement)应失败或仅部分有效; ② 带包探针应 judge C>=3; 两条都满足才 confirmed
+  measured: null
+
+source_record:
+  authors: Erdős, P.; Ginzburg, A.; Ziv, A.
+  title: Theorem in the additive number theory
+  year: 1961
+  url_or_doi_or_arxiv: Bull. Res. Council Israel 10F (1961), 41–43
+  source_type: primary
+  source_pool: C_textbook_theorem
+  accessed_on: 2026-08-18
+  original_text_obtained: false
+  evidence_status: verified
+  likely_memorized: true
+  memorization_note: |
+    定理是组合数论教材标准内容（如 additive combinatorics 教材），结论易被记得；
+    完整证明（尤其合成情形的提取计数）在训练语料中出现频率远低于结论本身。
+    注意: 原文未获取，参考证明为按标准教材重建——正式入池前必须补 original_text_obtained: true。
+
+selection_record:
+  mathematical_area: 组合数论 / 零和问题
+  proof_structure: key_lemma
+  narrow_slot_design_rationale: |
+    最难补的 gap 有两处: (1) 素数情形把"选 p 个且和为 0"编码成多项式方程组的非零解——
+    钥匙是依赖 D1（计数定理）+ D2（幂次指示函数），但哪个多项式、怎么组合要写手自己搭;
+    (2) 合成情形"反复提取 p-块再归纳"的计数论证，容易在剩余元素个数处出错。
+    两个钥匙都以精确陈述给足，闭合路径存在且不显然。
+  known_failure_modes:
+    - 素数情形: 度数条件算错（写 2p-1 个变量却只用 p-1 次幂导致 D1 前提不成立）
+    - 素数情形: 推出"公共零点数>=1"后直接结束，未用 D2 推出恰好 p 个非零分量
+    - 合成情形: 提取 k 块后剩余个数算错，导致中途不够 2p-1 个而卡住
+    - 合成情形: 归纳假设用错对象（对原始数组而非提取后的商数组用归纳）
+    - lazy stop: 素数情形做不出即放弃，未先完成合成情形的归约框架
+  rejection_risk:
+    - 若预测试发现目标写手裸题即写出完整证明 -> 秒杀，淘汰
+    - 原文未获取: 入正式池前必须补原文
+
+de_answering_record:
+  stripped:
+    - 计数定理的名字（Chevalley–Warning）
+    - 指示函数构造: 多项式 Σ x_i^{p-1} 与 Σ a_i x_i^{p-1} 的具体形式
+    - 合成情形"提取 p-块 + 商数组归纳"的策略
+    - 定理名（Erdős–Ginzburg–Ziv）与 Davenport 常数等术语
+  retained:
+    - 脊柱 S1 只给目标: "把选 p 个且和为 0 编码为多项式方程组的非零解"（编码是目标不是构造）
+    - 依赖 D1/D2 以精确陈述给足（这是脚手架，必须给足才能测"组合能力"）
+  audit_note: 写手包内无连线句、无名号、无"用 D1 可得"式提示；D1 的"何时用"由写手自己判断。
+
+writer_bundle:
+  statement: |
+    命题: 设 n >= 1 为整数。任意 2n-1 个整数中，都存在 n 个，其和能被 n 整除。
+
+    符号约定: 给定整数列 a_1, a_2, ..., a_{2n-1}。记 F_p 为模 p 的剩余类域（p 素数），
+    其元素按模 p 同余理解; "两个整数模 p 相等"与"差被 p 整除"同义。
+    多项式在 F_p 上时，系数与取值均按模 p 理解。
+  proof_spine:
+    - step_id: S1
+      objective: |
+        对 n 为素数的情形（记 n = p）证明结论成立。做法框架: 把"存在 p 个元素且其和为 0
+        (mod p)"编码为某个有限个 F_p 上多项式的方程组的非零公共解，并用允许依赖中的
+        计数定理完成论证。
+      completion_test: |
+        你显式写出了该方程组（变量个数、每个多项式及其次数都可核验），验证了它满足
+        允许依赖 D1 的度数条件，并证明了: 方程组的非零公共解与"和为 0 (mod p) 的 p 个
+        下标构成的子集"一一对应。整个 S1 论证闭合，无跳步。
+    - step_id: S2
+      objective: |
+        对合成情形: 设 n = p·m（p 为素数，m 为正整数且 m < n）。假设结论对 m 已成立，
+        把 S1 的素数情形结论当作黑箱，证明结论对 n 成立。
+      completion_test: |
+        写清了从 2pm-1 个元素中"反复提取若干组、每组恰 p 个且组内和能被 p 整除"的
+        计数论证: 提取的总组数、每轮提取前剩余元素个数的下界都显式写出且正确;
+        并明确构造出一个恰有 2m-1 个整数的数组，归纳假设恰好适用于它，最终回代得到
+        和为 p·m 的倍数的 pm = n 个元素。论证闭合。
+  allowed_dependencies:
+    - id: D1
+      kind: lemma
+      statement: |
+        （有限域上的计数定理）设 p 为素数，f_1, ..., f_r 为 F_p 上的 m 元多项式，
+        且 deg(f_1) + ... + deg(f_r) < m。则 f_1, ..., f_r 在 F_p^m 中的公共零点个数
+        N 满足 N ≡ 0 (mod p)。
+    - id: D2
+      kind: standard_result
+      statement: |
+        （剩余类幂的取值）对任意 x ∈ F_p: 若 x ≠ 0 则 x^(p-1) = 1; 而 0^(p-1) = 0。
+        因此 x^(p-1) ∈ {0, 1}，且 x^(p-1) = 1 当且仅当 x ≠ 0。
+    - id: D3
+      kind: standard_result
+      statement: |
+        （整除算术）(a) 若整数 S 被素数 p 整除，则存在整数 c 使 S = p·c;
+        (b) 若整数 S 被 n = p·m 整除（p, m 为正整数），且 S = p·c，则 c 被 m 整除。
+  claim_status_convention: |
+    对证明中每个承重断言标注六态之一:
+    - FIXED: 题目给定的目标或已定约定;
+    - IMPORTED-VERIFIED: 引用允许依赖，且已核对适用前提;
+    - PROVED-IN-PROJECT: 在本证明中给出完整证明;
+    - CONDITIONAL: 在精确写出的未证输入下成立;
+    - CANDIDATE: 提议的构造/策略，尚未建立;
+    - BLOCKED: 被精确障碍阻住（须写出最小 blocker）。
+    任何未加证明的承重断言不得无标签使用; BLOCKED 须附最小 blocker 与最强已证结论。
+  writing_discipline: |
+    1. 一个证明只回答一个主问题; 不复述题目包背景。
+    2. 不使用"工作流/审计"类词汇，只写数学正文。
+    3. 详细计算只出现在承重处（构造、度数验证、提取计数）; 例行步骤一笔带过。
+    4. 补不动时: 报告最小 blocker 与最强已证定理，不堆砌"显然/标准论证"。
+    5. 保守专业的数学文风: 自然段推进，公式与解释文字配比适度。
+  closed_book_notice: |
+    仅可使用本 bundle; 不得检索、不得假定未列出的结果、不得使用题目包外的定理名。
+
+judge_bundle:
+  theorem_name: Erdős–Ginzburg–Ziv 定理（1961）
+  reference_proof: |
+    素数情形 (n = p)。给定 a_1,...,a_{2p-1} ∈ F_p。取 m = 2p-1 个变量 x_1,...,x_{2p-1}，
+    定义两个多项式
+      f(x) = Σ_{i=1}^{2p-1} x_i^{p-1},   g(x) = Σ_{i=1}^{2p-1} a_i x_i^{p-1}.
+    deg f + deg g = 2(p-1) < 2p-1 = m，由 D1，公共零点数 N ≡ 0 (mod p)。
+    显然 (0,...,0) 是公共零点，故 N ≥ 1，结合 N ≡ 0 (mod p) 得 N ≥ p > 1，
+    故存在非零公共解 x = (x_1,...,x_{2p-1}) ≠ 0。
+    由 D2: f(x) ≡ 0 即 Σ x_i^{p-1} ≡ 0，而每个 x_i^{p-1} ∈ {0,1}，故
+      #{i : x_i ≠ 0} ≡ 0 (mod p)。
+    该数在 [1, 2p-1] 内，故恰为 p。再由 g(x) ≡ 0:
+      Σ_{i: x_i ≠ 0} a_i = Σ a_i x_i^{p-1} ≡ 0 (mod p)。
+    于是下标集 {i : x_i ≠ 0} 恰含 p 个元素且其 a 和 ≡ 0 (mod p)。素数情形证毕。
+
+    合成情形。n = p·m，对 m 归纳（n=1 平凡; n 为素数即上段; 其余 n = pm, m < n）。
+    给定 a_1,...,a_{2pm-1}。断言: 可从中提取 2m-1 个两两不交的 p 元子块，每块内和能被 p 整除。
+    归纳地: 设已提取 k 块（0 ≤ k ≤ 2m-2），剩余元素数 = 2pm-1-kp ≥ 2pm-1-(2m-2)p = 2p-1，
+    故剩余至少 2p-1 个，对其中任意 2p-1 个应用素数情形，得一 p 元子块其和 ≡ 0 (mod p)。
+    提取 2m-1 块 B_1,...,B_{2m-1}，记块内和 S_j = p·c_j（D3(a)）。
+    对整数列 c_1,...,c_{2m-1} 应用归纳假设（结论对 m 成立），存在 m 个下标
+    j_1,...,j_m 使 c_{j_1}+...+c_{j_m} ≡ 0 (mod m)。则并集 B_{j_1} ∪ ... ∪ B_{j_m}
+    恰含 pm = n 个元素，其和 = p(c_{j_1}+...+c_{j_m}) 被 pm = n 整除（D3(b)）。证毕。
+  key_lemmas:
+    - lemma: D1 计数定理
+      why_key: 素数情形的存在性引擎——把组合选择问题转化为零点计数
+      applicability_conditions: p 素数; 总度数 < 变量数; 结论只保证零点数 ≡ 0 (mod p)
+    - lemma: D2 幂次指示函数
+      why_key: x^(p-1) 是"非零"的指示函数，把零点信息翻译成子集大小
+      applicability_conditions: F_p 上的取值; 依赖 Fermat 小定理
+  spine_answer_key:
+    - step_id: S1
+      full_closure: |
+        方程组 f = Σ x_i^{p-1} = 0, g = Σ a_i x_i^{p-1} = 0（2p-1 个变量）;
+        度数 2(p-1) < 2p-1 满足 D1; N ≡ 0 (mod p) 且 N ≥ 1 ⇒ 非零公共解;
+        由 D2 得 #{x_i≠0} ≡ 0 (mod p) 且 ∈ [1,2p-1] ⇒ 恰为 p; 且 Σ_{x_i≠0} a_i ≡ 0。
+    - step_id: S2
+      full_closure: |
+        提取计数: 提取 k 块后剩余 2pm-1-kp ≥ 2p-1 (k ≤ 2m-2)，可继续提取;
+        共提 2m-1 块，S_j = p·c_j; 对 c_1..c_{2m-1} 用归纳假设取 m 项和为 m 的倍数;
+        并集恰 n 个元素，和 = p·(m 的倍数) 被 pm 整除。
+  failure_mode_annotations:
+    - 度数条件不满足（如只用 p 个变量或次数写成 p）-> S1 completion_test 不过
+    - 只证 N ≥ 1 未推出恰 p 个非零分量 -> 结论缺"选 p 个"
+    - 提取计数在剩余个数处算错 -> S2 completion_test 不过
+    - 归纳用于原始数组而非 c 数组 -> 整除链条断裂
+  variants:
+    - variant_id: full
+      modification: "无修改"
+      writer_bundle_patch: {}
+      expected_outcome: 完整补出证明; judge 按 spine_answer_key 核补全度
+    - variant_id: missing_D1
+      modification: 删除允许依赖 D1
+      writer_bundle_patch:
+        remove_dependency_ids: [D1]
+      expected_outcome: 素数情形无计数引擎，正确行为是报最小 blocker（此变体为探针用途，不进 A/B 主结论）
+
+run_policy:
+  variants_to_run: [full]
+  writer_models: []
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol

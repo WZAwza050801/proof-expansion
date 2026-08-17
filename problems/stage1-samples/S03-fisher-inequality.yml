@@ -1,0 +1,207 @@
+# 样题包 S03：Fisher 不等式（去答案化蒸馏）
+# v2 schema；STAGE-1 1.2 产物。status=candidate（未入队、未经预测试定档）
+package_id: P-S03_fisher-inequality-v2
+status: candidate
+split: dev
+probe_only: false
+created_by: terra
+created_at: 2026-08-18
+frozen_at: null
+
+narrow_slot_calibration:
+  expected_standalone_solvability: medium
+  rationale: |
+    定理（b ≥ v）是组合设计经典结果，线性代数证法（关联矩阵 + 行满秩）在教材与网络
+    材料中常见，部分强模型可能记得轮廓。三处"可失手点"仍构成窄缝: r 为常数的双计数
+    证明、"特征值非零"的退化排除（r-λ ≠ 0 需要 k < v）、秩在实数域上的论证。
+    给 D2/D3（秩性质 + 特殊对称矩阵行列式）后闭合路径很短，预计带包可补;
+    若预测试发现目标写手裸题即写出完整证明 -> 秒杀，淘汰（按协议实测定档）。
+  pretest_protocol: |
+    阶段2: ① 裸题探针(仅 statement)应失败或仅部分有效; ② 带包探针应 judge C>=3; 两条都满足才 confirmed
+  measured: null
+
+source_record:
+  authors: Fisher, R. A.
+  title: An examination of the different possible solutions of a problem in incomplete blocks
+  year: 1940
+  url_or_doi_or_arxiv: Annals of Eugenics 10 (1940), 52–75
+  source_type: primary
+  source_pool: C_textbook_theorem
+  accessed_on: 2026-08-18
+  original_text_obtained: false
+  evidence_status: verified
+  likely_memorized: true
+  memorization_note: |
+    结论与线性代数证法是组合设计教材标准内容（如 Stinson "Combinatorial Designs" 类教材），
+    记忆风险高于 S01/S02。写手包内不出现"关联矩阵 / N·N^T / Fisher"等词。
+    注意: 原文未获取，参考证明为按标准教材重建——正式入池前必须补 original_text_obtained: true。
+
+selection_record:
+  mathematical_area: 组合设计 / 关联结构
+  proof_structure: construction
+  narrow_slot_design_rationale: |
+    最难补的 gap: (1) r 为常数的双计数论证; (2) 把 b ≥ v 归约为"某 v×b 0/1 矩阵行满秩"
+    并进一步化为"该矩阵与其转置之积可逆"; (3) 可逆性: M M^T 的元素恰取两类值，
+    借助 D3 得到全部特征值并逐一证非零（含 r = λ 退化情形的排除）。
+    钥匙 D2/D3 以精确陈述给足，但"构造哪个矩阵、取哪个转置方向"由写手自己定。
+  known_failure_modes:
+    - r 常数性证明不完整（只对"某个点"计数）
+    - M M^T 对角/非对角元素算错（r 与 λ 位置互换）
+    - 忘记排除 r = λ 退化（r-λ 特征值为零会导致行列式为 0 的错误结论）
+    - 秩论证域混淆（在模 2 或有限域上算秩，特征值论证只在实数域成立）
+    - 行满秩 ⇒ b ≥ v 的连接没写
+    - lazy stop: 算出 M M^T 形式后即停，未证非奇异
+  rejection_risk:
+    - 记忆风险最高: 若预测试发现目标写手裸题写出完整证明 -> 秒杀，淘汰
+    - 原文未获取: 入正式池前必须补原文
+
+de_answering_record:
+  stripped:
+    - "关联矩阵"、"N·N^T" 及其 Gram 形式 (r-λ)I + λJ
+    - "特征值"一词（D3 以自足陈述给出）
+    - r 为常数的双计数构造
+    - 定理名（Fisher）与"2-设计参数恒等式 r(k-1) = λ(v-1)"
+  retained:
+    - 脊柱 S2 只给路线目标: "构造 v×b 0/1 矩阵并化为其与转置之积的可逆性"（这是目标形态，
+      但没给矩阵元素取什么值、转置取哪个方向）
+    - 依赖 D1–D4 全部以精确陈述给足
+  audit_note: 写手包内无连线句、无名号; "用哪个依赖"由写手自己判断。
+
+writer_bundle:
+  statement: |
+    命题: 设 v 个点的集合 V 上给定了 b 个块（V 的子集），满足:
+      (i) 每个块恰含 k 个点，其中 1 < k < v;
+      (ii) V 中任意两个不同点恰同属于 λ 个块，其中 λ ≥ 1。
+    证明: b ≥ v。
+
+    符号约定: 点集 V = {P_1, ..., P_v}，块集记 B（|B| = b）。对点 P 记 r(P) = 含 P 的块数。
+    全 1 矩阵 J_n 表示 n×n 且每个元素都是 1 的矩阵; I_n 为单位阵。
+    矩阵的秩与行列式在实数域上理解。
+  proof_spine:
+    - step_id: S1
+      objective: |
+        证明每个点所在的块数 r(P) 是常数（记为 r），并用 v, k, λ 表出 r。
+      completion_test: |
+        推导只用双计数（允许依赖 D1）; 结论 r(k-1) = λ(v-1) 正确;
+        用到了 1 < k（即 k-1 ≠ 0）的合理性说明。
+    - step_id: S2
+      objective: |
+        构造一个 v×b 的 0/1 矩阵 M 把"点-块关联"编码出来，把结论 b ≥ v 归结为
+        M 行满秩，并进一步归结为: 某个由 M 决定的 v×v 方阵（M 与其转置之积）非奇异。
+      completion_test: |
+        M 的定义明确（元素取值规则写清）; 证明了 rank(M M^T) = rank(M);
+        说明 b ≥ v 当且仅当 M M^T 非奇异; M M^T 的每个元素都写成了 v, k, λ（或 r）
+        的显式表达式。
+    - step_id: S3
+      objective: |
+        证明该 v×v 方阵非奇异: 利用其元素只取两类值这一结构，写出它的全部特征值
+        （或行列式），并逐一证明非零; 所有退化边界情形被排除或单独处理。
+      completion_test: |
+        特征值（或行列式）列表正确; 每个因子的非零性都有证明;
+        涉及 r 与 λ 相等、k 与 v 相等之类的退化情形被显式处理。
+    - step_id: S4
+      objective: |
+        由行满秩推出 b ≥ v，完成命题。
+      completion_test: |
+        结论与命题一致; 论证闭合，无范围越界。
+  allowed_dependencies:
+    - id: D1
+      kind: standard_result
+      statement: |
+        （双计数原理）若有限集合 S 可按两种方式分解计数，两种计数结果相等:
+        Σ_x f(x) = Σ_y g(y)，其中两种分解覆盖 S 的全部元素且无遗漏。
+    - id: D2
+      kind: standard_result
+      statement: |
+        （秩与转置）对任意实矩阵 A: rank(A^T A) = rank(A)。
+    - id: D3
+      kind: lemma
+      statement: |
+        （特殊对称矩阵）设 n ≥ 1，λ, μ 为实数。矩阵 λJ_n + μI_n 的特征值为:
+        μ（重数 n-1）与 nλ + μ（重数 1）; 其行列式 = μ^(n-1) · (nλ + μ)。
+    - id: D4
+      kind: standard_result
+      statement: |
+        （行满秩与行数）v×b 实矩阵 M 行满秩（rank(M) = v）当且仅当 M 的 v 行线性无关;
+        此时必有 b ≥ v。
+  claim_status_convention: |
+    对证明中每个承重断言标注六态之一:
+    - FIXED: 题目给定的目标或已定约定;
+    - IMPORTED-VERIFIED: 引用允许依赖，且已核对适用前提;
+    - PROVED-IN-PROJECT: 在本证明中给出完整证明;
+    - CONDITIONAL: 在精确写出的未证输入下成立;
+    - CANDIDATE: 提议的构造/策略，尚未建立;
+    - BLOCKED: 被精确障碍阻住（须写出最小 blocker）。
+    任何未加证明的承重断言不得无标签使用; BLOCKED 须附最小 blocker 与最强已证结论。
+  writing_discipline: |
+    1. 一个证明只回答一个主问题; 不复述题目包背景。
+    2. 不使用"工作流/审计"类词汇，只写数学正文。
+    3. 详细计算只出现在承重处（双计数、Gram 元素、特征值非零）; 例行步骤一笔带过。
+    4. 补不动时: 报告最小 blocker 与最强已证定理，不堆砌"显然/标准论证"。
+    5. 保守专业的数学文风: 自然段推进，公式与解释文字配比适度。
+  closed_book_notice: |
+    仅可使用本 bundle; 不得检索、不得假定未列出的结果、不得使用题目包外的定理名。
+
+judge_bundle:
+  theorem_name: Fisher 不等式（1940）——2-设计中 b ≥ v
+  reference_proof: |
+    对每点 P 双计数集合 { (Q, B) : Q ≠ P, B ∋ P 且 B ∋ Q }:
+    按块 B ∋ P 计数得 Σ_{B ∋ P} (k-1) = r(P)(k-1);
+    按点 Q ≠ P 计数得 λ(v-1)。故 r(P)(k-1) = λ(v-1)，由 1 < k 得
+      r = λ(v-1)/(k-1) 为常数。
+    定义 v×b 矩阵 M = (m_{ij})，m_{ij} = 1 若 P_i ∈ B_j，否则 0。
+    对 i, j: (M M^T)_{ij} = Σ_{B} m_{iB} m_{jB} = #{B : P_i, P_j ∈ B}，
+    即对角线为 r、非对角线为 λ。故 M M^T = (r-λ) I_v + λ J_v。
+    由 D3，特征值为 r-λ（重数 v-1）与 r + λ(v-1)（重数 1）。
+    非零性: r - λ = λ(v-1)/(k-1) - λ = λ(v-k)/(k-1) > 0（λ ≥ 1, v > k, k > 1）;
+    r + λ(v-1) > 0。故 det(M M^T) ≠ 0，M M^T 非奇异。
+    由 D2，rank(M) = rank(M M^T) = v，M 行满秩; 由 D4，b ≥ v。证毕。
+  key_lemmas:
+    - lemma: D3 特殊对称矩阵
+      why_key: M M^T 恰好是 λJ + (r-λ)I 型，其可逆性由特征值公式一次给出
+      applicability_conditions: 实数域; n ≥ 1; 需单独验证 μ = r-λ ≠ 0
+    - lemma: D2 秩与转置
+      why_key: 把 v×b 的秩问题压成 v×v 方阵的可逆性问题
+      applicability_conditions: 实矩阵; 实数域上成立（有限域上不成立）
+  spine_answer_key:
+    - step_id: S1
+      full_closure: |
+        固定 P: Σ_{B∋P}(k-1) = λ(v-1) ⇒ r(P)(k-1) = λ(v-1);
+        k > 1 ⇒ r = λ(v-1)/(k-1) 与 P 无关。
+    - step_id: S2
+      full_closure: |
+        M = 关联矩阵（P_i ∈ B_j 时 1）; (M M^T)_{ij} = r·δ_{ij} + λ(1-δ_{ij});
+        即 M M^T = (r-λ)I_v + λJ_v; rank(M M^T) = rank(M)（D2）;
+        b ≥ v ⇔ M 行满秩 ⇔ M M^T 非奇异（D4 + 可逆矩阵满秩）。
+    - step_id: S3
+      full_closure: |
+        D3: 特征值 r-λ（v-1 重）、r+λ(v-1)（1 重）; r-λ = λ(v-k)/(k-1) > 0;
+        r+λ(v-1) > 0 ⇒ 行列式非零。
+    - step_id: S4
+      full_closure: |
+        rank(M) = v ⇒ M 有 v 个线性无关行 ⇒ 行数 b ≥ v。
+  failure_mode_annotations:
+    - r 常数性未证或只对单点计数 -> S1 completion_test 不过
+    - M M^T 对角与非对角取值互换（λ 当对角）-> S2 形式错误
+    - 未排除 r = λ（对应 v = k 的退化）就断言特征值非零 -> S3 不过
+    - 在有限域上做秩/特征值论证 -> 扣正确性（S3 结论只对实数域成立）
+  variants:
+    - variant_id: full
+      modification: "无修改"
+      writer_bundle_patch: {}
+      expected_outcome: 完整补出证明; judge 按 spine_answer_key 核补全度
+    - variant_id: missing_D3
+      modification: 删除允许依赖 D3
+      writer_bundle_patch:
+        remove_dependency_ids: [D3]
+      expected_outcome: 可逆性失去现成公式，正确行为是报最小 blocker 或改道（探针用途，不进 A/B 主结论）
+
+run_policy:
+  variants_to_run: [full]
+  writer_models: []
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol

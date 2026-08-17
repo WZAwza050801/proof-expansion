@@ -1,0 +1,218 @@
+# 样题包 S02：有限除环必是域（去答案化蒸馏）
+# v2 schema；STAGE-1 1.2 产物。status=candidate（未入队、未经预测试定档）
+package_id: P-S02_finite-division-ring-v2
+status: candidate
+split: dev
+probe_only: false
+created_by: terra
+created_at: 2026-08-18
+frozen_at: null
+
+narrow_slot_calibration:
+  expected_standalone_solvability: low
+  rationale: |
+    定理（有限除环必是域）是代数学经典结果，很多模型"见过结论"但极少能独立背出完整证明:
+    证明需要类方程 + 中心化子维数结构 + 分圆多项式的整除与模长不等式三步咬合，
+    其中"用分圆多项式整除每个指标"是最不直觉的一步。给 D3（分圆多项式）与脊柱后，
+    各步验收标准明确，闭合路径存在; 预计带包可补（judge C>=3 待实测）。
+  pretest_protocol: |
+    阶段2: ① 裸题探针(仅 statement)应失败或仅部分有效; ② 带包探针应 judge C>=3; 两条都满足才 confirmed
+  measured: null
+
+source_record:
+  authors: Wedderburn, J. H. M.
+  title: A theorem on finite algebras
+  year: 1905
+  url_or_doi_or_arxiv: Trans. Amer. Math. Soc. 6 (1905), 349–352
+  source_type: primary
+  source_pool: C_textbook_theorem
+  accessed_on: 2026-08-18
+  original_text_obtained: false
+  evidence_status: verified
+  likely_memorized: true
+  memorization_note: |
+    结论在代数教材中高频出现（"Wedderburn 小定理"），模型大概率见过结论;
+    完整证明的记忆率低得多（多步计数 + 分圆技巧）。写手包内不出现定理名，
+    只给"有限除环必是域"的中性陈述，进一步压低记忆触发。
+    注意: 原文未获取，参考证明为按标准教材重建——正式入池前必须补 original_text_obtained: true。
+
+selection_record:
+  mathematical_area: 抽象代数 / 有限除环结构
+  proof_structure: contradiction
+  narrow_slot_design_rationale: |
+    最难补的 gap: (1) 把类方程的各项指标写成 (q^d-1)/(q^{c_x}-1) 且 c_x | d 的维数论证;
+    (2) 意识到 D3 分圆多项式的整除性可以逐项吃掉指标、从而孤立出 q-1;
+    (3) 用 |Φ_d(q)| > q-1 收矛盾。三个依赖都以精确陈述给足，组合方式由写手自己找。
+  known_failure_modes:
+    - 类方程方向写反或忘写中心项 q-1
+    - 未证明 c_x | d 与 c_x < d 就直接用整除结论
+    - 用 Φ_1 或错误指标; 声称"Φ_d(q) 整除 q-1"却未逐项论证
+    - 把 q 误当素数、或把 |Φ_d(q)| > q-1 的不等式证错方向
+    - 忘记"无非中心元则已证完"的平凡分支
+    - lazy stop: 写出类方程后即停，未推进整除链
+  rejection_risk:
+    - 若预测试发现目标写手裸题写出完整证明 -> 秒杀，淘汰
+    - 原文未获取: 入正式池前必须补原文
+
+de_answering_record:
+  stripped:
+    - "分圆多项式"这一名词及其整除作用（D3 只给陈述不给名号）
+    - "类方程"一词（D3 中的群作用计数以自足陈述给出）
+    - 中间构造: 中心化子维数 c_x 的引入、逐项整除的衔接
+    - 定理名（Wedderburn）与"中心化子升链"等教材术语
+  retained:
+    - 脊柱 S1 只给目标: "把 |D*| 按共轭类分解并把指标化为 (q^d-1)/(q^{c_x}-1)"（目标形态，不含方法）
+    - 依赖 D1–D5 全部以精确陈述给足
+  audit_note: 写手包内无连线句、无名号; "何时用哪一个依赖"由写手自己判断。
+
+writer_bundle:
+  statement: |
+    命题: 每个有限除环都是域（即其乘法可交换）。
+
+    符号约定: 除环 = 含乘法单位元 1 ≠ 0、且每个非零元都有乘法逆元的环（除环无零因子）。
+    设 D 为有限除环。记 Z = { z ∈ D : 对一切 x ∈ D 有 zx = xz } 为 D 的中心。
+    对 x ∈ D 记 C(x) = { y ∈ D : xy = yx }。记 D* = D \ {0} 为乘法群。
+    对有限群 G，记 Z(G) 为其中心、C_G(x) 为元素 x 的中心化子。
+  proof_spine:
+    - step_id: S1
+      objective: |
+        把乘法群 D* 的大小按共轭类写出一个等式（中心元素的贡献单独列出），并把每个
+        非中心共轭类对应的指标化为 (q^d - 1)/(q^{c_x} - 1) 的形式，其中 q, d, c_x 为
+        由允许依赖定义的整数参数; 同时证明每个 c_x 整除 d 且 c_x < d。
+        若无非中心元素，直接完成整个命题。
+      completion_test: |
+        类方程形式正确（含中心项与求和项）; 每个非中心指标 = (q^d-1)/(q^{c_x}-1);
+        c_x | d 且 c_x < d 的证明完整; 平凡分支（无非中心元）被显式处理。
+    - step_id: S2
+      objective: |
+        由 S1 的等式与允许依赖，推出一个整除关系: 存在整数 m ≥ 2 且 m | d，使得
+        依赖 D4 中的 Φ_m(q) 整除 q - 1。
+      completion_test: |
+        明确写出了 m（即 d 的某个 ≥2 的因子）; 逐项证明了 Φ_m(q) 整除每个非中心指标
+        与 q^d - 1，从而推出 Φ_m(q) | (q - 1)。
+    - step_id: S3
+      objective: |
+        用允许依赖中的不等式与 S2 的整除关系导出矛盾，从而 d = 1。
+      completion_test: |
+        矛盾论证完整（整除与模长不等式两边的量级比较写清）; 说明了为何 d ≥ 2 不可能。
+    - step_id: S4
+      objective: |
+        由 d = 1 推出 D 的乘法可交换，即 D 是域，完成命题。
+      completion_test: |
+        结论与命题一致; 无额外假设、无范围越界。
+  allowed_dependencies:
+    - id: D1
+      kind: standard_result
+      statement: |
+        （除环与中心）除环无零因子; 中心 Z 是 D 的含 0 与 1 的交换子环; 有限整环是域。
+        因此 Z 是有限域; 记 q = |Z|（q ≥ 2 为整数，q 未必是素数）。
+    - id: D2
+      kind: lemma
+      statement: |
+        （有限维结构）D 是 Z 上的有限维向量空间; 记 d = dim_Z(D)，则 |D| = q^d。
+        对每个 x ∈ D，中心化子 C(x) 是 D 的含 Z 的子除环; 记 c_x = dim_Z(C(x))。
+        则: |C(x)| = q^{c_x}; c_x 整除 d; x 非中心当且仅当 C(x) 是 D 的真子集，
+        即 c_x < d。
+    - id: D3
+      kind: lemma
+      statement: |
+        （共轭作用计数）设有限群 G 对自身作共轭作用。则
+          |G| = |Z(G)| + Σ_x [G : C_G(x)]，
+        其中求和取遍非中心共轭类的代表 x，[G : C_G(x)] 为指标（陪集个数）。
+    - id: D4
+      kind: lemma
+      statement: |
+        （分圆多项式）对每个 m ≥ 1 存在整系数多项式 Φ_m(X)，满足
+          (a) X^m - 1 = Π_{e | m} Φ_e(X);
+          (b) Φ_m(X) = Π_ζ (X - ζ)，ζ 取遍复数域中全部 m 次本原单位根。
+        推论: 对整数 q ≥ 2 与 m ≥ 2:
+          (c) Φ_m(q) 是非零整数，且 |Φ_m(q)| > q - 1;
+          (d) 若 c | m 且 c < m，则 (q^m - 1)/(q^c - 1) = Π_{e | m, e ∤ c} Φ_e(q) 是
+              整数，特别 Φ_m(q) 整除它;
+          (e) Φ_m(q) 整除 q^m - 1。
+    - id: D5
+      kind: standard_result
+      statement: |
+        （整除的模长）若非零整数 t 整除正整数 u，则 |t| ≤ u。
+  claim_status_convention: |
+    对证明中每个承重断言标注六态之一:
+    - FIXED: 题目给定的目标或已定约定;
+    - IMPORTED-VERIFIED: 引用允许依赖，且已核对适用前提;
+    - PROVED-IN-PROJECT: 在本证明中给出完整证明;
+    - CONDITIONAL: 在精确写出的未证输入下成立;
+    - CANDIDATE: 提议的构造/策略，尚未建立;
+    - BLOCKED: 被精确障碍阻住（须写出最小 blocker）。
+    任何未加证明的承重断言不得无标签使用; BLOCKED 须附最小 blocker 与最强已证结论。
+  writing_discipline: |
+    1. 一个证明只回答一个主问题; 不复述题目包背景。
+    2. 不使用"工作流/审计"类词汇，只写数学正文。
+    3. 详细计算只出现在承重处（维数论证、整除链、模长比较）; 例行步骤一笔带过。
+    4. 补不动时: 报告最小 blocker 与最强已证定理，不堆砌"显然/标准论证"。
+    5. 保守专业的数学文风: 自然段推进，公式与解释文字配比适度。
+  closed_book_notice: |
+    仅可使用本 bundle; 不得检索、不得假定未列出的结果、不得使用题目包外的定理名。
+
+judge_bundle:
+  theorem_name: Wedderburn 小定理（1905）——有限除环必是域
+  reference_proof: |
+    由 D1，Z 是有限域，|Z| = q ≥ 2; 由 D2，|D| = q^d，d = dim_Z(D)。
+    若 D 无非中心元则 D = Z 是域，证毕。否则对 D* 应用 D3:
+      q^d - 1 = (q - 1) + Σ_x [D* : C(x)*]。
+    对非中心 x，C(x)* = C(x) \ {0}，|C(x)| = q^{c_x}（D2），故
+      [D* : C(x)*] = (q^d - 1)/(q^{c_x} - 1)，
+    且 c_x | d、c_x < d（D2，x 非中心）。
+    由 D4(e)，Φ_d(q) | q^d - 1。由 D4(d)（取 m = d, c = c_x）:
+      Φ_d(q) | (q^d - 1)/(q^{c_x} - 1) 对每个非中心指标成立。
+    于是 Φ_d(q) 整除等式右边每一项，从而整除 q^d - 1 减去所有指标之和，即
+      Φ_d(q) | (q - 1)。
+    若 d ≥ 2: D4(c) 给 |Φ_d(q)| > q - 1，而 D5 给 |Φ_d(q)| ≤ q - 1，矛盾。
+    故 d = 1，即 D = Z，乘法可交换，D 是域。证毕。
+  key_lemmas:
+    - lemma: D4 分圆多项式
+      why_key: 唯一能"逐项吃掉"每个指标、把类方程压缩到 q-1 的工具
+      applicability_conditions: m = d ≥ 2; c_x | d 且 c_x < d 使 (d) 可用; q ≥ 2 整数（q 不必素数）
+    - lemma: D2 中心化子维数
+      why_key: 使每个共轭类指标变成幂差商 (q^d-1)/(q^{c_x}-1)，为 D4 铺路
+      applicability_conditions: D 除环、Z 域（D1 保证）
+  spine_answer_key:
+    - step_id: S1
+      full_closure: |
+        类方程 q^d - 1 = (q-1) + Σ_x (q^d-1)/(q^{c_x}-1); |C(x)| = q^{c_x};
+        塔律 dim_Z D = dim_{C(x)} D · c_x ⇒ c_x | d; x 非中心 ⇒ C(x) ⊊ D ⇒ c_x < d;
+        无非中心元 ⇒ D = Z 已证完。
+    - step_id: S2
+      full_closure: |
+        取 m = d: 由 D4(e) Φ_d(q) | q^d - 1; 由 D4(d)（c = c_x）Φ_d(q) | 每个指标;
+        两项相减得 Φ_d(q) | (q-1)。
+    - step_id: S3
+      full_closure: |
+        d ≥ 2 时 D4(c) 给 |Φ_d(q)| > q-1，D5 给 |Φ_d(q)| ≤ q-1，矛盾; 故 d = 1。
+    - step_id: S4
+      full_closure: |
+        d = 1 即 D = Z 为交换; 有限除环 D 为域; 结论与命题一致。
+  failure_mode_annotations:
+    - 类方程漏中心项 q-1 或指标倒置 -> S1 completion_test 不过
+    - 未证 c_x | d 直接断言整除 -> IMPORTED-VERIFIED 前提未核，扣严谨性
+    - 声称 Φ_d(q) | q-1 但未逐项论证 -> S2 completion_test 不过
+    - 模长不等式方向反（写 |Φ_d(q)| ≥ q-1）-> S3 矛盾不成立
+    - 忽略"无非中心元"分支 -> S1 不完整
+  variants:
+    - variant_id: full
+      modification: "无修改"
+      writer_bundle_patch: {}
+      expected_outcome: 完整补出证明; judge 按 spine_answer_key 核补全度
+    - variant_id: missing_D4
+      modification: 删除允许依赖 D4
+      writer_bundle_patch:
+        remove_dependency_ids: [D4]
+      expected_outcome: 整除链断裂，正确行为是报最小 blocker（此变体为探针用途，不进 A/B 主结论）
+
+run_policy:
+  variants_to_run: [full]
+  writer_models: []
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol
