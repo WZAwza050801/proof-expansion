@@ -1,5 +1,7 @@
 # {{RUN_ID}} — Aggregate Report
 
+> ⚠️ **v2 过渡标注（2026-08-18）**：本模板的维度（H/D/R/C）为 v1 旧口径；v2 口径 = C 门槛＋G/R/L 主指标（40/30/30）＋诚实护栏（含 lazy_stop），见 `experiment-design.md` §1.2/§6。模板与 `aggregate_stats.rb` 的维度改名列入阶段 3 基础设施同步。
+
 - split: {{DEV_OR_EVAL}}
 - 状态标注：本文件是统计汇总，不是数学证明；judge 分数是实验数据，不等于数学事实。
 - deterministic input: `aggregate.data.json`（script/version/hash: {{...}}）

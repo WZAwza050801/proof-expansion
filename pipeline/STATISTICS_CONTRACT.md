@@ -2,6 +2,7 @@
 
 - 版本：`v0.2`
 - 执行者：父 Harness 运行 `pipeline/aggregate_stats.rb`；`analyst_stats` 仅解释输出。
+- > ⚠️ **v2 过渡标注（2026-08-18）**：本契约的维度字母（H/D/R/C）为 v1 旧口径，已按 `pipeline/DESIGN-REFLECTION.md` R2 作废。v2 口径 = C（门槛）＋G 补全度/R 严谨性/L 可读性（主指标，权重 40/30/30）＋诚实护栏，见 `experiment-design.md` §1/§6 与 `prompt-gpt56sol-reviewer.md` v2。本契约与 `aggregate_stats.rb`/`aggregate.template.md`/`calibration_kappa.rb` 的维度改名列入**阶段 3 基础设施**同步；在同步完成前不开启任何新 run。
 
 ## 1. 可评分 submission 与 pair
 

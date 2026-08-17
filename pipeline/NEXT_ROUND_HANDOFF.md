@@ -3,6 +3,7 @@
 - 版本：`v0.3`
 - 交接状态：**执行契约、统计与校准 gate 已静态审查；2026-08-17 首次动态冒烟在 §4.1 探针处被阻（角色行 `maxDepth: 0` 与 DSH 语义冲突），已修复 preset 并记录证据，见 §9 与 `pipeline/P001-SMOKE-BLOCKER.md`。**
 - 本文件面向下一位 Harness operator。它规定冒烟、dev 先导、eval 前置门和失败处理；不得凭聊天记忆改写流程。
+- > ⚠️ **v2 过渡标注（2026-08-18）**：本交接的评分维度（H/D/R/C）、题目包 schema 与写手信封为 v1 旧口径。v2 口径见 `experiment-design.md` v2（§1 任务=证明补全、§5.1 v2 题包、§6 C/G/R/L 权重）、`prompt-terra-problem-curator.md` v2、`prompt-gpt56sol-reviewer.md` v2、`pipeline/writer-v04-direction.md`。执行链（validator/stats/信封）的同步列入阶段 3；同步完成前，本文件 §4–§6 的冒烟/先导/eval 流程**不得**用于新 run。
 
 ---
 

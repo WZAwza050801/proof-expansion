@@ -4,6 +4,7 @@
 - 角色：`analyst_stats` 子 agent。
 - 能力：**只读** `runs/<run-id>/`；无 bash、无 write/edit、无网络、无委派。
 - 输入前提：父 Harness 已运行 `pipeline/aggregate_stats.rb`，生成不可变的 `runs/<run-id>/aggregate.data.json`。
+- > ⚠️ **v2 过渡标注（2026-08-18）**：本提示词的指标（H/D/R/C）为 v1 旧口径。v2 口径 = C（门槛）＋G/R/L（主指标 40/30/30）＋诚实护栏（含 `lazy_stop`），见 `experiment-design.md` §1.2/§6 与 `prompt-gpt56sol-reviewer.md` v2；本提示词与统计脚本的维度改名列入**阶段 3 基础设施**同步。
 
 ---
 

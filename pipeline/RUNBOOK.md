@@ -1,5 +1,7 @@
 # Proof Expansion Evaluation Harness Runbook
 
+> ⚠️ **v2 过渡标注（2026-08-18）**：本 runbook 中的评分维度（H/D/R/C）与题目包 schema 为 v1 旧口径，已由 `experiment-design.md` v2 §5/§6 与 `prompt-terra-problem-curator.md` v2 / `prompt-gpt56sol-reviewer.md` v2 取代；执行链同步（validator、stats、匿名流程）列入阶段 3 基础设施，同步前不开启新 run。
+
 ## Purpose
 
 This harness accepts proof packages incrementally. Terra can create a new `candidate` while previously frozen `ready` packages are evaluated. A package never needs to wait for a full benchmark set. `pipeline/EXECUTION_CONTRACT.md` is the canonical execution protocol; `pipeline/NEXT_ROUND_HANDOFF.md` is the next-session checklist; `pipeline/STATISTICS_CONTRACT.md` defines aggregation.
