@@ -1,0 +1,111 @@
+---
+package_id: P008_putnam2022-functional-equation-v1
+status: ready
+split: dev
+created_by: terra
+created_at: 2026-08-17
+frozen_at: '2026-08-17'
+source_record:
+  authors: Manjul Bhargava, Kiran Kedlaya, and Lenny Ng
+  title: Solutions to the 83rd William Lowell Putnam Mathematical Competition (2022),
+    Problem B6
+  year: '2022'
+  url_or_doi_or_arxiv: https://kskedlaya.org/putnam-archive/2022s.tex
+  source_type: primary
+  accessed_on: 2026-08-17
+  original_text_obtained: true
+  evidence_status: proved
+  likely_memorized: false
+  memorization_note: 近年 Putnam B6 的连续正值泛函方程；分类答案可被记忆，但非单调性前提下的极限与归一化链条不具模板性。
+selection_record:
+  proof_structure: contradiction
+  discriminability_rationale: '该分类题的风险点不是猜到 f(x)=1/(1+cx)，而是从连续性和原方程严格推出零端、无穷端及 xf(x)
+    的渐近。候选模型常偷加“f 单调”“f 可逆”或错误交换极限；精细化提示应迫使它区分常数分支、归一化分支和变量替换的极限条件。给定骨架使其有可执行路径，但核心极限仍足以压过第一轮经典定理天花板。
+
+'
+  known_failure_modes:
+  - 未经证明就假设 f 单调或 f(x)<1。
+  - 把 f(xf(x)) 的极限直接替换为 f(1)，未证明 xf(x) 的极限。
+  - 漏验常数解或把尺度归一化误作无损而不说明。
+  human_approval:
+    approved_for_dev: true
+    approved_for_eval: false
+    approver: owner
+    approved_at: '2026-08-17'
+    rationale: dev 先导题集（Putnam B6/A6 高难度低分题），owner 2026-08-17 选定
+writer_bundle:
+  statement: |
+    求所有连续函数 f:(0,∞)→(0,∞)，满足对所有 x,y>0，
+    f(xf(y))+f(yf(x))=1+f(x+y)。
+  proof_skeleton: '先由方程和连续性建立 lim_{x→0+}f(x)=1。分离“f≥1 处处成立”的常数分支。对非恒等分支，建立 lim_{x→∞}f(x)=0；利用尺度不变性归一化一个
+    f 值为 1/2。接着从 x=y 的方程及归一化控制 xf(x)，证明其在无穷远的极限。把 y 替换为 xy 后取极限，得到倒数自变量关系，最后回代并取极限确定
+    f。
+
+'
+  allowed_dependencies:
+  - id: D1
+    kind: standard_result
+    statement: '若 g:(0,∞)→R 连续且 lim_{x→0+}g(x)=0、lim_{x→∞}g(x)=∞，则 g 的像包含 (0,∞)。
+
+'
+  - id: D2
+    kind: standard_result
+    statement: '连续函数在紧区间上取得最大值和最小值；若连续函数在两个点取值异号，则在其间有零点（介值定理）。
+
+'
+  - id: D3
+    kind: lemma
+    statement: '若 f 满足题设方程，则对任意 c>0，函数 g(x)=f(cx) 也满足同一方程。
+
+'
+  closed_book_notice: '只能使用本资料包。不得检索、使用工具、查看参考证明、评审规则或任何未列出的结果；若所需结论未被允许，请明确说明缺口。
+
+'
+judge_bundle:
+  reference_proof: |
+    先令 L_-=liminf_{x→0+}f(x)、L_+=limsup_{x→0+}f(x)。固定 y，由原方程知 L_+<∞，从而 xf(x)→0。当 y=x 时，2f(xf(x))=1+f(2x)，取上下极限得 2L_+=1+L_+、2L_-=1+L_-，故 lim_{0+}f=1。
+    若 f≥1 处处成立，令 S_c=sup_{0<x≤c}f(x)。原方程可用于显示 S_∞ 有限；又 x↦xf(x) 从 0 连续趋于∞，故取遍正实数。由 2f(xf(x))=1+f(2x) 得 2S_∞≤1+S_∞，于是 S_∞=1，f≡1。
+    以下设某处 f<1。取 I=inf f<1，选择 y 使 f(y) 接近 I。若 xf(x)=y，则 x=y 代入式给出 1+I≤2f(y)<2I+2ε，矛盾；借助 xf(x) 在零端趋零及连续性，推出 sup xf(x)<∞，因而 f(x)→0（否则会与正值连续性及原方程矛盾）。故 f^{-1}(1/2) 非空且紧。用 D3 缩放，使该集合最小元为 1。
+    由 2f(xf(x))=1+f(2x)>1=f(1) 知 xf(x)≠1；连续性和零端行为强迫 xf(x)<1。又 x→∞ 时右侧趋 1/2，故 xf(x)→1。
+    在原式中把 y 改为 xy：f(xf(xy))+f(xyf(x))=1+f(x+xy)。令 x→∞，用 xf(x)→1，得到 f(1/y)+f(y)=1。将其与原式合并为 f(xf(y))=f(x+y)+f(1/(yf(x)))。两边乘 xf(y)，令 x→∞，利用 xf(x)→1，得 1=f(y)+yf(y)，所以 f(y)=1/(1+y)。撤销归一化，非恒等解为 f(y)=1/(1+cy), c>0；连同 c=0 即全部解。直接代入可验证。
+  key_lemmas:
+  - lemma: lim_{x→0+}f(x)=1。
+    why_key: 它保证零端尺度和后续 xf(x) 的连续像论证。
+    applicability_conditions: 必须先由固定 y 的方程控制 limsup。
+  - lemma: 非恒等分支中 lim_{x→∞}xf(x)=1（归一化后）。
+    why_key: 这是导出 f(1/y)+f(y)=1 的关键。
+    applicability_conditions: 需先证明 f∞=0、选择 f^{-1}(1/2) 的最小元并排除 xf(x)=1。
+  failure_mode_annotations:
+  - 只验证候选函数、未排除其他连续解者不完整。
+  - 在 missing_lemma 变体中援引尺度不变性而不重证，属于不允许依赖。
+  variants:
+  - variant_id: full
+    modification: 无修改。
+    writer_bundle_patch:
+      remove_dependency_ids: []
+      replace_statement: 
+      replace_proof_skeleton: 
+      append_allowed_dependencies: []
+    expected_outcome: 应完成常数与非恒等分支，并严谨推出所有 f(x)=1/(1+cx), c≥0。
+  - variant_id: missing_lemma
+    modification: 移除尺度不变性引理。
+    writer_bundle_patch:
+      remove_dependency_ids:
+      - D3
+      replace_statement: 
+      replace_proof_skeleton: 先处理零端与常数分支。对非恒等分支，需要选择适当尺度以继续分析；只能使用现有依赖。
+      append_allowed_dependencies: []
+    expected_outcome: 正确行为是报告：给定骨架所需的尺度归一化步骤缺少允许的闭包引理；可说明需先自行从方程直接验证该不变性，不能把它作为未列依赖跳过。
+run_policy:
+  variants_to_run:
+  - full
+  - missing_lemma
+  writer_models:
+  - provider: deepseek-official
+    model: deepseek-v4-pro
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol

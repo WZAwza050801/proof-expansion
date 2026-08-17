@@ -1,0 +1,113 @@
+---
+package_id: P007_putnam2023-divisor-determinant-v1
+status: ready
+split: dev
+created_by: terra
+created_at: 2026-08-17
+frozen_at: '2026-08-17'
+source_record:
+  authors: Manjul Bhargava, Kiran Kedlaya, and Lenny Ng
+  title: Solutions to the 84th William Lowell Putnam Mathematical Competition (2023),
+    Problem B6
+  year: '2023'
+  url_or_doi_or_arxiv: https://kskedlaya.org/putnam-archive/2023s.tex
+  source_type: primary
+  accessed_on: 2026-08-17
+  original_text_obtained: true
+  evidence_status: proved
+  likely_memorized: false
+  memorization_note: 近年 Putnam B6；命题虽公开，但给定的 Cauchy--Binet/Möbius 骨架及残缺变体显著降低裸题记忆的收益。
+selection_record:
+  proof_structure: key_lemma
+  discriminability_rationale: '这是一个高阶行列式计算，要求把丢番图计数精确改写为矩阵乘积，再跟踪删列子式、列反转的符号与 Möbius
+    反演。三个候选模型很可能得到 A=MN 的局部观察，却在 Cauchy--Binet 的索引 n-k、删列符号或 C_k 的求和上跳步；普通提示容易把“显然”当作证明，而精细提示可迫使逐项核验。题目仍提供完整的可用定义和路线，故不属于完全无从下手的专家题。
+
+'
+  known_failure_modes:
+  - 把 N 写成 M^T，遗漏行反转导致的 (-1)^{n(n-1)/2}。
+  - 错误地断言所有删列子式均为 1，或遗漏 k=n/2 的零子式。
+  - 在 Möbius 反演中混淆 C_k 的定义与求和范围。
+  human_approval:
+    approved_for_dev: true
+    approved_for_eval: false
+    approver: owner
+    approved_at: '2026-08-17'
+    rationale: dev 先导题集（Putnam B6/A6 高难度低分题），owner 2026-08-17 选定
+writer_bundle:
+  statement: |
+    设 n 为正整数。对 i,j∈{1,…,n}，令 s(i,j) 是满足 ai+bj=n 的非负整数对 (a,b) 的数目。令 S=(s(i,j))_{1≤i,j≤n}。证明
+    det S=(-1)^{⌈n/2⌉-1}·2⌈n/2⌉。
+  proof_skeleton: '令 A 为 n×(n+1) 矩阵 A_{i,k}=1_{i|k}（1≤i≤n,0≤k≤n），并令 B 为 (n+1)×n 矩阵
+    B_{k,j}=1_{j|(n-k)}。先把 S 表为 AB。对 Cauchy--Binet 展开，比较 A 的删第 k 列子式与对应的 B 子式。再用 Möbius
+    反演表达删列子式，最后化简有限和及符号。
+
+'
+  allowed_dependencies:
+  - id: D1
+    kind: definition
+    statement: '指示函数 1_P 在命题 P 真时为 1、假时为 0；d|r 表示 d 整除 r。约定 0 的每个正因子均整除 0。
+
+'
+  - id: D2
+    kind: standard_result
+    statement: 'Cauchy--Binet（本例）：若 A 是 n×(n+1) 矩阵、B 是 (n+1)×n 矩阵，则 det(AB)=Σ_{k=0}^n
+      det(A^{(k)})det(B^{(k)})，其中上标 (k) 表示删去第 k 个对应列/行后所得 n×n 矩阵。
+
+'
+  - id: D3
+    kind: standard_result
+    statement: 'Möbius 反演的列向量形式：若 v_k=Σ_{d|k}e_d（1≤k≤n），其中 e_1,…,e_n 为标准列向量，则 e_k=Σ_{d|k}
+      μ(d)v_{k/d}；并且 Σ_{d|r}μ(d)=1（r=1）而在 r>1 时为 0。
+
+'
+  closed_book_notice: '只能使用本资料包。不得检索、使用工具、查看参考证明、评审规则或任何未列出的结果；若所需结论未被允许，请明确说明缺口。
+
+'
+judge_bundle:
+  reference_proof: |
+    记 A_{i,k}=1_{i|k}，B_{k,j}=1_{j|(n-k)}。则 (AB)_{ij} 是满足 i|k、j|(n-k)、0≤k≤n 的 k 的数目；映射 k↦(k/i,(n-k)/j) 是它与 ai+bj=n 的非负解之间的双射，故 S=AB。
+    令 A^{(k)} 为 A 删第 k 列所得矩阵。B 是 A^T 经行次序反转所得，故 det B^{(k)}=(-1)^{n(n-1)/2}det A^{(n-k)}。于是
+    det S=(-1)^{n(n-1)/2}Σ_{k=0}^n det A^{(k)}det A^{(n-k)}。
+    写 A 的列为 v_0,…,v_n。A^{(0)} 是单位上三角型，故 det A^{(0)}=1。由 v_k=Σ_{d|k}e_d 及 Möbius 反演，令 C_k=Σ_{1≤d≤⌊n/k⌋}μ(d)（k≥1），可得 v_0=Σ_{k=1}^n C_kv_k。因此对 k≥1，det A^{(k)}=(-1)^{k-1}C_k；形式上置 C_0=-1 后该式亦统一可用。
+    代入得 det S=(-1)^{n(n-1)/2+n-2}Σ_{k=0}^n C_kC_{n-k}。当 k>n/2 时 C_k=1；n 偶时 C_{n/2}=0。因此该和为 -2+2Σ_{k=1}^{⌊n/2⌋}C_k。交换求和并用 Σ_{d|r}μ(d) 的消去性质，得到 Σ_{k=1}^{⌊n/2⌋}C_k=1-⌈n/2⌉。故该卷积和为 -2⌈n/2⌉。将负号与前因子的奇偶性合并（直接按 n mod 4 检验），即得 det S=(-1)^{⌈n/2⌉-1}2⌈n/2⌉。
+  key_lemmas:
+  - lemma: S=AB 的双射计数。
+    why_key: 这是把原计数问题转化为可用 Cauchy--Binet 的唯一桥梁。
+    applicability_conditions: 必须保留 k∈[0,n] 与 a,b 非负的边界条件。
+  - lemma: det B^{(k)}=(-1)^{n(n-1)/2}det A^{(n-k)}。
+    why_key: 反转行与删去互补索引共同决定最终符号。
+    applicability_conditions: 行指标为 0,…,n，反转为 r↦n-r。
+  failure_mode_annotations:
+  - 没有给出双射或只声称 A=AB 的答案不能通过。
+  - 若缺少 D3 仍使用 Möbius 反演，应判为未遵守闭卷依赖。
+  variants:
+  - variant_id: full
+    modification: 无修改。
+    writer_bundle_patch:
+      remove_dependency_ids: []
+      replace_statement: 
+      replace_proof_skeleton: 
+      append_allowed_dependencies: []
+    expected_outcome: 应给出从 S=AB 到删列子式和符号化简的完整证明。
+  - variant_id: missing_lemma
+    modification: 移除 Möbius 反演依赖。
+    writer_bundle_patch:
+      remove_dependency_ids:
+      - D3
+      replace_statement: 
+      replace_proof_skeleton: 仍先表示 S=AB 并使用 Cauchy--Binet；随后需要精确计算删列子式。只能使用现有允许依赖。
+      append_allowed_dependencies: []
+    expected_outcome: 正确行为是指出：包中没有可用于将除数指示列转为单位列、从而计算删列子式的允许引理；不可把 Möbius 反演当作未声明常识直接调用。
+run_policy:
+  variants_to_run:
+  - full
+  - missing_lemma
+  writer_models:
+  - provider: deepseek-official
+    model: deepseek-v4-pro
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol

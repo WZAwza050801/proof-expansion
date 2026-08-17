@@ -1,0 +1,101 @@
+package_id: P002_erdos-szekeres-monotone-subsequence-v1
+status: candidate
+split: dev
+created_by: terra
+created_at: 2026-08-17
+frozen_at: null
+
+source_record:
+  authors: "Paul Erdős; George Szekeres"
+  title: "A combinatorial problem in geometry"
+  year: "1935"
+  url_or_doi_or_arxiv: "https://doi.org/10.1007/BF02049116"
+  source_type: primary
+  accessed_on: 2026-08-17
+  original_text_obtained: true
+  evidence_status: proved
+  likely_memorized: true
+  memorization_note: "经典定理的裸结论常见；本包要求按二维位置标签骨架展开，并以删去鸽巢原理的变体检验依赖管理。"
+
+selection_record:
+  proof_structure: construction
+  discriminability_rationale: |
+    题目要求把每个位置同时编码为“以该位置结尾的最长递增/递减子序列长度”，并证明该编码单射。
+    基线写手常把比较方向或“结尾”条件遗漏，或只说“由鸽巢原理”而未建立矛盾；精细化提示应迫使其逐项验证。
+    资料包给出定义和鸽巢原理，难度集中在关键构造而非背景知识。
+  known_failure_modes:
+    - "把相同标签推出矛盾时忘记比较两个位置的数值大小。"
+    - "将以 i 结尾的子序列错误地延伸到 i 之前的位置。"
+    - "未证明标签落在有限矩形中便调用鸽巢原理。"
+  human_approval:
+    approved_for_dev: false
+    approved_for_eval: false
+    approver: null
+    approved_at: null
+    rationale: null
+
+writer_bundle:
+  statement: |
+    设 r,s 为正整数，且 a_1,a_2,...,a_{rs+1} 是两两不同的实数。证明：其中存在长度至少 r+1 的严格递增子序列，或存在长度至少 s+1 的严格递减子序列。
+    这里“子序列”指保留原下标次序的序列。
+  proof_skeleton: |
+    对每个位置 i，记录两个以 i 结尾的最长单调子序列长度 (p_i,q_i)。
+    先在“没有所需长递增、也没有所需长递减”的反设下给这些标签确定范围；再证明两个不同位置不能有同一标签；最后对有限标签集合应用给定原理。
+  allowed_dependencies:
+    - id: D1
+      kind: definition
+      statement: |
+        p_i 定义为所有以 a_i 结尾的严格递增子序列的最大长度；q_i 定义为所有以 a_i 结尾的严格递减子序列的最大长度。
+    - id: D2
+      kind: standard_result
+      statement: |
+        鸽巢原理：若一个有限集合有多于 N 个元素，而它被映射到至多 N 个元素的集合，则该映射不是单射。
+  closed_book_notice: |
+    只可使用本资料包。不得检索、使用外部来源、参考证明、评审规则或未列出的结果。
+
+judge_bundle:
+  reference_proof: |
+    反设不存在长度 r+1 的严格递增子序列，也不存在长度 s+1 的严格递减子序列。按 D1 定义 p_i,q_i。
+    因为单元素序列可用，1<=p_i<=r 且 1<=q_i<=s，所以标签 (p_i,q_i) 落在 r*s 个有序对中。
+    证明标签互异。若 i<j，则 a_i 与 a_j 不同。若 a_i<a_j，取一个长度 p_i、以 a_i 结尾的递增子序列并在末尾接 a_j，得到以 a_j 结尾、长度 p_i+1 的递增子序列，故 p_j>p_i。若 a_i>a_j，同理把长度 q_i、以 a_i 结尾的递减子序列接 a_j，得 q_j>q_i。因此 i<j 时不可能同时 p_i=p_j、q_i=q_j。
+    于是 rs+1 个位置给出 rs+1 个互异标签，但标签空间只有 rs 个元素，与 D2 矛盾。故反设不成立，结论成立。
+  key_lemmas:
+    - lemma: "位置标签 (p_i,q_i) 的单射性。"
+      why_key: "这是把序列问题转成有限计数矛盾的唯一桥梁。"
+      applicability_conditions: "比较 i<j，且 a_i,a_j 两两不同；延长的子序列必须以 a_i 结尾。"
+  failure_mode_annotations:
+    - "只从 p_i=p_j 推出矛盾是错误的；必须按 a_i<a_j 或 a_i>a_j 分别用 p 或 q。"
+    - "若不先反设两种长子序列都不存在，标签范围不能收缩为 r*s。"
+  variants:
+    - variant_id: full
+      modification: "No modification."
+      writer_bundle_patch:
+        remove_dependency_ids: []
+        replace_statement: null
+        replace_proof_skeleton: null
+        append_allowed_dependencies: []
+      expected_outcome: "应给出完整标签构造、单射证明和鸽巢矛盾。"
+    - variant_id: missing_lemma
+      modification: "删除鸽巢原理这一允许依赖。"
+      writer_bundle_patch:
+        remove_dependency_ids:
+          - D2
+        replace_statement: null
+        replace_proof_skeleton: null
+        append_allowed_dependencies: []
+      expected_outcome: "写手应明确报告：在闭卷且只允许列出依赖的规则下，最后的有限计数原理未获许可，不能声称完整证明；可以说明此前单射构造。"
+
+run_policy:
+  variants_to_run:
+    - full
+    - missing_lemma
+  writer_models:
+    - "kimi-code/kimi-k3"
+    - "deepseek-official/deepseek-v4-pro"
+    - "qwen/qwen3.7-max"
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol

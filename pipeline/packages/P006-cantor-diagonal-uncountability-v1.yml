@@ -1,0 +1,97 @@
+package_id: P006_cantor-diagonal-uncountability-v1
+status: candidate
+split: dev
+created_by: terra
+created_at: 2026-08-17
+frozen_at: null
+
+source_record:
+  authors: "Georg Cantor"
+  title: "Über eine elementare Frage der Mannigfaltigkeitslehre"
+  year: "1891"
+  url_or_doi_or_arxiv: "https://eudml.org/doc/145130"
+  source_type: primary
+  accessed_on: 2026-08-17
+  original_text_obtained: true
+  evidence_status: proved
+  likely_memorized: true
+  memorization_note: "对角论证广为人知；本包采用二进制表示的规范选择与对象互换变体，重点测量量词和表示歧义管理。"
+
+selection_record:
+  proof_structure: equivalence
+  discriminability_rationale: |
+    题目把“可数”明确成满射枚举，并要求构造一个与每一行不同的二进制序列。真正难点是证明构造对象不在枚举像中，而非只喊“对角线不同”。
+    基线写手易把位串与实数混用、漏量词，或忽略二进制双重表示；精细提示可促使对象类型和逐坐标反证清晰化。
+  known_failure_modes:
+    - "只说“翻转对角线”而未证明对任意 n 均与第 n 行不同。"
+    - "把二进制位串的可数性与实数本身的双重表示混为一谈。"
+    - "把注入、满射和枚举的方向混淆。"
+  human_approval:
+    approved_for_dev: false
+    approved_for_eval: false
+    approver: null
+    approved_at: null
+    rationale: null
+
+writer_bundle:
+  statement: |
+    令 B={0,1}^N 为所有无限二进制序列的集合。证明 B 不可数，即不存在满射 f:N->B。
+  proof_skeleton: |
+    反设有满射 f，并把第 n 个序列的第 n 位记为一个二值量。
+    构造一条新序列，使其第 n 位与第 n 个序列的第 n 位不同；逐一比较新序列与枚举中的任意一项，以否定满射性。
+  allowed_dependencies:
+    - id: D1
+      kind: definition
+      statement: |
+        B={0,1}^N 的元素是函数 b:N-> {0,1}。两个序列相等当且仅当它们对每个自然数 n 的取值相等。
+    - id: D2
+      kind: definition
+      statement: |
+        集合 S 可数在本题中指：存在满射 f:N->S。
+  closed_book_notice: |
+    只可使用本资料包。不得检索、使用外部来源、参考证明、评审规则或未列出的结果。
+
+judge_bundle:
+  reference_proof: |
+    反设存在满射 f:N->B。对每个 n，f(n) 是一个二进制序列，记其第 n 位为 f(n)(n)。定义 d:N->{0,1} 为：若 f(n)(n)=0 则 d(n)=1，若 f(n)(n)=1 则 d(n)=0。于是 d 属于 B。
+    对任意 m，自定义知 d(m) != f(m)(m)。由 D1，d 与 f(m) 不相等。因此 d 不属于 f 的像，这和 f 满射矛盾。故不存在此满射，B 不可数。
+  key_lemmas:
+    - lemma: "对每个 m，d(m) != f(m)(m)，因而 d != f(m)。"
+      why_key: "这是将局部坐标差异提升为对所有枚举项的全局非相等的量词步骤。"
+      applicability_conditions: "f(m) 和 d 必须同为从 N 到 {0,1} 的函数；相等按逐坐标定义。"
+  failure_mode_annotations:
+    - "这里证明的是位串集合不可数，不涉及实数的二进制表示歧义。"
+    - "构造 d 后必须用任意 m 论证 d 不在像中，而非只比较一个对角元。"
+  variants:
+    - variant_id: full
+      modification: "No modification."
+      writer_bundle_patch:
+        remove_dependency_ids: []
+        replace_statement: null
+        replace_proof_skeleton: null
+        append_allowed_dependencies: []
+      expected_outcome: "应给出对角定义、d 属于 B、任意 m 的坐标差异与满射矛盾。"
+    - variant_id: swapped_objects
+      modification: "把陈述中的 B 错换成 [0,1]，却仍要求把每个对象写成无限二进制序列；不给出任何表示约定。"
+      writer_bundle_patch:
+        remove_dependency_ids: []
+        replace_statement: |
+          令 S=[0,1]。证明 S 不可数，即不存在满射 f:N->S。按照骨架把 f(n) 的“第 n 位”翻转。
+        replace_proof_skeleton: null
+        append_allowed_dependencies: []
+      expected_outcome: "写手应指出对象类型被错误互换：实数没有由资料指定的唯一“第 n 位”，二进制双重表示也未处理；当前材料不足以执行该骨架，不得直接照搬位串证明。"
+
+run_policy:
+  variants_to_run:
+    - full
+    - swapped_objects
+  writer_models:
+    - "kimi-code/kimi-k3"
+    - "deepseek-official/deepseek-v4-pro"
+    - "qwen/qwen3.7-max"
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol

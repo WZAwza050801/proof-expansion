@@ -1,0 +1,102 @@
+package_id: P005_binomial-theorem-induction-v1
+status: candidate
+split: dev
+created_by: terra
+created_at: 2026-08-17
+frozen_at: null
+
+source_record:
+  authors: "Isaac Newton; William F. Donoghue (editor)"
+  title: "The Mathematics of the Binomial Theorem"
+  year: "1969"
+  url_or_doi_or_arxiv: "https://archive.org/details/mathematicsofbin0000dono"
+  source_type: textbook
+  accessed_on: 2026-08-17
+  original_text_obtained: true
+  evidence_status: proved
+  likely_memorized: true
+  memorization_note: "二项式定理结论常见；包固定归纳法路径并把 Pascal 恒等式置为显式依赖，重点测边界项和指标变换。"
+
+selection_record:
+  proof_structure: induction
+  discriminability_rationale: |
+    归纳步要求把两和式正确错位、合并中间项并单独处理 k=0 和 k=n+1 边界。
+    基线答案常只写“用 Pascal 恒等式合并”而漏掉边界，或把上标 n、n+1 混淆；删除 Pascal 恒等式的变体检验是否诚实声明缺口。
+  known_failure_modes:
+    - "合并求和时遗漏 x^{n+1} 或 y^{n+1} 的边界项。"
+    - "把 C(n,k)+C(n,k-1) 的索引范围写错。"
+    - "未获许可时把 Pascal 恒等式当作当然已知。"
+  human_approval:
+    approved_for_dev: false
+    approved_for_eval: false
+    approver: null
+    approved_at: null
+    rationale: null
+
+writer_bundle:
+  statement: |
+    对每个非负整数 n 及任意可交换变量 x,y，证明
+    (x+y)^n = sum_{k=0}^n C(n,k)x^{n-k}y^k，
+    其中 C(n,k)=n!/(k!(n-k)!)（0<=k<=n）。
+  proof_skeleton: |
+    对 n 归纳。验证 n=0；在归纳步把 n 次的和式分别乘 x 和 y。
+    通过一次换指标使两和式的同次项对齐，用给定组合恒等式合并内部项，并单独核查两个边界项。
+  allowed_dependencies:
+    - id: D1
+      kind: standard_result
+      statement: |
+        Pascal 恒等式：当 1<=k<=n 时，C(n,k)+C(n,k-1)=C(n+1,k)。
+    - id: D2
+      kind: definition
+      statement: |
+        空和为 0，且 C(n,0)=C(n,n)=1。
+  closed_book_notice: |
+    只可使用本资料包。不得检索、使用外部来源、参考证明、评审规则或未列出的结果。
+
+judge_bundle:
+  reference_proof: |
+    对 n 归纳。n=0 时，(x+y)^0=1=C(0,0)。
+    假设 (x+y)^n=sum_{k=0}^n C(n,k)x^{n-k}y^k。则
+    (x+y)^{n+1}=x sum_{k=0}^n C(n,k)x^{n-k}y^k + y sum_{k=0}^n C(n,k)x^{n-k}y^k
+    =sum_{k=0}^n C(n,k)x^{n+1-k}y^k + sum_{k=1}^{n+1} C(n,k-1)x^{n+1-k}y^k。
+    第一和式的 k=0 项为 x^{n+1}，第二和式的 k=n+1 项为 y^{n+1}。对 1<=k<=n，D1 将系数合为 C(n+1,k)。再用 D2 将边界系数写为 C(n+1,0)、C(n+1,n+1)，得到所需 n+1 公式。归纳完成。
+  key_lemmas:
+    - lemma: "Pascal 恒等式及其适用范围 1<=k<=n。"
+      why_key: "它只合并内部项；边界项不能被该恒等式覆盖。"
+      applicability_conditions: "两个和式必须换成同一幂次 x^{n+1-k}y^k 后才能合并。"
+  failure_mode_annotations:
+    - "写成从 k=0 到 n+1 都使用 Pascal 恒等式是越界。"
+    - "只写“重排得结论”会遮蔽边界项是否保留。"
+  variants:
+    - variant_id: full
+      modification: "No modification."
+      writer_bundle_patch:
+        remove_dependency_ids: []
+        replace_statement: null
+        replace_proof_skeleton: null
+        append_allowed_dependencies: []
+      expected_outcome: "应有基例、合法换指标、内部项 Pascal 合并及两端边界项。"
+    - variant_id: missing_lemma
+      modification: "删除 Pascal 恒等式这一允许依赖。"
+      writer_bundle_patch:
+        remove_dependency_ids:
+          - D1
+        replace_statement: null
+        replace_proof_skeleton: null
+        append_allowed_dependencies: []
+      expected_outcome: "写手应说明归纳步需要证明或获准使用组合系数递推；在闭卷资料规则下不可无依据调用 Pascal 恒等式。"
+
+run_policy:
+  variants_to_run:
+    - full
+    - missing_lemma
+  writer_models:
+    - "kimi-code/kimi-k3"
+    - "deepseek-official/deepseek-v4-pro"
+    - "qwen/qwen3.7-max"
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol

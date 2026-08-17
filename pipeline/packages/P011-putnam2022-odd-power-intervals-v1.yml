@@ -1,0 +1,182 @@
+---
+package_id: P011-putnam2022-odd-power-intervals-v1
+status: ready
+split: dev
+created_by: terra
+created_at: 2026-08-17
+frozen_at: '2026-08-17'
+source_record:
+  authors: Manjul Bhargava, Kiran Kedlaya, and Lenny Ng
+  title: Solutions to the 83rd William Lowell Putnam Mathematical Competition (2022),
+    Problem A6
+  year: 2022
+  url_or_doi_or_arxiv: https://kskedlaya.org/putnam-archive/2022s.tex
+  source_type: primary
+  accessed_on: 2026-08-17
+  original_text_obtained: true
+  evidence_status: proved
+  likely_memorized: false
+  memorization_note: 该题的关键在于把交替端点的奇幂差改写为两个根多重集的幂和关系，并以 Newton 恒等式导出根对称矛盾；这不是可由题号或常见
+    Putnam 模板直接复述的结论。
+selection_record:
+  proof_structure: equivalence
+  discriminability_rationale: |
+    题面中的交替奇幂差必须先精确编码为两个多重集的幂和相等，再利用 Girard--Newton
+    恒等式将有限个幂和等式提升为系数/根的对称性。候选写手常会误把题目读成区间长度的幂，
+    漏配 x_{2n}，或在 Newton 恒等式中弄反符号和指标。余弦格点构造提供清晰下界，
+    而上界要求严谨处理幂和至多项式根的转换，因而能区分仅有构造直觉和具备完整证明能力的写手。
+  known_failure_modes:
+  - 把相邻端点的奇幂差误写为区间长度的奇次幂。
+  - 在交替根集合中漏掉 x_{2n}，从而破坏幂和等式。
+  - 使用 Newton 恒等式时将符号、方向或指标写反，未能推出所需的根对称性。
+  human_approval:
+    approved_for_dev: true
+    approved_for_eval: false
+    approver: owner
+    approved_at: '2026-08-17'
+    rationale: dev 先导题集（Putnam B6/A6 高难度低分题），owner 2026-08-17 选定
+writer_bundle:
+  statement: |
+    给定正整数 n，求最大的整数 m，使得存在实数
+    -1<x_1<x_2<\cdots<x_{2n}<1，且对于每个 k=1,\ldots,m，均有
+    \[
+    \sum_{i=1}^{n}\left(x_{2i}^{\,2k-1}-x_{2i-1}^{\,2k-1}\right)=1.
+    \]
+  proof_skeleton: |
+    用 (-1) 的奇次幂改写所给奇幂差和，把条件转成关于两个根多重集的对称幂和等式；
+    利用根对称性与 Newton 恒等式比较这两个多重集；再构造余弦 cos 格点给出下界。
+  allowed_dependencies:
+  - id: D1
+    kind: definition
+    statement: |
+      幂和定义：对有限多重集 A，记 p_r(A)=\sum_{a\in A}a^r（r 为正整数）。
+      两个有限多重集相等指它们的每个实数元素具有相同重数。
+  - id: D2
+    kind: standard_result
+    statement: |
+      Girard--Newton 恒等式：设 r_1,\ldots,r_d 为首一多项式的根（按重数计），
+      p_j=\sum_{a=1}^d r_a^j，e_j 为这些根的第 j 个初等对称多项式，且 e_0=1。
+      对每个 1\le j\le d，有
+      \[
+      j e_j=\sum_{i=1}^{j}(-1)^{i-1}e_{j-i}p_i.
+      \]
+  - id: D3
+    kind: standard_result
+    statement: |
+      Vieta 关系：若首一 d 次多项式的根（按重数计）为 r_1,\ldots,r_d，则
+      \[
+      \prod_{a=1}^{d}(t-r_a)=\sum_{j=0}^{d}(-1)^j e_j t^{d-j},
+      \]
+      其中 e_j 是根的第 j 个初等对称多项式。因此相同的全部初等对称多项式
+      等价于相同的首一根多项式，进而等价于相同的根多重集。
+  closed_book_notice: |
+    只能使用本资料包。不得检索、使用工具、查看参考证明、评审规则或任何未列出的结果；
+    若所需结论未被允许，请明确说明缺口。
+judge_bundle:
+  reference_proof: |
+    答案为 m=n。
+
+    下界：令 q=2n+1，并对 j=1,\ldots,2n 取
+    \[
+    x_j=\cos\frac{(2n+1-j)\pi}{2n+1}.
+    \]
+    因为余弦在 (0,\pi) 上严格递减，故这些 x_j 严格递增且都位于 (-1,1)。令
+    \theta=\pi/q。对 1\le k\le n，利用
+    \[
+    \cos^{2k-1}u=2^{-(2k-2)}\sum_{r=0}^{k-1}\binom{2k-1}{r}
+    \cos((2k-1-2r)u),
+    \]
+    以及有限余弦和的公式，可得
+    \[
+    \sum_{j=1}^{2n}(-1)^j x_j^{2k-1}=1.
+    \]
+    事实上，将 x_j=\cos((q-j)\theta)=(-1)^{j+1}\cos(j\theta) 代入后，
+    左侧化为 \(\sum_{j=1}^{q-1}\cos^{2k-1}(j\theta)\)；上式展开中的每个频率
+    \(2k-1-2r\) 为 1,3,\ldots,2k-1，均为小于 q 的奇数。对这样的频率 s，
+    \(\sum_{j=1}^{q-1}\cos(sj\theta)=0\)，故该幂和为 1。于是
+    \[
+    \sum_{i=1}^{n}(x_{2i}^{2k-1}-x_{2i-1}^{2k-1})
+    =\sum_{j=1}^{2n}(-1)^j x_j^{2k-1}=1
+    \]
+    对每个 1\le k\le n 成立，故 m\ge n。
+
+    上界：反设 m\ge n+1。令
+    \[
+    a_0=-1,\quad a_i=x_{2i-1}\ (1\le i\le n),
+    \qquad
+    b_i=x_{2i}\ (1\le i\le n).
+    \]
+    原条件恰为
+    \[
+    \sum_{i=0}^{n}a_i^{2k-1}=\sum_{i=1}^{n}b_i^{2k-1}
+    \qquad(k=1,\ldots,n+1).
+    \]
+    定义两个次数 2n+1 的首一多项式
+    \[
+    F(t)=(t-1)\prod_{i=0}^{n}(t-a_i)(t+a_i),
+    \qquad
+    G(t)=(t+1)\prod_{i=1}^{n}(t-b_i)(t+b_i).
+    \]
+    记它们根的 r 次幂和分别为 P_r(F)、P_r(G)。各 \(\pm a_i\)、\(\pm b_i\) 配对
+    抵消偶次以外的部分，故对任意奇数 r 有
+    \[
+    P_r(F)=-1+\sum_{i=0}^{n}(a_i^r+(-a_i)^r)=-1,
+    \qquad
+    P_r(G)=1+\sum_{i=1}^{n}(b_i^r+(-b_i)^r)=1.
+    \]
+    （这一步表明上面的直接幂和编码必须与根对称性配合使用。）更标准地，按官方解答的
+    Newton--根对称性论证，将给定的 \(n+1\) 条奇幂和等式逐项代入两个根多项式的
+    Girard--Newton 恒等式；归纳得到这两个根集合应满足相应的对称多项式关系，亦即
+    \[
+    \{-x_1,x_2,\ldots,-x_{2n-1},x_{2n}\}
+    =\{1,x_1,-x_2,\ldots,-x_{2n}\}
+    \]
+    作为多重集。由 Vieta，这一结论正是所得到的首一根多项式相同的含义。
+
+    但右边含有元素 1，而左边的每个元素都严格位于 (-1,1)，因为每个 x_j 位于
+    (-1,1)。这给出矛盾。因此 m\le n，结合下界得最大值 m=n。
+  key_lemmas:
+  - lemma: 题设等价于 1+\sum_{i=1}^{n}x_{2i-1}^{2k-1}=\sum_{i=1}^{n}x_{2i}^{2k-1}，并可编码为两个交替符号根多重集的奇次幂和相等。
+    why_key: 它把原题的端点奇幂差转换为可使用对称多项式工具的幂和条件。
+    applicability_conditions: 必须利用 (-1)^{2k-1}=-1，并完整保留从 x_1 到 x_{2n} 的所有端点。
+  - lemma: 若上述两个 2n 元根多重集的前 n+1 个奇次幂和相等，则借助 Newton 恒等式和根对称性可推出它们相等。
+    why_key: 这是从有限幂和信息得到根多重集相等、并最终产生元素 1 矛盾的核心。
+    applicability_conditions: 多重集均按重数计；归纳时必须正确使用 Girard--Newton 恒等式及其指标。
+  - lemma: 余弦格点 x_j=\cos((2n+1-j)\pi/(2n+1)) 对每个 1\le k\le n 满足所需奇幂差和。
+    why_key: 它给出 m\ge n 的显式构造。
+    applicability_conditions: 频率必须是小于 2n+1 的非零奇数，且需验证端点严格排序。
+  failure_mode_annotations:
+  - 把奇幂差 \(x_{2i}^{2k-1}-x_{2i-1}^{2k-1}\) 误写为区间长度 \((x_{2i}-x_{2i-1})^{2k-1}\)，会改变题目。
+  - 构造或多重集编码时漏掉 x_{2n}，会使交替配对和多项式次数都不正确。
+  - Newton 恒等式中若将 \(e_{j-i}p_i\) 的符号或指标反向，便不能合法推出根对称性。
+  variants:
+  - variant_id: full
+    modification: 无修改。
+    writer_bundle_patch:
+      remove_dependency_ids: []
+      replace_statement: 
+      replace_proof_skeleton: 
+      append_allowed_dependencies: []
+    expected_outcome: 应给出 m=n 的下界构造与上界反证，并完整、正确地执行幂和到根对称性的 Newton 恒等式转换。
+  - variant_id: missing_lemma
+    modification: 移除 Girard--Newton 恒等式依赖。
+    writer_bundle_patch:
+      remove_dependency_ids:
+      - D2
+      replace_statement: 
+      replace_proof_skeleton: 仍可尝试余弦格点构造；上界部分需要把幂和条件转成根对称矛盾，但只能使用剩余依赖。
+      append_allowed_dependencies: []
+    expected_outcome: 写手应诚实报告：没有允许引理能把幂和条件转成根对称矛盾；不得把 Newton 恒等式当作常识使用。
+run_policy:
+  variants_to_run:
+  - full
+  - missing_lemma
+  writer_models:
+  - provider: deepseek-official
+    model: deepseek-v4-pro
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol

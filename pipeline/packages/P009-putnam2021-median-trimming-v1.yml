@@ -1,0 +1,114 @@
+---
+package_id: P009_putnam2021-median-trimming-v1
+status: ready
+split: dev
+created_by: terra
+created_at: 2026-08-17
+frozen_at: '2026-08-17'
+source_record:
+  authors: Manjul Bhargava, Kiran Kedlaya, and Lenny Ng
+  title: Solutions to the 82nd William Lowell Putnam Mathematical Competition (2021),
+    Problem B6
+  year: '2021'
+  url_or_doi_or_arxiv: https://kskedlaya.org/putnam-archive/2021s.tex
+  source_type: primary
+  accessed_on: 2026-08-17
+  original_text_obtained: true
+  evidence_status: proved
+  likely_memorized: false
+  memorization_note: 题目是高难度概率递推；多层中位数分布的反函数面积论证远不如常见中位数公式易被直接回忆。
+selection_record:
+  proof_structure: induction
+  discriminability_rationale: '此题把递归随机过程转成分布函数迭代，并要求处理对称性、密度变换、反函数面积与方向相反的不等式。模型通常能写出中位数密度，却容易错误地把
+    F_k=F_1∘F_{k-1} 与 F_{k-1}∘F_1 混淆，或在取反函数时反转不等式。精细化过程提示应显著提高这些局部审计的完成率；题干给出了足够的标准工具，因而可产生部分有效步骤。
+
+'
+  known_failure_modes:
+  - 中位数密度漏掉系数 6 或把 F(1-F) 写成 F^2。
+  - 错误处理 F_k 的迭代次序和反函数复合。
+  - 将 1/2-F_1(x) 的上界在取反函数时保持错误方向。
+  human_approval:
+    approved_for_dev: true
+    approved_for_eval: false
+    approver: owner
+    approved_at: '2026-08-17'
+    rationale: dev 先导题集（Putnam B6/A6 高难度低分题），owner 2026-08-17 选定
+writer_bundle:
+  statement: |
+    从 3^2021 个相互独立、均匀分布于 [0,1] 的随机实数开始。一次“修剪”把序列分成相邻的三元组，并在每组三数中只保留中位数。重复修剪 2021 次后仅剩 X。令 μ=E|X-1/2|。证明
+    μ≥(1/4)(2/3)^2021。
+  proof_skeleton: '令 X_k 表示从 3^k 个均匀样本反复修剪 k 次后留下的数，令 F_k 为其分布函数、f_k 为密度。用三独立同分布变量的中位数公式写出
+    F_k 与 F_{k-1} 的关系。用对称性将 μ_k=E|X_k-1/2| 写为 [0,1/2] 上的面积，再改写为反函数的面积。对 F_1 在 [0,1/2]
+    的斜率作上界，推出相邻 μ_k 的递推下界，并归纳。
+
+'
+  allowed_dependencies:
+  - id: D1
+    kind: standard_result
+    statement: '若 Y_1,Y_2,Y_3 独立同分布，分布函数为 F、连续密度为 f，则其样本中位数 M 的分布函数为 P(M≤x)=3F(x)^2-2F(x)^3，密度为
+      6f(x)F(x)(1-F(x))。
+
+'
+  - id: D2
+    kind: standard_result
+    statement: |
+      若 F:[0,1/2]→[0,1/2] 连续严格递增且 F(0)=0,F(1/2)=1/2，则
+      ∫_0^{1/2}F(x)dx=∫_0^{1/2}(1/2-F^{-1}(y))dy。
+  - id: D3
+    kind: standard_result
+    statement: '对任意 t∈[0,1/2]，6t(1-t)≤3/2。
+
+'
+  closed_book_notice: '只能使用本资料包。不得检索、使用工具、查看参考证明、评审规则或任何未列出的结果；若所需结论未被允许，请明确说明缺口。
+
+'
+judge_bundle:
+  reference_proof: |
+    令 f_k,F_k 分别为 X_k 的密度和分布函数。各层分布关于 1/2 对称，故 F_k(1/2)=1/2。由 D1，F_k(x)=3F_{k-1}(x)^2-2F_{k-1}(x)^3=F_1(F_{k-1}(x))，其中 F_1(t)=3t^2-2t^3。
+    写 μ_k=E|X_k-1/2|。由对称和分部积分，μ_k=2∫_0^{1/2}(1/2-x)f_k(x)dx=2∫_0^{1/2}F_k(x)dx。由 D2，μ_k=2∫_0^{1/2}(1/2-F_k^{-1}(y))dy。
+    又 F_1'(t)=6t(1-t)≤3/2，故对 0≤x≤1/2，
+    1/2-F_1(x)=∫_x^{1/2}F_1'(t)dt≤(3/2)(1/2-x)。
+    令 x=F_k^{-1}(y)，并用 F_k=F_1∘F_{k-1}，得到
+    1/2-F_k^{-1}(y)≥(2/3)(1/2-F_{k-1}^{-1}(y)).
+    对 y 积分即 μ_k≥(2/3)μ_{k-1}。初始时 X_0 均匀，μ_0=E|U-1/2|=1/4。因此 μ_2021≥(1/4)(2/3)^2021。
+  key_lemmas:
+  - lemma: F_k=F_1∘F_{k-1}。
+    why_key: 把每层中位数操作化为同一个分布函数迭代。
+    applicability_conditions: 三输入独立且具有连续分布。
+  - lemma: 反函数面积恒等式与斜率界联用。
+    why_key: 把局部导数上界转为 μ 的全局下界。
+    applicability_conditions: F_k 在半区间严格递增，且端点值正确。
+  failure_mode_annotations:
+  - 把不等式在取反函数时写成 ≤ 是致命方向错误。
+  - full 变体若只给出密度递推但未连接 μ，不完整。
+  variants:
+  - variant_id: full
+    modification: 无修改。
+    writer_bundle_patch:
+      remove_dependency_ids: []
+      replace_statement: 
+      replace_proof_skeleton: 
+      append_allowed_dependencies: []
+    expected_outcome: 应推出 μ_k≥(2/3)μ_{k-1} 并以 μ_0=1/4 完成归纳。
+  - variant_id: missing_lemma
+    modification: 移除反函数面积恒等式。
+    writer_bundle_patch:
+      remove_dependency_ids:
+      - D2
+      replace_statement: 
+      replace_proof_skeleton: 可建立中位数分布递推与对称性；要把该信息转为 μ 的递推，只能使用剩余依赖。
+      append_allowed_dependencies: []
+    expected_outcome: 正确行为是指出：给定路线将 μ 改写为反函数面积时缺少允许结果；除非从基本积分严格自行证明该恒等式，否则不应引用。
+run_policy:
+  variants_to_run:
+  - full
+  - missing_lemma
+  writer_models:
+  - provider: deepseek-official
+    model: deepseek-v4-pro
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol

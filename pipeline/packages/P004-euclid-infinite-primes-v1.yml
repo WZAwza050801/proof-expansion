@@ -1,0 +1,103 @@
+package_id: P004_euclid-infinite-primes-v1
+status: candidate
+split: dev
+created_by: terra
+created_at: 2026-08-17
+frozen_at: null
+
+source_record:
+  authors: "Euclid; Thomas L. Heath (translator/editor)"
+  title: "The Thirteen Books of Euclid's Elements, Book IX, Proposition 20"
+  year: "1908"
+  url_or_doi_or_arxiv: "https://archive.org/details/thirteenbooksofe03eucl"
+  source_type: primary
+  accessed_on: 2026-08-17
+  original_text_obtained: true
+  evidence_status: proved
+  likely_memorized: true
+  memorization_note: "结论高度常见；采用指定的整除反证骨架和错误跳步变体，过程指标比结论正确性更有意义。"
+
+selection_record:
+  proof_structure: contradiction
+  discriminability_rationale: |
+    欧几里得反证看似熟悉，却要求精确区分“已列出的素数”与“新数的素因子”，并使用整除线性组合。
+    基线模型常错误声称 p_i 不整除 N 就推出 N 为素数，或省略 N>1 的素因子存在性；残缺骨架专门诱发该错跳步。
+  known_failure_modes:
+    - "把“没有列出的素数整除 N”误写成“N 是素数”。"
+    - "未说明 N>1 就调用素因子存在性。"
+    - "未用整除线性组合严格推出 p_i 不整除 N。"
+  human_approval:
+    approved_for_dev: false
+    approved_for_eval: false
+    approver: null
+    approved_at: null
+    rationale: null
+
+writer_bundle:
+  statement: |
+    证明：素数有无穷多个。
+  proof_skeleton: |
+    反设全部素数可列为 p_1,...,p_n。构造 N=p_1p_2...p_n+1。
+    对每个已列素数检查它与 N 的整除关系；随后使用允许的因子结论，得到与“列表完整”矛盾的素数。
+  allowed_dependencies:
+    - id: D1
+      kind: definition
+      statement: |
+        正整数 p>1 称为素数，若它的正因子只有 1 与 p。
+    - id: D2
+      kind: standard_result
+      statement: |
+        每个大于 1 的正整数都至少有一个素因子。
+    - id: D3
+      kind: standard_result
+      statement: |
+        若 d 整除 x 与 y，则 d 整除任意整数线性组合 ax+by。
+  closed_book_notice: |
+    只可使用本资料包。不得检索、使用外部来源、参考证明、评审规则或未列出的结果。
+
+judge_bundle:
+  reference_proof: |
+    反设素数只有有限多个，记为 p_1,...,p_n。令 N=p_1...p_n+1。显然 N>1。
+    对每个 i，若 p_i 整除 N，且 p_i 也整除积 P=p_1...p_n，则按 D3，p_i 整除 N-P=1，不可能。因此没有 p_i 整除 N。
+    由 D2，N 有一个素因子 q。q 是素数，故按反设应等于某个 p_i；但 q 整除 N 与上段矛盾。故反设不成立，素数无穷多。
+  key_lemmas:
+    - lemma: "若 p_i|N 和 p_i|P，则 p_i|(N-P)=1，矛盾。"
+      why_key: "它只排除列出的素数作为因子，而不错误地断言 N 自身为素数。"
+      applicability_conditions: "P 必须是所有列出素数的乘积，且 p_i>1。"
+  failure_mode_annotations:
+    - "N 不必为素数；例如某些欧几里得数是合数。"
+    - "D2 给出的是素因子 q，不是自动给出 N 是素数。"
+  variants:
+    - variant_id: full
+      modification: "No modification."
+      writer_bundle_patch:
+        remove_dependency_ids: []
+        replace_statement: null
+        replace_proof_skeleton: null
+        append_allowed_dependencies: []
+      expected_outcome: "应完成有限列表反设、整除线性组合和素因子矛盾。"
+    - variant_id: false_skip
+      modification: "将骨架最后一句替换为一个诱导性的错误跳步。"
+      writer_bundle_patch:
+        remove_dependency_ids: []
+        replace_statement: null
+        replace_proof_skeleton: |
+          反设全部素数可列为 p_1,...,p_n。构造 N=p_1p_2...p_n+1。
+          对每个已列素数检查它与 N 的整除关系；既然没有 p_i 整除 N，便直接断言 N 是一个新素数并结束。
+        append_allowed_dependencies: []
+      expected_outcome: "写手应拒绝该跳步并修正：N 可能合数，必须由 D2 取其素因子 q，再证明 q 不在列表中。"
+
+run_policy:
+  variants_to_run:
+    - full
+    - false_skip
+  writer_models:
+    - "kimi-code/kimi-k3"
+    - "deepseek-official/deepseek-v4-pro"
+    - "qwen/qwen3.7-max"
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol

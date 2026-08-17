@@ -1,0 +1,115 @@
+# Proof Expansion Problem Package Template
+# Schema version: 2
+# Visibility rule: everything in writer_bundle may be shown to A/B writers;
+# nothing in judge_bundle may be shown to writers.
+
+package_id: P###_<slug>-v1
+status: candidate # candidate | ready | retired
+split: dev # dev | eval
+created_by: terra | manual
+created_at: YYYY-MM-DD
+frozen_at: null
+
+source_record:
+  authors: ""
+  title: ""
+  year: ""
+  url_or_doi_or_arxiv: ""
+  source_type: primary # primary | textbook | secondary
+  accessed_on: YYYY-MM-DD
+  original_text_obtained: false
+  evidence_status: proved # proved | verified | unverified-source | not-applicable-smoke
+  likely_memorized: null # true | false; null until Terra assesses it
+  memorization_note: ""
+
+selection_record:
+  proof_structure: direct # direct | contradiction | induction | construction | equivalence | key_lemma
+  discriminability_rationale: |
+    Explain the predicted baseline failure mode and why this is neither too easy
+    nor too hard for the target writer models.
+  known_failure_modes:
+    - ""
+  human_approval:
+    approved_for_dev: false
+    approved_for_eval: false
+    approver: null
+    approved_at: null
+    rationale: null
+
+writer_bundle:
+  statement: |
+    Full theorem statement, all hypotheses, quantifiers, conclusion, and notation.
+  proof_skeleton: |
+    Compressed researcher-provided strategy only. Do not leak reference-proof answers.
+  allowed_dependencies:
+    - id: D1
+      kind: definition # definition | lemma | standard_result | previously_proved
+      statement: |
+        Exact writer-visible statement and all applicability assumptions.
+  closed_book_notice: |
+    Use only this bundle. No search, tools, external sources, reference proof,
+    judge rubric, or unlisted results are permitted.
+
+judge_bundle:
+  reference_proof: |
+    Complete source-traceable reference proof. Never send this field to writers.
+  key_lemmas:
+    - lemma: ""
+      why_key: ""
+      applicability_conditions: ""
+  failure_mode_annotations:
+    - ""
+  variants:
+    # Before delivery, the executor applies writer_bundle_patch to a fresh
+    # copy of writer_bundle. The original package remains immutable.
+    - variant_id: full
+      modification: "No modification."
+      writer_bundle_patch:
+        remove_dependency_ids: []
+        replace_statement: null
+        replace_proof_skeleton: null
+        append_allowed_dependencies: []
+      expected_outcome: ""
+    - variant_id: missing_hypothesis
+      modification: ""
+      writer_bundle_patch:
+        remove_dependency_ids: []
+        replace_statement: null
+        replace_proof_skeleton: null
+        append_allowed_dependencies: []
+      expected_outcome: ""
+    - variant_id: missing_lemma
+      modification: ""
+      writer_bundle_patch:
+        remove_dependency_ids: []
+        replace_statement: null
+        replace_proof_skeleton: null
+        append_allowed_dependencies: []
+      expected_outcome: ""
+    - variant_id: false_skip
+      modification: ""
+      writer_bundle_patch:
+        remove_dependency_ids: []
+        replace_statement: null
+        replace_proof_skeleton: null
+        append_allowed_dependencies: []
+      expected_outcome: ""
+    - variant_id: swapped_objects
+      modification: ""
+      writer_bundle_patch:
+        remove_dependency_ids: []
+        replace_statement: null
+        replace_proof_skeleton: null
+        append_allowed_dependencies: []
+      expected_outcome: ""
+
+run_policy:
+  variants_to_run:
+    - full
+  writer_models: [] # Explicit provider/model routes; A and B must match per model.
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol

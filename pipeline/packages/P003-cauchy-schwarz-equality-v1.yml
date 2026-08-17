@@ -1,0 +1,101 @@
+package_id: P003_cauchy-schwarz-equality-v1
+status: candidate
+split: dev
+created_by: terra
+created_at: 2026-08-17
+frozen_at: null
+
+source_record:
+  authors: "George Pólya; Gábor Szegő"
+  title: "Problems and Theorems in Analysis, Volume I"
+  year: "1972"
+  url_or_doi_or_arxiv: "https://link.springer.com/book/10.1007/978-3-642-61973-5"
+  source_type: textbook
+  accessed_on: 2026-08-17
+  original_text_obtained: true
+  evidence_status: proved
+  likely_memorized: true
+  memorization_note: "不等式名称常被记忆；本题将正确性视为上限，重点观察平方展开、零范数边界与等号刻画是否被逐项处理。"
+
+selection_record:
+  proof_structure: direct
+  discriminability_rationale: |
+    用最小二次型证明 Cauchy--Schwarz 是短而严格的直接证明，但等号条件和 v=0 的边界常被流畅文字跳过。
+    基线答案容易直接“除以 ||v||^2”或从 t 的最小值为零错误推出线性相关；精细提示可促使显式分情况并核对判别式。
+  known_failure_modes:
+    - "未处理 v=0 就令 t=<u,v>/||v||^2。"
+    - "把 ||u-tv||^2>=0 的展开式中交叉项符号写错。"
+    - "等号时未论证 u-tv=0。"
+  human_approval:
+    approved_for_dev: false
+    approved_for_eval: false
+    approver: null
+    approved_at: null
+    rationale: null
+
+writer_bundle:
+  statement: |
+    设 V 是实内积空间，u,v 属于 V。证明
+    |<u,v>| <= ||u|| ||v||。
+    并证明等号成立当且仅当 u,v 线性相关（其中零向量与任意向量视为线性相关）。
+  proof_skeleton: |
+    先隔离一个可能使除法无意义的退化情形。其余情形中，选择适当实数 t 并使用 ||u-tv||^2>=0；完整展开后，把所得不等式改写为目标式。最后从等号的来源反向追踪等号条件。
+  allowed_dependencies:
+    - id: D1
+      kind: definition
+      statement: |
+        实内积满足 <x,x>=||x||^2>=0，且 <x,x>=0 当且仅当 x=0；并且 <ax+by,z>=a<x,z>+b<y,z>，<x,y>=<y,x>。
+    - id: D2
+      kind: definition
+      statement: |
+        向量 u,v 线性相关，指存在不全为零的实数 alpha,beta，使 alpha u+beta v=0。
+  closed_book_notice: |
+    只可使用本资料包。不得检索、使用外部来源、参考证明、评审规则或未列出的结果。
+
+judge_bundle:
+  reference_proof: |
+    若 v=0，则 <u,v>=0，目标不等式成立；且 u,v 线性相关，因为 0*u+1*v=0。以下设 v!=0，所以 ||v||^2>0。
+    令 t=<u,v>/||v||^2。由 D1，0<=||u-tv||^2=<u-tv,u-tv>=||u||^2-2t<u,v>+t^2||v||^2
+    =||u||^2-<u,v>^2/||v||^2。
+    乘以正数 ||v||^2，得到 <u,v>^2<=||u||^2||v||^2；两边非负，开方得 |<u,v>|<=||u||||v||。
+    若等号成立，以上非负量为零，故 ||u-tv||^2=0，从而 u=tv，故线性相关。反之若 u=cv，则 <u,v>=c||v||^2 且 ||u||=|c||||v||，故等号成立；当 v=0 已在前面处理。
+  key_lemmas:
+    - lemma: "正定性：||x||^2=0 当且仅当 x=0。"
+      why_key: "它把数值等号转成向量的线性相关关系。"
+      applicability_conditions: "必须在实内积空间中，并且先合法定义 t。"
+  failure_mode_annotations:
+    - "不先分 v=0 情形而直接定义 t 是非法的。"
+    - "线性相关的零向量边界必须和等号刻画一致。"
+  variants:
+    - variant_id: full
+      modification: "No modification."
+      writer_bundle_patch:
+        remove_dependency_ids: []
+        replace_statement: null
+        replace_proof_skeleton: null
+        append_allowed_dependencies: []
+      expected_outcome: "应有合法的退化情形处理、平方展开和双向等号刻画。"
+    - variant_id: missing_hypothesis
+      modification: "把“实内积空间”替换为“实向量空间”，同时保留符号 <,> 和 || || 未作额外公理说明。"
+      writer_bundle_patch:
+        remove_dependency_ids: []
+        replace_statement: |
+          设 V 是实向量空间，u,v 属于 V。证明 |<u,v>| <= ||u|| ||v||，并刻画等号。
+        replace_proof_skeleton: null
+        append_allowed_dependencies: []
+      expected_outcome: "写手应指出命题资料不足：未假定内积/范数性质，符号没有定义，不能进行平方非负或等号分析；不得偷偷补成内积空间。"
+
+run_policy:
+  variants_to_run:
+    - full
+    - missing_hypothesis
+  writer_models:
+    - "kimi-code/kimi-k3"
+    - "deepseek-official/deepseek-v4-pro"
+    - "qwen/qwen3.7-max"
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol

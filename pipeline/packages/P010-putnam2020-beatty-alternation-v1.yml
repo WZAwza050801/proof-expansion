@@ -1,0 +1,110 @@
+---
+package_id: P010_putnam2020-beatty-alternation-v1
+status: ready
+split: dev
+created_by: terra
+created_at: 2026-08-17
+frozen_at: '2026-08-17'
+source_record:
+  authors: Manjul Bhargava, Kiran Kedlaya, and Lenny Ng
+  title: Solutions to the 81st William Lowell Putnam Mathematical Competition (2020;
+    held February 2021), Problem B6
+  year: '2020'
+  url_or_doi_or_arxiv: https://kskedlaya.org/putnam-archive/2020s.tex
+  source_type: primary
+  accessed_on: 2026-08-17
+  original_text_obtained: true
+  evidence_status: proved
+  likely_memorized: false
+  memorization_note: 非官方举行的 2020 Putnam B6；涉及 Beatty 型自相似归纳，较少形成标准训练模板。
+selection_record:
+  proof_structure: induction
+  discriminability_rationale: '该题需要把地板函数符号序列按常值簇重新编码，再把簇长度与互补斜率 √2+1 关联，最后执行尺度从 N
+    到 4N 的强归纳。候选模型容易把严格/非严格不等式、索引从 0 或 1、以及 m 奇偶时的额外 c_m 项搞错。精细提示能显著暴露或修正这些细节；而提供簇长度引理后模型至少能推进到有效中段。
+
+'
+  known_failure_modes:
+  - 把 floor 边界 i<j(√2+1)<i+1 写成非严格，导致簇归属错误。
+  - 漏去从 k=0 到 k=1 的偏移，错误声称部分和相同。
+  - 强归纳中未证明 m<2N+2，或偶数 m 时漏加 c_m。
+  human_approval:
+    approved_for_dev: true
+    approved_for_eval: false
+    approver: owner
+    approved_at: '2026-08-17'
+    rationale: dev 先导题集（Putnam B6/A6 高难度低分题），owner 2026-08-17 选定
+writer_bundle:
+  statement: |
+    设 n 为正整数，证明
+    Σ_{k=1}^n (-1)^{⌊k(√2-1)⌋}≥0。
+  proof_skeleton: '令 a_k=⌊k(√2-1)⌋，把符号序列按 a_k 的相同值分成连续簇；令 c_i 是第 i 个簇的长度（从 i=0 起）。先由计数求出
+    c_i=2+⌊(i+1)(√2-1)⌋-⌊i(√2-1)⌋，并将 c_i=3 的位置重述为 Beatty 型索引。证明一个尺度归纳：若到 N 的结论成立，则到
+    4N 成立；在簇和中按 m 的奇偶分别还原为较短的原符号和。
+
+'
+  allowed_dependencies:
+  - id: D1
+    kind: lemma
+    statement: |
+      对 i≥0，簇长度 c_i 满足
+      c_i=2+⌊(i+1)(√2-1)⌋-⌊i(√2-1)⌋，
+      且 c_i=3 当且仅当 i=⌊j(√2+1)⌋（某个非负整数 j）；否则 c_i=2。
+  - id: D2
+    kind: standard_result
+    statement: "√2-1 的倒数为 √2+1；特别地，对 m>0，有 m(√2-1)<m/2。\n"
+  - id: D3
+    kind: definition
+    statement: '所有簇和均按 i=0 开始。第 i 簇的符号为 (-1)^i，长度为 c_i。
+
+'
+  closed_book_notice: '只能使用本资料包。不得检索、使用工具、查看参考证明、评审规则或任何未列出的结果；若所需结论未被允许，请明确说明缺口。
+
+'
+judge_bundle:
+  reference_proof: |
+    扩展至 k=0 并记 a_k=⌊k(√2-1)⌋。第 i 个连续符号簇长度为 c_i。D1 给出 c_i=2 加上一个指示量：当且仅当 i=⌊j(√2+1)⌋ 时该指示量为 1。
+    证明较强命题：若对所有 n≤N 有 Σ_{k=0}^n(-1)^{a_k}≥1，则对所有 n≤4N 亦然。N=1 可直接验证。对于 n≤4N，只需检查完整簇端点的交替簇和 Σ_{i=0}^m(-1)^ic_i；若 c_0+…+c_{m-1}<4N+3，则因 c_i≥2 有 m<2N+2。
+    若 m 为奇数，常数 2 的交替和抵消，利用 D1 有
+    Σ_{i=0}^m(-1)^ic_i=Σ_{j: j(√2+1)<m}(-1)^{⌊j(√2+1)⌋}=Σ_{j<m(√2-1)}(-1)^{a_j}。
+    这里 j<m(√2-1)<N+1，故由归纳假设该和为正。若 m 为偶数，同样的计算给出该簇和为 c_m 加上相应的短原和，仍为正。故所有完整簇端点正；每个簇内部的最小部分和也不小于端点所需界（正簇先增、负簇至下一端点）。于是尺度归纳完成，原题从 k=1 开始的和即非负。
+  key_lemmas:
+  - lemma: c_i=3 的 Beatty 索引刻画。
+    why_key: 它把簇和重新写成同一原符号序列的短前缀和。
+    applicability_conditions: 必须使用严格条件 j(√2+1)<m 来避免端点误计。
+  - lemma: N→4N 的尺度归纳。
+    why_key: 直接有限验证无法覆盖所有 n；该步骤提供自相似闭合。
+    applicability_conditions: 需有 m<2N+2 以保证缩短后的索引落在归纳范围内。
+  failure_mode_annotations:
+  - 错误忽略从 k=0 到题目从 k=1 的转换会产生偏移。
+  - missing_lemma 中若仍声称 c_i=3 的位置而不证明，应判出依赖违规。
+  variants:
+  - variant_id: full
+    modification: 无修改。
+    writer_bundle_patch:
+      remove_dependency_ids: []
+      replace_statement: 
+      replace_proof_skeleton: 
+      append_allowed_dependencies: []
+    expected_outcome: 应完成簇编码、N→4N 强归纳，并正确转换回从 k=1 的结论。
+  - variant_id: missing_lemma
+    modification: 移除簇长度的 Beatty 位置刻画。
+    writer_bundle_patch:
+      remove_dependency_ids:
+      - D1
+      replace_statement: 
+      replace_proof_skeleton: 把符号序列分簇并尝试把交替簇和还原为较短前缀和；只能使用现有允许依赖。
+      append_allowed_dependencies: []
+    expected_outcome: 正确行为是报告：没有 D1 时无法被允许地识别长度 3 的簇并完成自相似还原；不得凭未声明的 Beatty 结论跳过。
+run_policy:
+  variants_to_run:
+  - full
+  - missing_lemma
+  writer_models:
+  - provider: deepseek-official
+    model: deepseek-v4-pro
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol
