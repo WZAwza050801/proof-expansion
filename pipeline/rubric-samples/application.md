@@ -30,7 +30,7 @@
 - [x] 两稿正确性相同（C = 4 = 4，数学内容等价）；
 - [x] 一篇像人、一篇像 AI；
 - [x] 新评分在 L 上稳定拉开（4 vs 1，且每个子项都有原文证据，评委无需直接判"AI 味"）；
-- [ ] 待办：在 proof-pipeline 会话用 `judge_blind`（micu/gpt-5.6-sol）对两稿各盲评一次，确认 judge 给出的 L 分差 ≥ 2 分且 C 不误伤（复核通过后本项转 ✅）。
+- [x] 2026-08-18 补充：judge 探针（v4-pro 按 v2 rubric 盲评两稿）**通过**——H 稿 C=G=R=4、L=4.0、weighted 4.0；A 稿 C=G=R=4、L=1.5、weighted 3.25；L 分差 2.5，四个子项一致拉开且每条附原文证据，C 未误伤（≥2 分验收线满足）。预演数据；正式复核仍在 proof-pipeline 会话用 `judge_blind`（micu/gpt-5.6-sol）进行。
 
 ## 4. 校准要点（供正式 rubric 使用）
 

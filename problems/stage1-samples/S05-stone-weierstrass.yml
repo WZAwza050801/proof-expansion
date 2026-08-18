@@ -1,0 +1,213 @@
+# 样题包 S05：Stone–Weierstrass 定理（实值格版本，去答案化蒸馏）
+# v2 schema；STAGE-1 1.2 产物。status=candidate（未入队、未定档）
+package_id: P-S05_stone-weierstrass-v2
+status: candidate
+split: dev
+probe_only: false
+created_by: terra
+created_at: 2026-08-18
+frozen_at: null
+
+narrow_slot_calibration:
+  expected_standalone_solvability: medium
+  rationale: |
+    定理（Stone–Weierstrass）是分析学标准结果，pro 大概率知道证明框架（|f| 逼近 + 格 + 插值覆盖）;
+    flash 通常只能写出片段。本包把最冷的组合步骤（逐点插值仿射组合、双覆盖 sandwich）留作
+    承重 gap，钥匙（Weierstrass 逼近、紧覆盖、max/min 恒等式）以依赖给足。预计 flash 裸题
+    补不出、带包可补; pro 若裸题秒杀则对 pro 淘汰。
+  pretest_protocol: |
+    阶段2: ① 裸题探针(仅 statement)应失败或仅部分有效; ② 带包探针应 judge C>=3; 两条都满足才 confirmed
+  measured: excluded_instant_solve   # 2026-08-18 预演: v4-pro 与 v4-flash 裸题均秒杀(flash 甚至给出二项级数自足证法); 保留为秒杀对照题
+
+source_record:
+  authors: Stone, M. H.
+  title: Applications of the theory of Boolean rings to general topology
+  year: 1937
+  url_or_doi_or_arxiv: Trans. Amer. Math. Soc. 41 (1937), 375–481
+  source_type: primary
+  source_pool: C_textbook_theorem
+  accessed_on: 2026-08-18
+  original_text_obtained: false
+  evidence_status: verified
+  likely_memorized: true
+  memorization_note: |
+    定理是实分析/泛函教材标准内容，陈述高频出现; 完整证明（绝对值逼近 → 格闭包 → 逐点插值
+    → 双覆盖）记忆率中等。写手包不出现"Stone–Weierstrass"名。原文未获取，参考证明为按
+    标准教材重建——正式入池前必须补 original_text_obtained: true。
+
+selection_record:
+  mathematical_area: 泛函分析 / 拓扑（连续函数代数）
+  proof_structure: construction
+  narrow_slot_design_rationale: |
+    四步链中真正的 gap: (1) 闭包对 |f| 封闭（钥匙 D1 的 |t| 多项式逼近 + D2 换元收敛）;
+    (2) 由分离性构造两点插值 f_xy（仿射组合，需要常值函数与代数封闭）;
+    (3) U_y/V_x 双层开覆盖与 max/min 封闭的 sandwich。钥匙以依赖给足，拼接由写手自己完成。
+  known_failure_modes:
+    - |f| 逼近时换元不写（p_n(f/M) 的收敛性未核）
+    - 两点插值构造未用仿射组合（g(x)≠g(y) 未归一化）
+    - 第二层覆盖（V_x 一侧）漏掉或方向反（写成 g_x < h+ε 单侧）
+    - 只用单层覆盖得出单侧不等式，未形成双侧 sandwich
+    - lazy stop: 完成 S1/S2 后未推进插值与覆盖
+  rejection_risk:
+    - pro 裸题秒杀 → 对 pro 淘汰（flash 可能仍是窄缝）
+    - 原文未获取: 入正式池前必须补原文
+
+de_answering_record:
+  stripped:
+    - "用 Weierstrass 定理逼近 |t|"的连接（D1 已给出 |t| 可用多项式逼近的陈述，但"用它"由写手定）
+    - max/min 的半和表示（D4 以精确陈述给出，何时调用由写手定）
+    - 两点插值 f_xy 的仿射组合构造
+    - U_y/V_x 双覆盖 sandwich 的论证结构
+    - 定理名（Stone–Weierstrass）
+  retained:
+    - 脊柱 S1 只给目标: "证明闭包对绝对值封闭"（目标，不含换元细节）
+    - 依赖 D1–D5 全部以精确陈述给足
+  audit_note: 写手包内无连线句、无名号; "用哪个依赖"由写手自己判断。
+
+writer_bundle:
+  statement: |
+    命题: 设 X 为紧 Hausdorff 空间，C(X) 为 X 上全体连续实值函数，赋 sup 范数
+      ‖f‖ = sup_{x∈X} |f(x)|。设 A ⊆ C(X) 满足:
+        (i) A 含全部常值函数;
+        (ii) A 对逐点加法与逐点乘法封闭（即 A 是子代数）;
+        (iii) A 分离点: 对任意 x ≠ y ∈ X，存在 f ∈ A 使 f(x) ≠ f(y)。
+    证明: A 在 C(X) 中稠密，即对任意 h ∈ C(X) 与任意 ε > 0，存在 g ∈ A 使 ‖g − h‖ < ε。
+
+    符号约定: 记 \bar A 为 A 在 C(X) 中的闭包（一致收敛极限的全体）。
+    对 f, g ∈ C(X)，max(f,g) 与 min(f,g) 为逐点最大/最小。
+  proof_spine:
+    - step_id: S1
+      objective: |
+        证明闭包 \bar A 对绝对值封闭: 若 f ∈ \bar A，则 |f| ∈ \bar A。
+        做法框架: 把 f 的取值范围压进一个固定区间，用允许依赖 D1 的多项式逼近把 |·| 换元进来。
+      completion_test: |
+        换元论证完整（压缩区间、多项式 p_n、合成 p_n∘f 属于 \bar A、一致收敛的核验
+        三步都写清）; 结论 |f| ∈ \bar A 成立。
+    - step_id: S2
+      objective: |
+        由 S1 推出 \bar A 对逐点 max 与 min 封闭（即 \bar A 是一个"格"）。
+      completion_test: |
+        max 与 min 的 |·| 表示式写对（允许依赖 D4 核对适用前提）; 封闭性论证完整。
+    - step_id: S3
+      objective: |
+        证明两点插值性质: 对任意 h ∈ C(X) 与任意 x ≠ y，存在 f ∈ A（仅用 A，不用闭包）
+        使 f(x) = h(x) 且 f(y) = h(y)。做法框架: 先用分离性取一个在 x,y 处取值不同的
+        函数，再把它与常值函数作仿射组合。
+      completion_test: |
+        分离函数 g 的选取、仿射组合的显式形式、两点取值的验证三步完整;
+        用到了 A 含常值函数与代数封闭（可用 IMPORTED-VERIFIED 标注）。
+    - step_id: S4
+      objective: |
+        完成稠密性: 对任意 h ∈ C(X) 与 ε > 0，构造 g ∈ \bar A 使 ‖g − h‖ ≤ ε。
+        做法框架: 对每个点用 S3 构造一族函数，用紧性做两次有限覆盖，
+        第一次取 max、第二次取 min，得到双侧 sandwich。
+      completion_test: |
+        两次开覆盖的构造（开集的定义、含有点的验证）与有限子覆盖的使用完整;
+        max/min 封闭的调用合法; 最终双侧不等式 h − ε ≤ g ≤ h + ε 成立。
+  allowed_dependencies:
+    - id: D1
+      kind: standard_result
+      statement: |
+        （Weierstrass 多项式逼近）[−1,1] 上的连续函数可由多项式序列一致逼近。
+        特别，t ↦ |t| 在 [−1,1] 上可由多项式序列 (p_n) 一致逼近（即 sup_{|t|≤1} |p_n(t) − |t|| → 0）。
+    - id: D2
+      kind: standard_result
+      statement: |
+        （一致收敛与合成）若实数序列 (p_n) 在区间 [−M, M] 上一致收敛于连续函数 φ，
+        且 f ∈ C(X) 满足 f(X) ⊆ [−M, M]，则 p_n ∘ f 在 X 上一致收敛于 φ ∘ f。
+    - id: D3
+      kind: standard_result
+      statement: |
+        （紧性与有限子覆盖）紧 Hausdorff 空间 X 的每个开覆盖有有限子覆盖。
+        对连续函数 u ∈ C(X) 与实数 c，集合 {x ∈ X : u(x) > c} 与 {x ∈ X : u(x) < c} 都是开集。
+    - id: D4
+      kind: standard_result
+      statement: |
+        （max/min 恒等式）对实数 r, s: max(r,s) = (r + s + |r − s|)/2，min(r,s) = (r + s − |r − s|)/2。
+    - id: D5
+      kind: standard_result
+      statement: |
+        （闭包是闭子代数）\bar A 对逐点加法、乘法、数乘封闭，且对一致极限封闭;
+        A 的有限和、有限积、有限 max/min 均属于 \bar A 时其一致极限也属于 \bar A。
+  claim_status_convention: |
+    对证明中每个承重断言标注六态之一:
+    - FIXED: 题目给定的目标或已定约定;
+    - IMPORTED-VERIFIED: 引用允许依赖，且已核对适用前提;
+    - PROVED-IN-PROJECT: 在本证明中给出完整证明;
+    - CONDITIONAL: 在精确写出的未证输入下成立;
+    - CANDIDATE: 提议的构造/策略，尚未建立;
+    - BLOCKED: 被精确障碍阻住（须写出最小 blocker）。
+    任何未加证明的承重断言不得无标签使用; BLOCKED 须附最小 blocker 与最强已证结论。
+  writing_discipline: |
+    1. 一个证明只回答一个主问题; 不复述题目包背景。
+    2. 不使用"工作流/审计"类词汇，只写数学正文。
+    3. 详细计算只出现在承重处（换元收敛、插值验证、覆盖）; 例行步骤一笔带过。
+    4. 补不动时: 报告最小 blocker 与最强已证定理，不堆砌"显然/标准论证"。
+    5. 保守专业的数学文风: 自然段推进，公式与解释文字配比适度。
+  closed_book_notice: |
+    仅可使用本 bundle; 不得检索、不得假定未列出的结果、不得使用题目包外的定理名。
+
+judge_bundle:
+  theorem_name: Stone–Weierstrass 定理（实值、格版本，1937）
+  reference_proof: |
+    S1: 设 f ∈ \bar A，取 M = ‖f‖（可设 M > 0; M = 0 时 f ≡ 0 平凡）。由 D1 取多项式
+    (p_n) 使 sup_{|t|≤1} |p_n(t) − |t|| → 0。f/M 的值域 ⊆ [−1,1]。由 D2，
+    p_n ∘ (f/M) → |·| ∘ (f/M) = |f|/M 一致于 X，即 M·(p_n ∘ (f/M)) → |f| 一致。
+    因 A 是代数，p_n ∘ (f/M) ∈ \bar A（\bar A 为闭子代数，D5），故 |f| ∈ \bar A。
+
+    S2: 由 D4，max(f,g) = (f+g+|f−g|)/2 ∈ \bar A（S1 与 D5），min 同理。
+
+    S3: 对 x ≠ y，由 (iii) 取 g ∈ A 使 g(x) ≠ g(y)。令
+      f = h(x)·(g − g(y)·1)/(g(x) − g(y)) + h(y)·(g(x)·1 − g)/(g(x) − g(y))
+      其中 1 为常值函数。因 A 含常值函数且是代数，f ∈ A; 直接代入:
+      f(x) = h(x)，f(y) = h(y)。（检查: g(x) − g(y) ≠ 0 使分母合法。）
+
+    S4: 固定 h ∈ C(X)，ε > 0。对每对 x ≠ y，用 S3 取 f_xy ∈ A 使 f_xy(x) = h(x)，
+    f_xy(y) = h(y)。固定 x，对每个 y ≠ x 定义开集 U_y = {z : f_xy(z) > h(z) − ε};
+    U_y 含 x（f_xy(x) = h(x) > h(x) − ε）与 y。{U_y : y ≠ x} 覆盖 X，由 D3 取有限
+    子覆盖 U_{y_1},...,U_{y_m}。令 g_x = max(f_xy_1,...,f_xy_m) ∈ \bar A（S2）。则
+    g_x(x) = h(x)，且处处 g_x ≥ h − ε。
+    再对每个 x 定义开集 V_x = {z : g_x(z) < h(z) + ε}，它含 x。{V_x : x ∈ X} 覆盖 X，
+    取有限子覆盖 V_{x_1},...,V_{x_k}。令 g = min(g_x_1,...,g_x_k) ∈ \bar A。则
+    h − ε ≤ g ≤ h + ε 处处成立，即 ‖g − h‖ ≤ ε。由 ε 任意，A 稠密。证毕。
+  key_lemmas:
+    - lemma: D1 Weierstrass 逼近
+      why_key: 唯一的外部逼近工具，使闭包获得 |·|（进而 max/min）
+      applicability_conditions: 连续函数在紧区间上; 通过 D2 换元到任意 |f| ≤ M
+    - lemma: S3 两点插值
+      why_key: 分离性 + 常值函数 + 代数封闭三者合力的结晶，是覆盖论证的原料
+      applicability_conditions: g(x) ≠ g(y) 保证分母非零
+  spine_answer_key:
+    - step_id: S1
+      full_closure: |
+        M·p_n(f/M) ∈ \bar A 且一致收敛于 |f|; 闭包闭合性（D5）给出 |f| ∈ \bar A。
+    - step_id: S2
+      full_closure: |
+        max(f,g) = (f+g+|f−g|)/2; min 同理（D4 + S1 + D5）。
+    - step_id: S3
+      full_closure: |
+        f = (h(x)(g − g(y)) − h(y)(g − g(x)))/(g(x) − g(y)) ∈ A; f(x)=h(x), f(y)=h(y)。
+    - step_id: S4
+      full_closure: |
+        U_y = {f_xy > h − ε} 开覆盖 → 有限覆盖 → g_x = max ∈ \bar A, g_x ≥ h−ε, g_x(x)=h(x);
+        V_x = {g_x < h + ε} 开覆盖 → 有限覆盖 → g = min ∈ \bar A; h−ε ≤ g ≤ h+ε。
+  failure_mode_annotations:
+    - 换元不写（p_n(f/M) 而非 p_n(f)）→ 一致收敛核验失败
+    - 插值仿射组合未归一化或分母为 0 未排除 → S3 不过
+    - 单侧覆盖（只做 U_y 或只做 V_x）→ 只得到单侧不等式
+    - g_x(x) = h(x) 的验证漏掉 → 第二层覆盖 V_x 含 x 的断言缺据
+  variants:
+    - variant_id: full
+      modification: "无修改"
+      writer_bundle_patch: {}
+      expected_outcome: 完整补出证明; judge 按 spine_answer_key 核补全度
+
+run_policy:
+  variants_to_run: [full]
+  writer_models: []
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol

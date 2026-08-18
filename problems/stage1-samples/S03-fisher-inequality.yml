@@ -18,7 +18,7 @@ narrow_slot_calibration:
     若预测试发现目标写手裸题即写出完整证明 -> 秒杀，淘汰（按协议实测定档）。
   pretest_protocol: |
     阶段2: ① 裸题探针(仅 statement)应失败或仅部分有效; ② 带包探针应 judge C>=3; 两条都满足才 confirmed
-  measured: null
+  measured: excluded_instant_solve   # 2026-08-18 预演: v4-pro 与 v4-flash 裸题均秒杀(关联矩阵特征值法完整默写); 保留为冒烟/校准对照题
 
 source_record:
   authors: Fisher, R. A.

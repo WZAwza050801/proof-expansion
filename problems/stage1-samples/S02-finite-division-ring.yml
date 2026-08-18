@@ -17,7 +17,7 @@ narrow_slot_calibration:
     各步验收标准明确，闭合路径存在; 预计带包可补（judge C>=3 待实测）。
   pretest_protocol: |
     阶段2: ① 裸题探针(仅 statement)应失败或仅部分有效; ② 带包探针应 judge C>=3; 两条都满足才 confirmed
-  measured: null
+  measured: excluded_instant_solve   # 2026-08-18 预演: v4-pro 与 v4-flash 裸题均秒杀(类方程+分圆三件套完整默写); 保留为冒烟/校准对照题
 
 source_record:
   authors: Wedderburn, J. H. M.

@@ -1,0 +1,193 @@
+# 样题包 S04：Frankl–Wilson 型多项式方法定理（去答案化蒸馏）
+# v2 schema；STAGE-1 1.2 产物。status=candidate（未入队、未定档）
+package_id: P-S04_frankl-wilson-poly-method-v2
+status: candidate
+split: dev
+probe_only: false
+created_by: terra
+created_at: 2026-08-18
+frozen_at: null
+
+narrow_slot_calibration:
+  expected_standalone_solvability: low
+  rationale: |
+    定理（Frankl–Wilson 多项式方法）在组合数学/理论计算机科学中著名，v4-pro 可能认识结论甚至
+    记得证明框架；核心构造 h_A = Π_{a≠k}(Σ_{i∈A} x_i − a)（"把 |A∩B| 的取值编码成多项式求值"）
+    不是常见默写内容，v4-flash 裸题预计补不出。给 D1–D4（威尔逊/立方点函数结构/维数）与脊柱后
+    闭合路径明确，预计带包可补。pro 若裸题秒杀则按协议淘汰（对 pro），flash 通过即可定窄缝。
+  pretest_protocol: |
+    阶段2: ① 裸题探针(仅 statement)应失败或仅部分有效; ② 带包探针应 judge C>=3; 两条都满足才 confirmed
+  measured: excluded_instant_solve   # 2026-08-18 预演: v4-pro 与 v4-flash 裸题均秒杀(h_A 构造+多线性化完整默写); 保留为秒杀对照题
+
+source_record:
+  authors: Frankl, P.; Wilson, R. M.
+  title: Intersection theorems with geometric consequences
+  year: 1981
+  url_or_doi_or_arxiv: Combinatorica 1 (1981), 357–368
+  source_type: primary
+  source_pool: C_textbook_theorem
+  accessed_on: 2026-08-18
+  original_text_obtained: false
+  evidence_status: verified
+  likely_memorized: true
+  memorization_note: |
+    结论（含 Borsuk 反例推论）在教材与综述中高频出现（Alon–Spencer、Babai–Frankl、Matoušek），
+    定理陈述易被记得; 完整证明的 h_A 构造记忆率显著低于结论本身。本包采用求和上界形式
+    |F| ≤ Σ_{j≤p−1} C(n,j)（与原文 C(n,p−1) 形式的差别在 selection_record 说明）。
+    原文未获取，参考证明为按标准教材重建——正式入池前必须补 original_text_obtained: true。
+
+selection_record:
+  mathematical_area: 极值组合 / 多项式方法
+  proof_structure: construction
+  narrow_slot_design_rationale: |
+    最难补的 gap: (1) 构造一个次数 ≤ p−1 的多项式，使它在各成员特征向量上的取值"区分"该成员
+    （即 A 处非零、其他成员处为 0）——钥匙是"把 |A∩B| 的每个可能残差都做成线性因子的根"，
+    配合 D1（威尔逊）得到非零常数; (2) 多线性化降维 + 在 1_B 处求值消元的独立性论证。
+    两个钥匙（D1/D3/D4）以精确陈述给足，组合方式由写手自己找。
+    注: 原文的界是 C(n,p−1)（额外 L-条件版本）; 本包采用更稳的求和界形式（Σ_{j≤p−1}C(n,j)），
+    证明完全自足，且是教材中的标准表述。
+  known_failure_modes:
+    - 构造的多项式次数 > p−1（如用 Π_{a≠k}(Σx_i − a·Σ全部变量) 之外的非齐次形式）导致维数论证失效
+    - 忘记验证 A=B 时的取值是非零常数（漏用威尔逊或算错 ∏_{u∈F_p*}u）
+    - 独立性论证只在 A≠B 处验证未覆盖 A=B
+    - 多线性化后丢项（多项式在立方点上的函数与多线性表示的一一对应未写清）
+    - lazy stop: 构造失败后未推进 S3 的维数结论
+  rejection_risk:
+    - pro 裸题秒杀 → 对 pro 淘汰（flash 可能仍是窄缝）
+    - 原文未获取: 入正式池前必须补原文
+
+de_answering_record:
+  stripped:
+    - 核心构造: h_A = Π_{a∈F_p, a≠k} (Σ_{i∈A} x_i − a) 的具体形式
+    - "多线性化 + 在 1_B 处求值"的独立性论证
+    - 定理名（Frankl–Wilson）与"多项式方法"术语
+  retained:
+    - 脊柱 S1 只给目标: "构造次数 ≤ p−1 的多项式，在成员特征向量上取值区分该成员"（目标形态，不含构造）
+    - 依赖 D1–D4 全部以精确陈述给足
+  audit_note: 写手包内无连线句、无名号; "用哪个依赖"由写手自己判断。
+
+writer_bundle:
+  statement: |
+    命题: 设 p 为素数，n ≥ 1 为整数，[n] = {1, 2, ..., n}。设 F 是 [n] 的子集族（F 中各成员互不相同），满足:
+      (i) 存在固定的 k ∈ {0, 1, ..., p−1}，使每个 A ∈ F 都有 |A| ≡ k (mod p);
+      (ii) 对任意两个不同的 A, B ∈ F: |A∩B| ≢ k (mod p)。
+    证明: |F| ≤ C(n,0) + C(n,1) + ... + C(n,p−1)。
+
+    符号约定: F_p 为模 p 的剩余类域。对 B ⊆ [n] 记 1_B = (b_1,...,b_n) ∈ {0,1}^n，其中 b_i = 1
+    当且仅当 i ∈ B。多项式在 F_p 上时系数与取值按模 p 理解。C(n,j) 为组合数（j > n 时 C(n,j) = 0）。
+  proof_spine:
+    - step_id: S1
+      objective: |
+        对每个 A ∈ F 构造一个 F_p 上的 n 元多项式，其次数不超过 p−1，且满足: 对任意 B ∈ F，
+        该多项式在点 1_B 处的取值，当 B = A 时为一个只依赖 p 的非零常数，当 B ≠ A 时为 0。
+        提示框架: 这个多项式应"以 |A∩B| 的各个可能取值（模 p）为根的方向"去构造。
+      completion_test: |
+        多项式显式写出（每个因子的含义可核验）; 次数 ≤ p−1 已验证; 两个取值断言
+        （B=A 时非零常数、B≠A 时 0）都有完整推导，其中非零常数的计算写清了模 p 结果。
+    - step_id: S2
+      objective: |
+        把 S1 的多项式族转化为它们在各点上的函数，说明这些函数都属于同一个"低次多线性
+        函数空间"，并证明它们在该空间中线性无关。
+      completion_test: |
+        写清"每个 {0,1}^n 上的函数有唯一多线性表示、且 S1 多项式的多线性表示次数 ≤ p−1"
+        的论证; 线性无关性有完整证明（对任意非平凡线性组合，找到某个 1_B 使其取值非零）。
+    - step_id: S3
+      objective: |
+        用低次多线性函数空间的维数得出 |F| 的上界，完成命题。
+      completion_test: |
+        维数 = C(n,0) + ... + C(n,p−1) 计算正确（单项式个数）; 结论 |F| ≤ 该维数与命题一致。
+  allowed_dependencies:
+    - id: D1
+      kind: standard_result
+      statement: |
+        （威尔逊定理）对素数 p: (p−1)! ≡ −1 (mod p)。等价地，F_p 中全部非零元素的乘积为 −1。
+    - id: D2
+      kind: standard_result
+      statement: |
+        （乘积求值）设 k ∈ F_p，则 { k − a : a ∈ F_p, a ≠ k } = F_p \ {0}（恰为全部非零元素）。
+        对整数 t 与 a ∈ F_p: 若 t ≢ a (mod p)，则乘积 Π_{a≠k}(t − a) ≡ 0 (mod p)，
+        因为因子 (t − (t mod p)) 出现在其中。
+    - id: D3
+      kind: lemma
+      statement: |
+        （立方点上的函数与多线性多项式）{0,1}^n 上的每个 F_p 值函数 f 都有唯一的多线性表示:
+          f(x) = Σ_{S ⊆ [n]} c_S · Π_{i∈S} x_i，
+        且不同的多线性多项式给出不同的函数（多线性单项式 {Π_{i∈S} x_i : S ⊆ [n]} 线性无关）。
+        进一步: 若 F_p 上多项式 g 的总次数 ≤ p−1，则 g 在 {0,1}^n 上诱导的函数的多线性表示
+        只含 |S| ≤ p−1 的单项式。
+    - id: D4
+      kind: standard_result
+      statement: |
+        （线性代数基本事实）若向量空间 V 的维数为 N，v_1,...,v_m ∈ V 线性无关，则 m ≤ N。
+        次数 ≤ p−1 的 n 元多线性单项式共有 C(n,0) + C(n,1) + ... + C(n,p−1) 个。
+  claim_status_convention: |
+    对证明中每个承重断言标注六态之一:
+    - FIXED: 题目给定的目标或已定约定;
+    - IMPORTED-VERIFIED: 引用允许依赖，且已核对适用前提;
+    - PROVED-IN-PROJECT: 在本证明中给出完整证明;
+    - CONDITIONAL: 在精确写出的未证输入下成立;
+    - CANDIDATE: 提议的构造/策略，尚未建立;
+    - BLOCKED: 被精确障碍阻住（须写出最小 blocker）。
+    任何未加证明的承重断言不得无标签使用; BLOCKED 须附最小 blocker 与最强已证结论。
+  writing_discipline: |
+    1. 一个证明只回答一个主问题; 不复述题目包背景。
+    2. 不使用"工作流/审计"类词汇，只写数学正文。
+    3. 详细计算只出现在承重处（构造、取值计算、维数）; 例行步骤一笔带过。
+    4. 补不动时: 报告最小 blocker 与最强已证定理，不堆砌"显然/标准论证"。
+    5. 保守专业的数学文风: 自然段推进，公式与解释文字配比适度。
+  closed_book_notice: |
+    仅可使用本 bundle; 不得检索、不得假定未列出的结果、不得使用题目包外的定理名。
+
+judge_bundle:
+  theorem_name: Frankl–Wilson 多项式方法定理（1981，求和界形式）
+  reference_proof: |
+    对每个 A ∈ F 定义 F_p 上 n 元多项式
+      f_A(x) = Π_{a ∈ F_p, a ≠ k} ( Σ_{i∈A} x_i − a ).
+    每个因子是线性式，故 deg f_A = p−1。对 B ⊆ [n]，代入 x = 1_B:
+      f_A(1_B) = Π_{a≠k} ( |A∩B| − a )  (mod p)。
+    若 B ≠ A: 由 (ii)，|A∩B| ≢ k (mod p)，而 {a ∈ F_p : a ≠ k} = F_p \ {k} 含 |A∩B| 的
+    剩余类，故乘积中有一因子 ≡ 0，即 f_A(1_B) = 0。
+    若 B = A: |A∩B| = |A| ≡ k (mod p)，由 D2 与 D1:
+      f_A(1_A) = Π_{a≠k}(k − a) = Π_{u ∈ F_p*} u = (p−1)! ≡ −1 (mod p)。
+    由 D3，每个 f_A 在 {0,1}^n 上的函数有多线性表示 \bar f_A，只含 |S| ≤ p−1 的单项式。
+    断言 {\bar f_A : A ∈ F} 线性无关: 若 Σ_{A∈F} c_A \bar f_A ≡ 0（在 {0,1}^n 上），则对每个
+    B ∈ F 代入 1_B: 0 = Σ_A c_A f_A(1_B) = −c_B（因为 f_A(1_B) = −δ_{A,B}）。故全部 c_B = 0。
+    由 D4，|F| ≤ C(n,0) + ... + C(n,p−1)。证毕。
+  key_lemmas:
+    - lemma: D3 立方点函数与多线性表示
+      why_key: 把"次数 ≤ p−1 的多项式"与"低维多线性空间"对接，使维数论证可用
+      applicability_conditions: 只关心 {0,1}^n 上的取值; 唯一性来自单项式独立性
+    - lemma: D1 威尔逊定理
+      why_key: B=A 时的取值恰为非零常数 −1，使消元法能逐项读出系数
+      applicability_conditions: p 素数; 需要 {k−a : a≠k} = F_p*（D2）
+  spine_answer_key:
+    - step_id: S1
+      full_closure: |
+        f_A(x) = Π_{a≠k}(Σ_{i∈A} x_i − a); deg = p−1;
+        B≠A: 因子 a ≡ |A∩B| (mod p) 使值为 0; B=A: Π_{a≠k}(k−a) = (p−1)! ≡ −1。
+    - step_id: S2
+      full_closure: |
+        D3 给多线性表示 \bar f_A（|S| ≤ p−1）; 若 Σ c_A \bar f_A ≡ 0，代入 1_B 得
+        −c_B = 0，故独立。
+    - step_id: S3
+      full_closure: |
+        低次多线性空间维数 = Σ_{j≤p−1} C(n,j)（D4）; |F| ≤ 维数。
+  failure_mode_annotations:
+    - 构造的多项式次数 > p−1 或用了非齐次重量 → S1 completion_test 不过
+    - B=A 取值误算（漏威尔逊或算成 0）→ 消元法失效
+    - 只验证 A≠B 情形漏掉 A=B → 独立性证明不完整
+  variants:
+    - variant_id: full
+      modification: "无修改"
+      writer_bundle_patch: {}
+      expected_outcome: 完整补出证明; judge 按 spine_answer_key 核补全度
+
+run_policy:
+  variants_to_run: [full]
+  writer_models: []
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol
