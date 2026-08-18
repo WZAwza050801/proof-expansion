@@ -17,6 +17,8 @@
 | `S07-putnam2022a5-tiling.yml` | Putnam 2022 A5 铺砖博弈 | 组合博弈 | induction | low | **窄缝确认（flash）**；pro 秒杀 |
 | `S08-putnam2023b6-determinant.yml` | Putnam 2023 B6 行列式 | 数论/线代 | construction | low | 秒杀（flash/pro）；27B 待复核 |
 | `S09-seidel-stage1-audit.yml` | Seidel 猜想 Stage-I 审计（**前沿探针题**） | 辛拓扑/范畴 | key_lemma | — | probe_only：charter 模板演示，测上限不进区分度 |
+| `S10-bohr-multidilate.yml` | Kościuszko 多系数 Bohr 膨胀密度增量二分引理 | 加法组合 | direct | medium | **论文蒸馏**：EJC 2025 (arXiv:2306.08567) Lemma 10 |
+| `S11-pcap-monotonicity.yml` | p-容度势水平集单调性公式 | 几何分析 | direct | low | **论文蒸馏**：arXiv:2205.11642 (2023) Theorem 1.1 |
 
 - 定档（预演级，2026-08-18）：S02/S04/S05 = `confirmed`（写手 Qwen/Qwen3.6-27B）；**S07 = `confirmed`（写手 deepseek-v4-flash，benchmark 难题档）**；S01 = `downgraded_to_probe`；S03/S06/S08 = `excluded_instant_solve`。窄缝是 model-relative 的。
 - 带包探针全部闭合——v2 题包格式验证通过。
@@ -35,7 +37,8 @@
 
 ## 诚实标注
 
-- 五道题 `original_text_obtained: false`：参考证明为按标准教材重建（重建内容已在本包内全文给出）。
-  **入正式池前必须获取原文并改为 `true`**（EXECUTION_CONTRACT §3.2 的硬门）。
+- 经典定理五题（S01–S05）`original_text_obtained: false`：参考证明为按标准教材重建（重建内容已在本包内全文给出）；
+  Putnam 三题（S06–S08）与论文蒸馏两题（S10–S11）`original_text_obtained: true`（S06–S08 来自 Putnam-AXIOM 数据集官方解答，S10–S11 由 Terra 预演核对 arXiv 原文）。
+  **入正式池前必须获取原文并人工复核数学内容**（EXECUTION_CONTRACT §3.2 的硬门；S10–S11 的数学内容尚未经人工复核，属 Terra 预演产出）。
 - 旧 schema（`pipeline/problem-package.template.yml`）与 `validate_package.rb` 尚未覆盖 v2 字段；
   本目录样题不进入队列，待阶段 3 基础设施同步后再接 validator。

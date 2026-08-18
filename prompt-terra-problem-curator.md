@@ -85,8 +85,10 @@
 2. `proof_spine`：分步脊柱，3–6 步。每步三字段：
    - `step_id`：S1, S2, …；
    - `objective`：这一步要建立**什么结论**（去答案化：给目标、不给方法、不给关键构造）；
+   - `idea`：**大体证明思路**（1–2 句框架提示：往哪个方向走、把什么归约成什么；只给思路级提示，不泄关键构造细节）；
    - `completion_test`：这一步"算完成"的客观验收标准（charter 式：能明确写出、可被 judge 独立核验的目标形态；**不给出达成方法**）。
    步与步之间只写"下一目标"，不写"由上一目标如何推下一目标"。
+   **完整性要求**：脊柱必须覆盖所切片段证明的**完整结构**（全部步骤、无一遗漏），只是每步细节不全——这就是"完整的证明结构＋大体证明思路"的 charter 级压缩。
 3. `allowed_dependencies`：允许依赖的**精确陈述**（`definition | lemma | standard_result | previously_proved`）。只给陈述：**不给名号、不给证明、不给"何时用"**。
 4. `claim_status_convention`：六态 claim 约定（蒸馏自 charter §5，写手对每步标注）。
 5. `writing_discipline`：写作纪律（蒸馏自 charter §7，3–5 条）。

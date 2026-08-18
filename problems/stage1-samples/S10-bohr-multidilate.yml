@@ -1,0 +1,194 @@
+package_id: P-S10_bohr-multidilate-density-v2
+status: candidate
+split: dev
+probe_only: false
+created_by: terra
+created_at: 2026-08-18
+narrow_slot_calibration:
+  expected_standalone_solvability: medium
+  rationale: |
+    密度增量(density increment)与"先正则化再求平均"是加法组合的常见套路, 前沿模型大概率能写出
+    "对某个平移 x 有 A-x 在 Bohr 集上高密度"这一类弱结论, 因此裸题不至于完全无效.
+    但本引理的承重点在于"同步多膨胀"构造 B' = Π_j a_j·B_ε 与 B_i = Π_{j≠i} a_j·B_{ε·δ_i}
+    (取 ε = α/(16k) 使 a_i·B_i = B'_{δ_i}), 以及由此得到的 7/8 与 (1+1/16k) 精确二分常数——
+    这两处无法从领域直觉直接背出, 是带包才能补上的 gap.
+  pretest_protocol: |
+    阶段2: ① 裸题探针(仅 statement)应失败或仅部分有效; ② 带包探针应 judge C>=3; 两条都满足才 confirmed
+  measured: null
+source_record:
+  authors: Tomasz Kościuszko
+  title: "Invariant Equations in Many Variables"
+  year: 2025
+  url_or_doi_or_arxiv: "arXiv:2306.08567 (published: Electron. J. Combin. 32(3) (2025), #P3.24)"
+  source_type: primary
+  source_pool: Bplus_frontier
+  accessed_on: 2026-08-18
+  original_text_obtained: true
+  evidence_status: proved
+  likely_memorized: false
+  memorization_note: |
+    单作者 EJC 2025 论文, 研究对象是"不变方程解的计数"; 该多膨胀密度增量引理是论文内部承重技术步骤,
+    其精确常数 (7/8, 1/16k) 与同步膨胀构造属于冷门中间结果; 模型熟悉 Bohr 集/Croot–Sisask/Sanders
+    工具包但不可能背出这一条具体引理的证明.
+selection_record:
+  mathematical_area: 加法组合 (Bohr 集 / 密度增量)
+  proof_structure: direct
+  expected_output_scale: short
+  narrow_slot_design_rationale: |
+    最难补的 gap 是同步膨胀构造本身: 如何一次选好 B' 与 B_1..B_k, 使得 a_i·B_i = B'_{δ_i} 对所有 i 同时成立,
+    且 ε=α/(16k) 的尺度恰好让二分常数 7/8 与 (1+1/16k) 在三角不等式+平均的收尾中闭合.
+    钥匙是包里 D2(a·B 定义) 与 D3(正则卷积贴近) 两个依赖, 以及 proof_spine S1 给出的"按系数拆分膨胀"框架.
+  known_failure_modes:
+    - 只证出存在平移 x 使 |A∩(x+B)| 大, 没有同时携带 a_i 膨胀与 δ_i 结构, 结论弱化.
+    - 把 Sanders/Bloom 型密度增量当作黑箱直接套用, 而非本引理特有的要么全部保持 7/8 要么某一路增益 1+1/16k二分.
+    - 常数错乱: 用 ε=α/2 之类, 导致收尾处 (k-1/16)α-(k-1)(1+1/16k)α 无法≥(7/8)α.
+    - 忽略 Z/pZ 假设, 在一般阿贝尔群里误用 a·B (那里没有乘以群元的良定义).
+  rejection_risk:
+    - 记法较技术(Bohr 集、dilate、regular、a·B), 写手若未逐字读依赖定义可能形式化漂移.
+    - 需要 4 条 Bohr 集前置命题(正则贴近、正则膨胀存在性等)作为依赖, 包比单步引理略重.
+de_answering_record:
+  stripped:
+    - B' = Π_j a_j·B_ε 与 B_i = Π_{j≠i} a_j·B_{ε·δ_i} 的显式同步膨胀定义
+    - ε = α/(16k) 的取值
+    - 二分常数 7/8 与 1+1/16k
+    - 存在 x∈B 使 Σ_i μ_{B_i}∗1_A(x) ≥ (k-1/16)α 的具体平均过程
+    - 收尾时 ||μ_{B_i}∗1_A||∞ < (1+1/16k)α ⇒ 逐项 ≥ (7/8)α 的减法估算
+  retained:
+    - 目标：建立要么全部膨胀保持 ≥c·α 密度, 要么某一膨胀密度增益的二分
+    - 脊柱：先对 B 做正则化/卷积贴近, 再用三角不等式把 kα=Σ_i μ_B(A) 劈成 k 份贴近项与平均项, 对 x 求平均
+    - 提示：需要为每个系数 a_i 单独准备一个可乘的 Bohr 子集, 使其 a_i-像正好落在同一 B' 的第 δ_i 膨胀里
+  audit_note: "写手包内无 B'/B_i 的显式定义、无 ε 取值、无 7/8 与 1/16k 常数; 只保留\"平均+二分\"的思路级提示."
+writer_bundle:
+  statement: |
+    设 p 为素数, 在循环群 Z/pZ 中工作. 一族特征 Γ 与 0<ρ≤2 决定的 Bohr 集为
+      B = Bohr(Γ,ρ) := { x : |1-γ(x)| ≤ ρ 对所有 γ∈Γ },
+    其秩 d=|Γ|≥1, ρ 称为半径. 对 δ>0 记 B_δ := Bohr(Γ,ρδ), 称为 B 的 δ-膨胀(dilate).
+    称 B 正则(regular), 若对一切 |δ|≤1/(12d) 有
+      1-12d|δ| ≤ |B_{1+δ}|/|B| ≤ 1+12d|δ|.
+    对非零元 a∈Z/pZ, 定义 a·B := { x : |1-γ(a^{-1}x)| ≤ ρ 对所有 γ∈Γ } (= Bohr({γ∘a^{-1}},ρ)),
+    其秩与半径同 B.
+
+    引理. 设 B⊆Z/pZ 是秩 d>0、半径 ρ 的正则 Bohr 集, A⊆B 满足 |A|=α|B|,
+    且 a_1,...,a_k 为不被 p 整除的整数. 则存在正则 Bohr 集 B' (秩为 d, 半径 ρ' ≥ ρ·(cα/(kd)),
+    其中 c 为只依赖 a_1,...,a_k 的小常数), 使得对任意 δ_1,...,δ_k∈(0,1] 都存在某平移 x 与集合
+    A_1,...,A_k ⊆ A-x, 满足 a_i·A_i ⊆ B'_{δ_i}, 并且以下二者至少其一成立:
+      (i) 对所有 i, |(a_i·A_i)∩B'_{δ_i}| ≥ (7/8)α|B'_{δ_i}|;
+      (ii) 对某个 i, |(a_i·A_i)∩B'_{δ_i}| ≥ (1+1/(16k))α|B'_{δ_i}|.
+  proof_spine:
+    - step_id: S1
+      objective: |
+        构造候选 Bohr 集 B' 与 B_1..B_k, 使 a_i·B_i = B'_{δ_i} 且 B' 的秩/半径满足要求.
+      idea: |
+        取一个待定小膨胀因子 ε, 令 B' 为 B 经全部 a_j 膨胀后再按 ε 膨胀的并; 令 B_i 为 B 经
+        (j≠i 的 a_j 与 ε·δ_i) 膨胀. 由于 a_i 恰好补上第 i 个缺的因子, 自动得到 a_i·B_i = B'_{δ_i}.
+      completion_test: |
+        写出 B' 与 B_i 的显式定义, 验证 a_i·B_i⊆B'_{δ_i} 逐 i 成立, 且 B' 秩为 d、半径 ≥ ρ·cα/(kd).
+    - step_id: S2
+      objective: |
+        对每个 i 得到卷积贴近界 ||μ_B∗μ_{B_i} - μ_B||_1 ≤ (1/16k)α.
+      idea: |
+        用 B 的正则性与"B_i ⊆ B 的某小膨胀"这一包含关系, 调用正则卷积贴近命题(见 D3).
+      completion_test: |
+        写出 ε 与 (1/16k)α 的关系, 使贴近命题的误差参数 ε_pr 恰等于 (1/16k)α.
+    - step_id: S3
+      objective: |
+        由平均论证得到某 x∈B 使 Σ_i μ_{B_i}∗1_A(x) ≥ (k-1/16)α.
+      idea: |
+        由 μ_B(A)=α 出发做三角不等式: kα ≤ Σ_i ||μ_B1_A-(μ_B∗μ_{B_i})1_A||_1 + Σ_i ||(μ_B∗μ_{B_i})1_A||_1,
+        第一项用 S2 压到 (1/16)α, 第二项写成 (1/|B|)Σ_i Σ_{x∈B} μ_{B_i}∗1_A(x), 取达到平均的 x.
+      completion_test: |
+        得到 Σ_i μ_{B_i}∗1_A(x) ≥ (k-1/16)α 的严格不等式链条.
+    - step_id: S4
+      objective: |
+        取 A_i=(A-x)∩B_i 并完成二分: 若某路增益则得 (ii), 否则全部保持 (7/8)α 得 (i).
+      idea: |
+        若存在 i 使 μ_{B_i}∗1_A(x) ≥ (1+1/16k)α 则直接 (ii); 否则对每个 i 用 S3 的总和减去其余 (k-1) 项
+        的上界 (1+1/16k)α, 得 μ_{B_i}∗1_A(x) ≥ (k-1/16)α-(k-1)(1+1/16k)α ≥ (7/8)α.
+      completion_test: |
+        写出 a_i·A_i ⊆ a_i·B_i = B'_{δ_i} 的验证, 以及两个不等式的完整收尾计算.
+  allowed_dependencies:
+    - id: D1
+      kind: definition
+      statement: |
+        Bohr 集 Bohr(Γ,ρ)、秩、半径、δ-膨胀 B_δ、正则性的定义(见 statement 中的约定).
+    - id: D2
+      kind: definition
+      statement: |
+        对非零 a∈Z/pZ, a·B := {x : |1-γ(a^{-1}x)|≤ρ 对所有 γ∈Γ}; 若 B=Bohr(Γ,ρ) 则 a·B=Bohr({γ∘a^{-1}},ρ),
+        与 B 同秩同半径, 且 x∈B ⇒ a x∈a·B.
+    - id: D3
+      kind: standard_result
+      statement: |
+        正则卷积贴近: 设 B 为秩 d 的正则 Bohr 集, B'⊆B_δ 且 δ≤ε_pr/(24d), 则 ||μ_B∗μ_{B'} - μ_B||_1 ≤ ε_pr.
+    - id: D4
+      kind: standard_result
+      statement: |
+        正则膨胀存在性: 任一 Bohr 集 B 都存在 δ∈[1/2,1] 使 B_δ 正则.
+  claim_status_convention: |
+    六态: FIXED / IMPORTED-VERIFIED / PROVED-IN-PROJECT / CONDITIONAL / CANDIDATE / BLOCKED。
+  writing_discipline: |
+    一个证明只回答一个主问题; 不复述背景; 详细计算只在承重处; 补不动时报最小 blocker 与最强已证定理; 自然段推进。
+  closed_book_notice: |
+    仅可使用本 bundle; 不得检索、不得假定未列出的结果。
+judge_bundle:
+  theorem_name: "Kościuszko 多系数膨胀密度增量引理 (Lemma 10)"
+  reference_proof: |
+    取 ε := (1/16k)α. 定义 B' := Π_j a_j·B_ε 以及 B_i := Π_{j≠i} a_j·B_{ε·δ_i}.
+    显然 B' 秩为 d 且半径满足下界(由膨胀的合成与 |a_j| 控制, 常数依赖 a_j), 且 B' 的选取与 δ_i 无关.
+    按构造 a_i·B_i = B'_{δ_i}. 若 B' 非正则, 由 D4 取 δ∈[1/2,1] 使 B'_δ 正则, 并把 δ_i 换成 δ·δ_i,
+    故无妨假设 B' 正则.
+
+    由 D3(以 B 与 B_i 代入, B_i ⊆ B 的某小膨胀, 误差 ε_pr=(1/16k)α)得
+      ||μ_B∗μ_{B_i} - μ_B||_1 ≤ (1/16k)α    (每 i).
+    由 μ_B(A)=α 及三角不等式:
+      kα = Σ_i μ_B(A) ≤ Σ_i ||μ_B1_A-(μ_B∗μ_{B_i})1_A||_1 + Σ_i ||(μ_B∗μ_{B_i})1_A||_1
+          ≤ (1/16)α + (1/|B|) Σ_i Σ_{x∈B} μ_{B_i}∗1_A(x).
+    故存在 x∈B 使 Σ_i μ_{B_i}∗1_A(x) ≥ (k-1/16)α.
+
+    取 A_i := (A-x)∩B_i, 则 a_i·A_i ⊆ a_i·B_i = B'_{δ_i}.
+    若某 i 使 μ_{B_i}∗1_A(x) ≥ (1+1/16k)α, 则 |(a_i·A_i)∩B'_{δ_i}| = |a_i·A_i| = |A_i| = μ_{B_i}∗1_A(x)|B_i|
+      = μ_{B_i}∗1_A(x)|B'_{δ_i}| ≥ (1+1/16k)α|B'_{δ_i}|, 得 (ii).
+    否则 ||μ_{B_i}∗1_A||∞ < (1+1/16k)α 对所有 i, 于是
+      μ_{B_i}∗1_A(x) ≥ (k-1/16)α - Σ_{j≠i} μ_{B_j}∗1_A(x) ≥ (k-1/16)α - (k-1)(1+1/16k)α
+                     = (1 - 2/16 + 1/(16k))α ≥ (7/8)α,
+    故 |(a_i·A_i)∩B'_{δ_i}| ≥ (7/8)α|B'_{δ_i}| 对所有 i, 得 (i). ∎
+  key_lemmas:
+    - lemma: 正则卷积贴近 (D3)
+      why_key: "是唯一把\"集合密度\"翻译成\"卷积平移贴近\"的入口, 使平均论证可行."
+      applicability_conditions: "B 正则、秩 d; B'⊆B_δ 且 δ≤ε_pr/(24d)."
+    - lemma: 同步膨胀构造 a_i·B_i = B'_{δ_i}
+      why_key: "是整条引理的几何心脏, 没有它结论中的多系数结构无法成立."
+      applicability_conditions: "群为 Z/pZ, 保证 a·B 良定义."
+  spine_answer_key:
+    - step_id: S1
+      full_closure: |
+        ε=(1/16k)α; B'=Π_j a_j·B_ε, B_i=Π_{j≠i} a_j·B_{εδ_i}; 由 a_i·B_i=B'_{δ_i};
+        B' 秩 d、半径 ρ'≥ρ·cα/(kd); 由 D4 可 WLOG 正则.
+    - step_id: S2
+      full_closure: |
+        B_i ⊆ B_{ε·(乘积因子)} 落入 B 的 1/(24d) 级膨胀, D3 给 ||μ_B∗μ_{B_i}-μ_B||_1 ≤ (1/16k)α.
+    - step_id: S3
+      full_closure: |
+        kα ≤ (1/16)α + (1/|B|)Σ_iΣ_x μ_{B_i}∗1_A(x) ⇒ ∃x: Σ_i μ_{B_i}∗1_A(x) ≥ (k-1/16)α.
+    - step_id: S4
+      full_closure: |
+        A_i=(A-x)∩B_i; 二分: 增益分支得 (ii); 否则 Σ 减 (k-1)(1+1/16k)α 得 ≥(7/8)α 分支 (i).
+  failure_mode_annotations:
+    - 只给单系数膨胀(丢 Π_{j≠i} 结构), 无法同时满足全部 i.
+    - 把 (1+1/16k) 写成 (1+ε) 再取 ε=1/16, 收尾时 7/8 无法闭合.
+    - 忽略 D4 的正则化回扣, 把 B' 直接当正则用.
+    - 在一般阿贝尔群陈述 (ii) 中的 a_i·A_i, 而 a·B 仅 Z/pZ 可定义.
+  variants:
+    - variant_id: full
+      modification: "无修改"
+      writer_bundle_patch: {}
+      expected_outcome: "完整补出同步膨胀构造与二分; judge 按 spine_answer_key 核补全度."
+run_policy:
+  variants_to_run: [full]
+  writer_models: []
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol

@@ -1,0 +1,175 @@
+package_id: P-S11_pcap-monotonicity-v2
+status: candidate
+split: dev
+probe_only: false
+created_by: terra
+created_at: 2026-08-18
+narrow_slot_calibration:
+  expected_standalone_solvability: low
+  rationale: "论文 2022/2023 公开, 模型可能见过陈述, 但完整 div X 恒等式(Bochner+Gauss+Kato)与三阶段临界点处理(η_k 截断、ε-逼近)高度技术化, 裸题补不出; 带包后强写手可补出 C≥3."
+  pretest_protocol: "阶段2: ① 裸题探针(仅 statement)应失败或仅部分有效; ② 带包探针应 judge C>=3; 两条都满足才 confirmed"
+  measured: null
+source_record:
+  authors: Virginia Agostiniani, Carlo Mantegazza, Lorenzo Mazzieri, Francesca Oronzio
+  title: "Riemannian Penrose inequality via Nonlinear Potential Theory"
+  year: 2023
+  url_or_doi_or_arxiv: "arXiv:2205.11642; Atti Accad. Naz. Lincei Rend. Lincei Mat. Appl. 34(3) (2023) 715–726; DOI 10.4171/RLM/1024"
+  source_type: primary
+  source_pool: B_paper_lemma
+  accessed_on: 2026-08-18
+  original_text_obtained: true
+  evidence_status: verified
+  likely_memorized: false
+  memorization_note: "陈述可能被见过, 完整 div X 恒等式与临界点三阶段处理几乎不可能被背出."
+selection_record:
+  mathematical_area: 几何分析 / 非负数量曲率流形上的 p-调和函数与 p-容度单调性公式
+  proof_structure: direct
+  expected_output_scale: long
+  narrow_slot_design_rationale: "最难 gap=S1 的 div X 恒等式与 S5/S6 临界点处理; 钥匙=D2/D3/D8+D7+D9+D5."
+  known_failure_modes:
+    - 只积分无临界点情形, 局部 div X 当全局(S5/S6 缺口)
+    - 对 C^{1,β} 解直接用 Sard(漏 ε-逼近)
+    - 丢 R^Σ/2 项或未证层连通就断言 χ≤2
+    - 伪造由 Penrose 不等式/质量定理直接得单调性; lazy stop 不写具体恒等式
+  rejection_risk: 技术门槛高, 可能偏探针(带包也崩则降级); 依赖 8 条, reference 证明长
+de_answering_record:
+  stripped:
+    - 名号: Bochner / 二次缩并 Gauss / Kato / Gauss–Bonnet / Geroch 型计算
+    - div X 显式恒等式 (1.14)(1.15); Y 场 (1.16)(1.17) 与 η_k 截断 (1.20)(1.21)
+    - Di Benedetto ε-逼近 (1.30) 与 |∇u|_ε; 层连通性论证细节
+    - 人名: Colding, Huisken–Ilmanen, Di Benedetto, Alessandrini, Manfredi
+  retained: 定理陈述(含 X,F_p,α_p,t_p,c_p); 六步脊柱 objective+idea(思路级); 依赖精确匿名陈述
+  audit_note: "写手包内无上述名号、无 (1.14)(1.15) 显式、无 Y/η_k/ε-逼近构造、无\"由某引理可得\"连线句."
+writer_bundle:
+  statement: |
+    设 (M,g) 为 3 维完备非紧黎曼流形, 具非负数量曲率 R≥0 与光滑紧连通边界 ∂M. 对 1<p<3 设问题
+      Δ_p u = 0 in M,  u = 0 on ∂M,  u → 1 at ∞
+    有唯一解 u_p ∈ C^{1,β}(M)∩W^{1,p}(M), 其中 Δ_p u = div(|∇u|^{p-2}∇u). 记 u 取值于 [0,1), ∂M={u=0}.
+    记号: p-容度 Cap_p(∂M) = inf{∫_M |∇v|^p dμ : v∈C^∞_c(M), v=1 on ∂M} = ∫_M |∇u|^p dμ = ∫_{u=t}|∇u|^{p-1}dσ (t 正则值);
+    c_p = (Cap_p(∂M)/4π)^{1/(p-1)}; 向量场
+      X = [c_p^{(p-1)/(3-p)}/((3-p)/(p-1)(1-u))^{(p-1)/(3-p)}] · { |∇u|^{p-2}∇u/c_p^{p-1}
+          + [∇|∇u|−(Δu/|∇u|)∇u]/((3-p)/(p-1)(1-u)) + |∇u|∇u/((3-p)/(p-1)(1-u))^2 };
+    函数 F_p(t) = ∫_{u=α_p(t)} ⟨X, ∇u/|∇u|⟩ dσ, 其中 α_p(t) = 1−(t_p/t)^{(3-p)/(p-1)}, t_p = ((p-1)/(3-p)·c_p)^{(p-1)/(3-p)}, t∈[t_p,∞).
+    定理(正则值单调性). 设 H_2(M,∂M;ℤ)={0}, s,t∈[t_p,∞) 使 α_p(s),α_p(t) 为正则值. 则 s ≤ t ⟹ F_p(s) ≤ F_p(t).
+  proof_spine:
+    - step_id: S1
+      objective: "临界点外把 div X 表为 (|∇u|^{p-1}/c_p^{p-1} − R^Σ/2) 乘正系数, 加显式非负项(含 R、|∇^Σ|∇u||²、|h̊|² 与一个完全平方)."
+      idea: "用 Bochner 展开 |∇∇u|² 与 Ric(∇u,∇u), 用 Gauss 方程把 Ric(ν,ν) 换 R、R^Σ、h̊、H, 再用 Δu=(2−p)⟨∇|∇u|,∇u⟩/|∇u| 与 Kato 恒等式重排 Hessian 项."
+      completion_test: "写出 div X 恒等式: (|∇u|^{p-1}/c_p^{p-1} − R^Σ/2) 乘正系数, 加 R/2、|∇^Σ|∇u||²/|∇u|²、|h̊|²/2 与系数 (5-p)/(p-1) 的完全平方 (|∇u|/((3-p)/(p-1)(1-u)) − H/2)²."
+    - step_id: S2
+      objective: "用 Gauss–Bonnet 与容度恒等式把 ∫_{u=τ}(|∇u|^{p-1}/c_p^{p-1} − R^Σ/2)dσ 化为 4π−2πχ({u=τ})."
+      idea: "∫_{u=τ}|∇u|^{p-1}dσ=Cap_p=4π c_p^{p-1}; ∫_{u=τ}R^Σ dσ=4πχ({u=τ})."
+      completion_test: "写出 ∫_{u=τ}(|∇u|^{p-1}/c_p^{p-1} − R^Σ/2)dσ = 4π − 2πχ({u=τ}) 的完整推导."
+    - step_id: S3
+      objective: "证明正则水平集 {u=τ} 为闭连通曲面, 从而 χ≤2 且 4π−2πχ≥0."
+      idea: "用 H_2(M,∂M;ℤ)=0 与强极大值原理: 子层集 {u<τ} 连通; 任一层的连通分支分离 M 且不含内部极值."
+      completion_test: "写出 {u<τ} 连通、{u=τ} 恰一连通分支的完整论证, 推出 4π−2πχ({u=τ})≥0."
+    - step_id: S4
+      objective: "无临界点情形用散度定理+余面积把 F_p(t)−F_p(s) 表为 ∫ div X, 用 S1–S3 得非负."
+      idea: "沿 {α_p(s)<u<α_p(t)} 积分散度, 余面积换元到 τ 积分, 逐层套 S2/S3."
+      completion_test: "写出 F_p(t)−F_p(s) = ∫_{(α_p(s),α_p(t))}[c_p^{(p-1)/(3-p)}/((3-p)/(p-1)(1-τ))^{(p-1)/(3-p)+1}]·(4π−2πχ)dτ ≥ 0 的完整链条."
+    - step_id: S5
+      objective: "推广到临界值集 N=u(Crit(u)) 零测的情形."
+      idea: "引入在临界集附近被非降截断 η_k 截断的向量场使其全局光滑; 散度定理后取 k→∞(单调/控制收敛), 用 N 零测限制到正则值."
+      completion_test: "写出截断向量场构造、div 下界、k→∞ 取极限合法性, 及 F_p(t)−F_p(s) ≥ ∫_{(α_p(s),α_p(t))\N} … ≥ 0 的完整链条."
+    - step_id: S6
+      objective: "去掉\"临界值零测\"假设, 完成一般情形."
+      idea: "固定 T 使 {u_p=T} 正则; 对 ε>0 解把 |∇u| 换 √(|∇u|²+ε²) 的正则化 Dirichlet 问题得光滑逼近解, Sard 可用, S5 成立得近似单调性; 令 ε→0 用 C^{1,β} 收敛完成."
+      completion_test: "写出逼近问题精确形式、近似单调不等式(含 ε→0 误差趋于 0), 推出极限 F_p(t)−F_p(s)≥0."
+  allowed_dependencies:
+    - id: D1
+      kind: definition
+      statement: "上文 p-容度、c_p、X、F_p、α_p、t_p 定义; 正则层上 Δu=(2−p)⟨∇|∇u|,∇u⟩/|∇u|, H=Δu/|∇u|−⟨∇|∇u|,∇u⟩/|∇u|²=−(p−1)⟨∇|∇u|,∇u⟩/|∇u|² (ν=∇u/|∇u|)."
+    - id: D2
+      kind: standard_result
+      statement: "½Δ|∇u|² = |∇∇u|² + ⟨∇Δu,∇u⟩ + Ric(∇u,∇u)."
+    - id: D3
+      kind: standard_result
+      statement: "超曲面 Σ 二次缩并 Gauss 方程: R = R^Σ + 2Ric(ν,ν) + |h|² − H²; 曲面 h=h̊+(H/2)g_Σ 故 |h|²=|h̊|²+H²/2."
+    - id: D4
+      kind: standard_result
+      statement: "闭曲面 Gauss–Bonnet: ∫_Σ R^Σ dσ = 4πχ(Σ)."
+    - id: D5
+      kind: standard_result
+      statement: "余面积公式: ∫_M f|∇u| dμ = ∫ dτ ∫_{u=τ} f dσ."
+    - id: D6
+      kind: standard_result
+      statement: "散度定理: ∫_Ω div X dμ = ∫_{∂Ω} ⟨X,ν_∂Ω⟩ dσ."
+    - id: D7
+      kind: standard_result
+      statement: "p-调和函数强极大值原理与 Hopf 引理: t=0 正则; 内部严格极值被禁止."
+    - id: D8
+      kind: standard_result
+      statement: "p-调和函数 Kato 恒等式: |∇∇u|²−[1+(p−1)²/2]|∇|∇u||² = |∇u|²|h̊|² + [1−(p−1)²/2]|∇^Σ|∇u||²."
+    - id: D9
+      kind: standard_result
+      statement: "Sard 定理: C^k 映射正则值集全测度; p-调和函数临界集外光滑、全局 C^{1,β}."
+  claim_status_convention: "六态: FIXED / IMPORTED-VERIFIED / PROVED-IN-PROJECT / CONDITIONAL / CANDIDATE / BLOCKED. 每承重断言标注其一."
+  writing_discipline: "一个证明回答一个主问题; 不复述背景; 详细计算只在承重处; 补不动时报最小 blocker 与最强已证定理."
+  closed_book_notice: "仅可使用本 bundle; 不得检索、不得假定未列出的结果、不得使用题目包外的定理名."
+judge_bundle:
+  theorem_name: "Theorem 1.1 — p-容度势水平集单调性公式 (Monotonicity along the regular values)"
+  reference_proof: |
+    记 φ(u):=((3-p)/(p-1))(1-u), κ:=c_p^{(p-1)/(3-p)}. 第1步(无临界点). 用 Bochner+二次缩并 Gauss+(1.10)(1.11) 配 Kato 恒等式得
+      div X = (κ|∇u|/φ^{(p-1)/(3-p)+1})·{ |∇u|^{p-1}/c_p^{p-1} − R^Σ/2 + |∇^Σ|∇u||²/|∇u|² + R/2 + |h̊|²/2 + (5-p)/(p-1)(|∇u|/φ − H/2)² }.
+    因 R≥0 且后四项非负, div X ≥ (κ|∇u|/φ^{(p-1)/(3-p)+1})·(|∇u|^{p-1}/c_p^{p-1} − R^Σ/2). 由散度定理、余面积:
+      F_p(t)−F_p(s) = ∫_{α_p(s)<u<α_p(t)} div X dμ = ∫_{(α_p(s),α_p(t))} dτ ∫_{u=τ}(div X)/|∇u| dσ
+        ≥ ∫_{(α_p(s),α_p(t))} (κ/φ^{(p-1)/(3-p)+1}) ∫_{u=τ}(|∇u|^{p-1}/c_p^{p-1} − R^Σ/2) dσ dτ.
+    由 (1.5)(1.6) ∫_{u=τ}|∇u|^{p-1}dσ=Cap_p=4π c_p^{p-1}, 由 Gauss–Bonnet ∫_{u=τ}R^Σ dσ=4πχ({u=τ}), 内层 = 4π−2πχ({u=τ}). 无临界点时每层微分同胚于连通闭曲面 ∂M, χ≤2, 故 4π−2πχ≥0, 得 F_p(t)≥F_p(s).
+    第2步(临界值可忽略). 设 N=u(Crit(u)) 零测. 定义
+      Y = (κ/φ^{(p-1)/(3-p)})·{ [∇|∇u|−(Δu/|∇u|)∇u]/φ + |∇u|∇u/φ² },
+    则 X = c_p^{-(2-p)(p-1)/(3-p)}|∇u|^{p-2}∇u/φ^{(p-1)/(3-p)} + Y, 且
+      div Y = (κ|∇u|/φ^{(p-1)/(3-p)+1})·{ −R^Σ/2 + |∇^⊤|∇u||²/|∇u|² + R/2 + |h̊|²/2 + (5-p)/(p-1)(|∇u|/φ − H/2)² }.
+    取光滑非降截断 η_k: η_k(τ)=0 于 [0,1/2k], 0≤η'_k≤2k 于 [1/2k,3/2k], η_k=1 于 [3/2k,∞). 令 Y_k=η_k((p−1)|∇u|/φ^{1/(3-p)})·Y, X_k=c_p^{-(2-p)(p-1)/(3-p)}|∇u|^{p-2}∇u/φ^{(p-1)/(3-p)}+Y_k. 由 η'_k≥0 得 div Y_k≥η_k div Y, 故 div X_k ≥ c_p^{-(2-p)(p-1)/(3-p)}|∇u|^p/φ^{(p-1)/(3-p)+1} + η_k div Y. 对充分大 k, X_k 在边界与 X 重合, 散度定理给 F_p(t)−F_p(s)=∫ div X_k dμ. 将 div Y=P+D(P≥0, D 为 Ric 项局部有界), 用单调收敛(η_k P)与控制收敛(η_k D)取 k→∞, 得
+      F_p(t)−F_p(s) ≥ ∫_{(α_p(s),α_p(t))\N} dτ ∫_{u=τ}(div X)/|∇u| dσ ≥ ∫_{(α_p(s),α_p(t))\N}(κ/φ^{(p-1)/(3-p)+1})(4π−2πχ)dτ ≥ 0.
+    连通性: τ∈(0,1) 正则. {u<τ} 连通: u proper 使各分支有界, 分支不交 ∂M 则 u 取内部极小违强极大值, 又 ∂M 连通. 设 S 为 {u=τ} 分支: 由 H_2(M,∂M;ℤ)=0, S 与 ∂M 整数倍同调, 相交理论给 S 分离 M(A⊔S⊔B); 设 ∂M⊆A 则 {u<τ}⊆A, 若有另一分支 Σ⊂A 内部则 u=τ=max_{∂A}u 违强极大值. 故 {u=τ} 连通, χ≤2, 4π−2πχ≥0.
+    第3步(一般情形). 取 T∈(0,1) 使 {u_p=T} 正则. 对 ε>0 在 M_T={0≤u_p≤T} 解
+      div(|∇u|_ε^{p-2}∇u)=0 in M_T,  u=0 on ∂M,  u=T on {u_p=T},  |∇u|_ε=√(|∇u|²+ε²).
+    解 u_p^ε 光滑(非退化拟线性), Sard 可用. 令 c_{p,ε}^{p-1}=(1/4π)∫_{∂M}|∇u|_ε^{p-2}|∇u|dσ, 及 X_ε、F_p^ε、α_p^ε=1−(t_p^ε/t)^{(3-p)/(p-1)}、t_p^ε=((p-1)/(3-p)·c_{p,ε})^{(p-1)/(3-p)}(把 X、F_p、α_p、t_p 中 |∇u|^{p-2} 换 |∇u|_ε^{p-2}、c_p 换 c_{p,ε}). 重复第2步得近似单调性(Lemma 1.2):
+      F_p^ε(t)−F_p^ε(s) ≥ −ε((p+1)/(p-1))² ∫_{α_p^ε(s)<u<α_p^ε(t)} [ε|∇u|/(2(p+1)|∇u|²+3ε²)]·[c_{p,ε}^{(p-1)/(3-p)}|∇u|²/φ^{(p-1)/(3-p)+3}] dμ.
+    因 u_p^ε→u_p 于 C^{1,β}(紧子集)且于 M_T\Crit(u_p) 光滑收敛, c_{p,ε}→c_p、t_p^ε→t_p, 误差 O(ε)→0, 令 ε→0 得 F_p(t)−F_p(s)≥0. ∎
+  key_lemmas:
+    - lemma: div X 显式恒等式 (1.14)(1.15)
+      why_key: "唯一把 Ric≥0 与层几何翻译成 div X≥(4π−2πχ)/… 的入口"
+      applicability_conditions: "临界点外; Bochner+Gauss+Kato+(1.10)(1.11)"
+    - lemma: 层连通性 (H_2(M,∂M;ℤ)=0 ⇒ 正则层连通)
+      why_key: "使 4π−2πχ≥0 成立"
+      applicability_conditions: "τ 正则值; 强极大值原理与相交理论"
+    - lemma: η_k 截断正则化 (Y,Y_k,X_k)
+      why_key: "把无临界点公式推广到有临界点"
+      applicability_conditions: "N=u(Crit(u)) 零测; 单调/控制收敛"
+    - lemma: Di Benedetto ε-逼近 + Lemma 1.2
+      why_key: "去掉\"临界值零测\"假设, 完成一般 1<p<3"
+      applicability_conditions: "u_p 为 C^{1,β}∩W^{1,p} 解"
+  spine_answer_key:
+    - step_id: S1
+      full_closure: "div X = (κ|∇u|/φ^{(p-1)/(3-p)+1})·{ |∇u|^{p-1}/c_p^{p-1} − R^Σ/2 + |∇^Σ|∇u||²/|∇u|² + R/2 + |h̊|²/2 + (5-p)/(p-1)(|∇u|/φ − H/2)² }."
+    - step_id: S2
+      full_closure: "∫(|∇u|^{p-1}/c_p^{p-1} − R^Σ/2)dσ = Cap_p/c_p^{p-1} − 2πχ = 4π − 2πχ({u=τ})."
+    - step_id: S3
+      full_closure: "{u<τ} 连通(u proper+强极大值); S 分离 M(相交理论, H_2=0); 无第二分支(内部极大违强极大值) ⇒ {u=τ} 连通, χ≤2."
+    - step_id: S4
+      full_closure: "F_p(t)−F_p(s)=∫_{α_p(s)<u<α_p(t)}div X dμ=∫dτ∫_{u=τ}(div X)/|∇u|dσ ≥ ∫(κ/φ^{(p-1)/(3-p)+1})(4π−2πχ)dτ ≥ 0."
+    - step_id: S5
+      full_closure: "Y((1.16)(1.17)), η_k((1.20)), Y_k,X_k; div Y_k≥η_k div Y; F_p(t)−F_p(s)=∫div X_k dμ; div Y=P+D, P≥0, D 局部有界, 单调+控制收敛取 k→∞; N 零测限制到正则值, 逐层 4π−2πχ≥0."
+    - step_id: S6
+      full_closure: "逼近问题 (1.30), |∇u|_ε=√(|∇u|²+ε²); c_{p,ε},X_ε,F_p^ε,α_p^ε; Lemma 1.2 近似单调性(误差 O(ε)); u_p^ε→u_p 于 C^{1,β} 且光滑收敛于 Crit 外, ε→0 得极限."
+  failure_mode_annotations:
+    - 只做无临界点积分, 局部 div X 当全局 → S5/S6 缺口, 判跳步
+    - 对 C^{1,β} 解直接用 Sard → 概念错误, 漏 ε-逼近
+    - 丢 R^Σ/2 项或未证层连通就断言 χ≤2 → S2/S3 化归缺失
+    - 引用未给的 Penrose 不等式/质量定理 → 伪造依赖; 只写由 Bochner+Gauss 即得不写恒等式 → lazy stop
+  variants:
+    - variant_id: full
+      modification: "无修改"
+      writer_bundle_patch: {}
+      expected_outcome: "完整补出 div X 恒等式、层连通性与三阶段临界点处理; judge 按 spine_answer_key 核补全度."
+run_policy:
+  variants_to_run: [full]
+  writer_models: []
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol

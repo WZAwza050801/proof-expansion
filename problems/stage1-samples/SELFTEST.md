@@ -71,3 +71,11 @@
 
 - 响应研究者指示：出题默认路径改为**前沿/基础数学论文 → 题包**（不再以公开题库为主），蒸馏模板 = 桌面 `seidel_conjecture_distilled_work_charter.md`（P0–P7 脊柱＋completion test＋六态＋§7 写作纪律）。curator 提示词已新增「主池 B+」一节。
 - S09 = 由 charter 蒸馏的第一道**探针题**（Seidel 猜想 Stage-I 审计：组织证明计划，不证猜想）。probe_only，正式上限测试在阶段 2（gpt-5.6-terra 级模型或人工评审）。「论文中已有完整证明的关键引理 → 窄缝题」的实例留待阶段 2 由 Terra 用搜索能力从具体论文切割。
+
+## 第五轮：Terra 论文蒸馏（别的方向的前沿论文 → charter 级题包）
+
+- 按研究者指示：Seidel 留到最后；出题方向改为**别的领域的前沿论文**。Terra（预演：deepseek-v4-pro，正式出题须在 proof-pipeline 会话用 `terra_curator`（gpt-5.6-terra）；本会话 openrouter 路由不可达）用搜索核验并蒸馏出两题：
+  - **S10**：Kościuszko, "Invariant Equations in Many Variables"（EJC 32(3) 2025 #P3.24，arXiv:2306.08567）Lemma 10——加法组合的多系数 Bohr 集膨胀密度增量二分；
+  - **S11**：Agostiniani–Mantegazza–Mazzieri–Oronzio, "Riemannian Penrose inequality via Nonlinear Potential Theory"（arXiv:2205.11642，2023）Theorem 1.1——p-容度势水平集单调性公式。
+- 两者都按新模板输出：**完整证明结构**（S10 四步 / S11 六步脊柱，每步 objective＋idea（大体证明思路）＋completion test）＋允许依赖＋参考证明作 judge 锚点。
+- **待办硬门**：① 两题的数学内容（Terra 蒸馏稿）**未经人工复核**，`ready` 前必须人工核对原文；② 裸题/带包预测试定档（`measured` 仍为 null）；③ 正式出题在 proof-pipeline 会话由 gpt-5.6-terra 重跑核验。
