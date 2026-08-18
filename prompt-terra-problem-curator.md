@@ -119,8 +119,8 @@
 
 ### 工作流
 
-1. 定域与预筛选（主池 C → B → A 优先级）；
-2. 蒸馏题包：statement → 脊柱（objective + completion test）→ 允许依赖 → 去答案化记录；
+1. 定域与预筛选（主池 **B+ → B → C → A** 优先级；论文 charter 级压缩是默认路径）；
+2. 蒸馏题包：statement → 脊柱（objective + completion test）→ 允许依赖 → 去答案化记录（压缩级别 = charter 级：描述不全、基本思路在；输入压缩、输出长，标注 `expected_output_scale`）；
 3. 预测试（阶段 2 协议）：① 裸题探针（仅 statement）→ 应补不出；② 带包探针 → 应 C ≥ 3；据此定档；
 4. 写 `narrow_slot_calibration`、失败模式注释、`spine_answer_key`；
 5. 彻底分离 writer / judge bundle；
@@ -128,7 +128,18 @@
 
 ### 数量原则
 
-dev 集 ≤ 5 题、eval 集 ≤ 10 题、探针 ≤ 2 题；宁可每题包质量完整，不要凑数量。样题阶段先只做 2–3 道验证模板。
+dev 集 ≤ 5 题、eval 集 ≤ 10 题、探针 ≤ 2 题；宁可每题包质量完整，不要凑数量。每道正式题包都必须经裸题/带包预测试定档（`measured` 非空）后才允许 `ready`；未定档的只能标 `candidate`。
+
+### 用户输入模板
+
+```text
+论文/研究计划源（可多个，含路径或 arXiv/DOI）：{{PAPER_SOURCES_OR_NONE}}
+目标步骤（论文的哪个"基本步骤"/证明义务；未切割时写范围）：{{TARGET_STEP_OR_SCOPE}}
+候选题数量：{{TARGET_COUNT}}
+目标写手水平（按预测试定档的模型）：{{WRITER_PROFILE}}
+排除范围：{{EXCLUSIONS_OR_NONE}}
+语言：中文数学写作
+```
 
 ---
 

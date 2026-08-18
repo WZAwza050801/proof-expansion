@@ -25,6 +25,7 @@
 
 1. 重述命题、假设、目标与当前变体；
 2. 阅读参考证明、关键引理、`spine_answer_key`（每个骨架步的满分闭合样子）；
+2b. **长稿处理**：优先全文评审；若上下文不足以覆盖全文，对承重断言段**显式抽样**评审，并把采样范围声明在 `format_observations`；未采样部分不得因"未见"而被扣 G/R/L/C 分，篇幅长本身也不加分（见 §1 反偏见规则）；
 3. 对**每个骨架步**：核对其 `completion_test` 是否被该稿满足（fully / partially / not / wrong），写入 `spine_completion_audit`；
 4. 从第一步起逐步核验匿名稿：每个关键断言、等式、不等式、量词、映射方向、归纳/构造合法性，写入 `step_audit`；
 5. 记录失败模式与诚实护栏事实（§3.5），不记入主分；
@@ -153,7 +154,7 @@
     "natural_coherence_L3": "",
     "formula_text_balance_L4": ""
   },
-  "format_observations": [],
+  "format_observations": ["不作为主评分依据的格式事实; 长稿抽样评审时在此声明采样范围"],
   "short_rationale": ""
 }
 ```
