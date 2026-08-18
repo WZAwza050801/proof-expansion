@@ -48,6 +48,12 @@
 **主池 B+：前沿/基础数学论文蒸馏（默认出题路径，Seidel charter 模板）**
 
 - 出题主路径：Terra 直接阅读**前沿或基础数学论文**（arXiv/期刊/研究者自己的研究计划），把其中"可精确陈述的证明义务或关键引理"蒸馏成题包——**不是翻公开题库**。公开题库（含 Putnam 级）已被强模型背过，只作对照/校准材料。
+- **压缩级别（charter 级，本池的硬标准）**：把论文关键部分压到 Seidel charter 的级别——**描述不全、但基本思路在**：
+  - 目标与符号精确（不允许含糊）；
+  - 证明脊柱只写关键步骤的 objective（这一步要建立什么）＋ completion test，**不写怎么做**；
+  - 允许依赖给精确陈述，不给证明、不给名号；
+  - 不复述论文背景与全文，不逐条翻译原文——每题输入包应远短于原论文对应章节，输出长（见下），输入压缩。
+- **题目粒度 = 论文的一个"基本步骤"（证明义务）**，不是整篇论文：与研究者后续对长论文写作的"基本步骤切割"对齐；切割方案到位后，题包直接取自每一步的义务清单。
 - 蒸馏模板 = 桌面 `seidel_conjecture_distilled_work_charter.md` 的结构（charter 是"把一个前沿猜想的证明计划压缩成可执行义务清单"的范例）：
   - `statement` ← charter §1 exact mathematical objective：对象、假设、结论、量词全部显式；
   - `proof_spine` ← charter §3 P0–P7 脊柱：每步 = 一个证明义务，附 completion test；objective 只写"要建立什么"，不写"怎么做"；
@@ -165,6 +171,7 @@ source_record:
 selection_record:
   mathematical_area: <领域与子领域>
   proof_structure: direct | contradiction | induction | construction | equivalence | key_lemma
+  expected_output_scale: short | medium | long   # 预期写手输出规模（<2k / 2k–8k / >8k token），供预算冻结与存储规划（experiment-design §5.2b）
   narrow_slot_design_rationale: |
     <哪一步是最难补的 gap；依赖包里哪个陈述是钥匙；为何给足后能闭合>
   known_failure_modes:
