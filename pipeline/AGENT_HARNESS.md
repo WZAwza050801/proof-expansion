@@ -8,7 +8,7 @@ This is a **DSH agent preset plus workspace protocol**, not a one-shot benchmark
 - Persistent queue: `pipeline/queue.yml`
 - Versioned role prompts: project-root `prompt-*.md` files
 - Package visibility boundary: `pipeline/problem-package.template.yml`
-- Hard per-role capability locks in the preset: `terra_curator` (search allowed, `openrouter/openai/gpt-5.6-terra`), `writer_closed` (zero tools, `deepseek-v4-flash`), `judge_blind` (zero tools + `micu/gpt-5.6-sol`), `analyst_stats` (**read-only** artefact interpretation)
+- Hard per-role capability locks in the preset: `terra_curator` (search allowed, `micu/gpt-5.6-terra`), `writer_closed` (zero tools, `deepseek-v4-flash`), `judge_blind` (zero tools + `micu/gpt-5.6-sol`), `analyst_stats` (**read-only** artefact interpretation)
 - Immutable per-run artefact convention: `runs/<run-id>/...`
 
 The preset keeps a session in “harness operator” mode. It accepts candidate packages incrementally, selects ready packages independently, creates matched A/B jobs through role-locked subagents, anonymizes outputs for GPT-5.6-SOL review, and writes/aggregates artefacts. The native `workflow` tool is not used for writers or judges because it cannot enforce their tool filters.

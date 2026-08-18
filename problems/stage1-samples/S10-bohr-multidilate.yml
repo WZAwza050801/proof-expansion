@@ -14,7 +14,7 @@ narrow_slot_calibration:
     这两处无法从领域直觉直接背出, 是带包才能补上的 gap.
   pretest_protocol: |
     阶段2: ① 裸题探针(仅 statement)应失败或仅部分有效; ② 带包探针应 judge C>=3; 两条都满足才 confirmed
-  measured: null
+  measured: confirmed   # 2026-08-18 预演: 裸题三模型全失败(flash 声称命题为假但无完整证明/pro 卡常数/27B 半途); 带包 flash/pro/27B 全部闭合二分证明. 注意: 三份带包证明一致指出"秩 d"在 D1-D4 下不可达、只能做到秩≤kd —— 蒸馏陈述与原文可能不一致, 入 ready 前必须人工对照原文核验
 source_record:
   authors: Tomasz Kościuszko
   title: "Invariant Equations in Many Variables"

@@ -17,8 +17,8 @@
 | `S07-putnam2022a5-tiling.yml` | Putnam 2022 A5 铺砖博弈 | 组合博弈 | induction | low | **窄缝确认（flash）**；pro 秒杀 |
 | `S08-putnam2023b6-determinant.yml` | Putnam 2023 B6 行列式 | 数论/线代 | construction | low | 秒杀（flash/pro）；27B 待复核 |
 | `S09-seidel-stage1-audit.yml` | Seidel 猜想 Stage-I 审计（**前沿探针题**） | 辛拓扑/范畴 | key_lemma | — | probe_only：charter 模板演示，测上限不进区分度 |
-| `S10-bohr-multidilate.yml` | Kościuszko 多系数 Bohr 膨胀密度增量二分引理 | 加法组合 | direct | medium | **论文蒸馏**：EJC 2025 (arXiv:2306.08567) Lemma 10 |
-| `S11-pcap-monotonicity.yml` | p-容度势水平集单调性公式 | 几何分析 | direct | low | **论文蒸馏**：arXiv:2205.11642 (2023) Theorem 1.1 |
+| `S10-bohr-multidilate.yml` | Kościuszko 多系数 Bohr 膨胀密度增量二分引理 | 加法组合 | direct | medium | **论文蒸馏**：EJC 2025 Lemma 10；窄缝确认（flash/pro/27B）；"秩 d"陈述待人工对照原文 |
+| `S11-pcap-monotonicity.yml` | p-容度势水平集单调性公式 | 几何分析 | direct | low | **论文蒸馏**：arXiv:2205.11642 Thm 1.1；窄缝确认（flash/pro 完整闭合六步） |
 
 - 定档（预演级，2026-08-18）：S02/S04/S05 = `confirmed`（写手 Qwen/Qwen3.6-27B）；**S07 = `confirmed`（写手 deepseek-v4-flash，benchmark 难题档）**；S01 = `downgraded_to_probe`；S03/S06/S08 = `excluded_instant_solve`。窄缝是 model-relative 的。
 - 带包探针全部闭合——v2 题包格式验证通过。

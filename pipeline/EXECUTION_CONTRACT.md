@@ -35,7 +35,7 @@
 当前映射：
 
 ```text
-terra_curator  -> openrouter/openai/gpt-5.6-terra
+terra_curator  -> micu/gpt-5.6-terra
 writer_closed  -> deepseek-official/deepseek-v4-flash (P001 smoke only)
 judge_blind    -> micu/gpt-5.6-sol
 analyst_stats  -> read-only, no model pin

@@ -74,8 +74,19 @@
 
 ## 第五轮：Terra 论文蒸馏（别的方向的前沿论文 → charter 级题包）
 
-- 按研究者指示：Seidel 留到最后；出题方向改为**别的领域的前沿论文**。Terra（预演：deepseek-v4-pro，正式出题须在 proof-pipeline 会话用 `terra_curator`（gpt-5.6-terra）；本会话 openrouter 路由不可达）用搜索核验并蒸馏出两题：
+- 按研究者指示：Seidel 留到最后；出题方向改为**别的领域的前沿论文**。Terra（预演：deepseek-v4-pro，正式出题须在 proof-pipeline 会话用 `terra_curator`（gpt-5.6-terra）；已按研究者指示把 Terra 路由从 openrouter 改为 micu）用搜索核验并蒸馏出两题：
   - **S10**：Kościuszko, "Invariant Equations in Many Variables"（EJC 32(3) 2025 #P3.24，arXiv:2306.08567）Lemma 10——加法组合的多系数 Bohr 集膨胀密度增量二分；
   - **S11**：Agostiniani–Mantegazza–Mazzieri–Oronzio, "Riemannian Penrose inequality via Nonlinear Potential Theory"（arXiv:2205.11642，2023）Theorem 1.1——p-容度势水平集单调性公式。
 - 两者都按新模板输出：**完整证明结构**（S10 四步 / S11 六步脊柱，每步 objective＋idea（大体证明思路）＋completion test）＋允许依赖＋参考证明作 judge 锚点。
 - **待办硬门**：① 两题的数学内容（Terra 蒸馏稿）**未经人工复核**，`ready` 前必须人工核对原文；② 裸题/带包预测试定档（`measured` 仍为 null）；③ 正式出题在 proof-pipeline 会话由 gpt-5.6-terra 重跑核验。
+
+## 第六轮：论文片段窄缝定档（S10/S11 预测试）
+
+- 裸题探针（flash / pro / Qwen3.6-27B，共 6 份）：**全部失败**——
+  S10：flash 声称引理为假（多分支分裂论证）但给不出完整证明、pro 完成归约骨架后卡在常数匹配、27B 平均论证中途崩溃；
+  S11：三模型均卡在 p-调和 Bochner/Kato 恒等式（27B 还写出错误的 Ric≥R/3 估计）。
+- 带包探针（共 8 份）：**S10 flash/pro/27B 全部闭合**（同步膨胀构造＋卷积贴近＋平均＋二分收尾），
+  **S11 flash/pro 完整闭合六步**（div X 恒等式→Gauss–Bonnet 化层→连通性→无临界点→η_k 截断→ε 正则化逼近），27B 主链正确。
+- **定档：S10、S11 = confirmed（窄缝），写手 = flash/pro（27B 对 S10 亦成立）。**
+- **重要发现（须人工复核）**：S10 的三份带包证明一致指出——按蒸馏后的陈述，B' 的"秩 d"在 D1–D4 下不可达（构造迫使字符族含 ∪Γ∘a_i^{-1}，秩只能 ≤ kd）；三分证明都把结论改成秩 ≤ kd 并如实报告。这说明**蒸馏陈述与原文 Lemma 10 可能不一致**（原文或许允许秩增长或假设更强）。入 ready 前必须由人工对照 arXiv:2306.08567 原文修正陈述——这正是"Taste 不能全自动、人工批准门"的实证。
+- 至此论文蒸馏路线完整跑通：**Terra 从别的方向的真实前沿论文切义务 → charter 级压缩 → 预测试确认窄缝（flash/pro）**。

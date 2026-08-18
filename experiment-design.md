@@ -99,7 +99,7 @@
 
 | 角色行 | 工具 | 委派 | 模型 |
 |---|---|---|---|
-| `terra_curator` | 可搜索 + 文件系统 | maxDepth 0 | 锁定 `openrouter/openai/gpt-5.6-terra` |
+| `terra_curator` | 可搜索 + 文件系统 | maxDepth 0 | 锁定 `micu/gpt-5.6-terra` |
 | `writer_closed` | **零工具**（不可搜索/读盘/跑命令） | maxDepth 0 | 锁定 `deepseek-official/deepseek-v4-flash`（D2 冻结后可加按模型锁定行） |
 | `judge_blind` | **零工具** | maxDepth 0 | 锁定 `micu/gpt-5.6-sol` |
 | `analyst_stats` | **只读** run 产物，返回解释报告 | maxDepth 0 | 继承会话模型 |

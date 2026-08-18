@@ -8,7 +8,7 @@ narrow_slot_calibration:
   expected_standalone_solvability: low
   rationale: "论文 2022/2023 公开, 模型可能见过陈述, 但完整 div X 恒等式(Bochner+Gauss+Kato)与三阶段临界点处理(η_k 截断、ε-逼近)高度技术化, 裸题补不出; 带包后强写手可补出 C≥3."
   pretest_protocol: "阶段2: ① 裸题探针(仅 statement)应失败或仅部分有效; ② 带包探针应 judge C>=3; 两条都满足才 confirmed"
-  measured: null
+  measured: confirmed   # 2026-08-18 预演: 裸题三模型全失败(均卡在 p-调和 Bochner/Kato 恒等式); 带包 flash/pro 完整闭合 S1-S6(div X 恒等式/层连通/截断极限/ε 逼近), 27B 主链正确. 入 ready 前须人工对照 arXiv:2205.11642 原文核验
 source_record:
   authors: Virginia Agostiniani, Carlo Mantegazza, Lorenzo Mazzieri, Francesca Oronzio
   title: "Riemannian Penrose inequality via Nonlinear Potential Theory"

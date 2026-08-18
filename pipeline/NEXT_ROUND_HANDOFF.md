@@ -28,7 +28,7 @@
 | 项目 | 状态 | 结论 |
 |---|---|---|
 | 用户自有 preset `proof-pipeline` | 已 mount-validate | `valid`；未修改 shipped preset |
-| Terra | 硬角色行 | `openrouter/openai/gpt-5.6-terra`，可搜索/读写，`maxDepth:1` |
+| Terra | 硬角色行 | `micu/gpt-5.6-terra`，可搜索/读写，`maxDepth:1` |
 | 写手 | 硬角色行 | `writer_closed`，**零工具**、`maxDepth:1`，当前 smoke 锁 `deepseek-official/deepseek-v4-flash` |
 | Judge | 硬角色行 | `judge_blind`，**零工具**、`maxDepth:1`，锁 `micu/gpt-5.6-sol` |
 | 统计 | 硬读角色 + 确定性脚本 | `aggregate_stats.rb` 算统计；`analyst_stats` 只读解释，父 Harness 逐字写 aggregate |
@@ -96,7 +96,7 @@
 当前固定路由：
 
 ```text
-Terra:  openrouter / openai/gpt-5.6-terra
+Terra:  micu / gpt-5.6-terra
 Judge:  micu / gpt-5.6-sol
 Smoke writer: deepseek-official / deepseek-v4-flash
 ```

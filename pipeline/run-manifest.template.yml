@@ -16,8 +16,8 @@ package_sha256: REPLACE_WITH_SHA256
 routing:
   terra:
     role: terra_curator
-    provider: openrouter
-    model: openai/gpt-5.6-terra
+    provider: micu
+    model: gpt-5.6-terra
   judge:
     role: judge_blind
     provider: micu
