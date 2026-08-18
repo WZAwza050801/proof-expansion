@@ -45,6 +45,20 @@
 - 教材 / 论文 preliminaries 中"定理陈述人人见过、完整证明不是人人背得"的结果（如有限除环定理、Erdős–Ginzburg–Ziv、Fisher 不等式、Blichfeldt–Minkowski 一类）。这类题天然满足"定理已知"，去答案化空间最大。
 - 来源必须可核验：标准教材（版次/章节）或论文原文（DOI/arXiv）。
 
+**主池 B+：前沿/基础数学论文蒸馏（默认出题路径，Seidel charter 模板）**
+
+- 出题主路径：Terra 直接阅读**前沿或基础数学论文**（arXiv/期刊/研究者自己的研究计划），把其中"可精确陈述的证明义务或关键引理"蒸馏成题包——**不是翻公开题库**。公开题库（含 Putnam 级）已被强模型背过，只作对照/校准材料。
+- 蒸馏模板 = 桌面 `seidel_conjecture_distilled_work_charter.md` 的结构（charter 是"把一个前沿猜想的证明计划压缩成可执行义务清单"的范例）：
+  - `statement` ← charter §1 exact mathematical objective：对象、假设、结论、量词全部显式；
+  - `proof_spine` ← charter §3 P0–P7 脊柱：每步 = 一个证明义务，附 completion test；objective 只写"要建立什么"，不写"怎么做"；
+  - `allowed_dependencies` ← charter §2 的"诚实假设"清单：imported theorems 的精确陈述，写手须核对适用前提；
+  - `claim_status_convention` ← charter §5 六态（FIXED / IMPORTED-VERIFIED / PROVED-IN-PROJECT / CONDITIONAL / CANDIDATE / BLOCKED）；
+  - `writing_discipline` ← charter §7 蒸馏。
+- 两类输出：
+  - **窄缝题**：论文中"已有完整证明的关键引理"——原文证明作 `reference_proof`（judge 锚点）；写手包只给陈述＋脊柱＋依赖；
+  - **探针题**（`probe_only: true`）：open problem 的证明义务片段（Seidel 级）——没有参考证明，judge 锚点 = 义务清单本身与 charter 的完成标准；只测上限，不进 A/B 区分度结论。
+- 样例：`problems/stage1-samples/S09-seidel-stage1-audit.yml`（由桌面 Seidel charter 蒸馏的 Stage-I 审计探针，模板演示）。
+
 **主池 B：研究级片段（深度池，Putnam-AXIOM 风格）**
 
 - 从已发表论文切出**自洽的关键引理片段**：选题哲学对齐 [Putnam-AXIOM（ICML 2025）](https://icml.cc/virtual/2025/poster/44232)——研究级、答案可核验、专家可解。片段 = 论文关键中间引理；原文证明作 judge 锚点。

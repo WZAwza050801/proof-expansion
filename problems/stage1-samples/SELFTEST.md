@@ -66,3 +66,8 @@
 1. **S07（Putnam 2022 A5）对 deepseek-v4-flash 窄缝确认**——benchmark 难题档的第一个窄缝实证：flash 裸题解不出（一次空答、一次错答 404），给脊柱＋pass 引理后完整解出 290。这直接回应了"挑 benchmark 难一点的"的要求。
 2. **更硬的题也被强模型秒杀**：2019 B6 与 2023 B6 连 27B 都近乎默写。结论：公开 benchmark（含 Putnam 最难档）对 flash/pro 整体仍在秒杀区——对强模型的窄缝必须用**非公开研究级片段**（FrontierMath 风格，题目私有拿不到，只能从近期论文手切片段，即阶段 2 主池 B 的工作）。
 3. 阶段 2 的题池策略由此清晰：flash 档用 Putnam 难题（如 S07 类），pro 档必须上论文片段。
+
+## 第四轮补充：前沿论文蒸馏（Seidel charter 模板）
+
+- 响应研究者指示：出题默认路径改为**前沿/基础数学论文 → 题包**（不再以公开题库为主），蒸馏模板 = 桌面 `seidel_conjecture_distilled_work_charter.md`（P0–P7 脊柱＋completion test＋六态＋§7 写作纪律）。curator 提示词已新增「主池 B+」一节。
+- S09 = 由 charter 蒸馏的第一道**探针题**（Seidel 猜想 Stage-I 审计：组织证明计划，不证猜想）。probe_only，正式上限测试在阶段 2（gpt-5.6-terra 级模型或人工评审）。「论文中已有完整证明的关键引理 → 窄缝题」的实例留待阶段 2 由 Terra 用搜索能力从具体论文切割。

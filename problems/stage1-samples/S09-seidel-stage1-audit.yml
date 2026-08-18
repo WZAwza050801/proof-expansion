@@ -1,0 +1,240 @@
+# 样题包 S09：Seidel 猜想 Stage-I 审计（前沿探针题，Seidel charter 模板演示）
+# v2 schema；STAGE-1 1.2 产物的模板演示。probe_only（天花板探针，不进 A/B 区分度）
+package_id: P-S09_seidel-stage1-audit-v2
+status: candidate
+split: probe
+probe_only: true
+created_by: terra
+created_at: 2026-08-18
+frozen_at: null
+
+narrow_slot_calibration:
+  expected_standalone_solvability: low
+  rationale: |
+    前沿（辛拓扑/Fukaya–Seidel 范畴）证明计划的组织任务。任何被测模型都做不出有意义的完整
+    Stage-I 决策包——这正是探针题的用途: 测模型与 judge 的补全上限，不用于 A/B 区分度。
+  pretest_protocol: |
+    阶段2: 探针题只跑上限观察（gpt-5.6-terra 级模型或人工评审），不按窄缝协议定档; measured 恒为 probe_only
+  measured: null
+
+source_record:
+  authors: 研究者自有研究计划（Seidel 猜想：twisted closed–open map 拟同构）
+  title: Distilled Research Charter for the Seidel Fixed-Point Floer–Hochschild Project
+  year: 2026
+  url_or_doi_or_arxiv: 桌面 `seidel_conjecture_distilled_work_charter.md`（另存 PDF）; 对应文献: Seidel, Fukaya categories and Picard–Lefschetz theory 等
+  source_type: primary
+  source_pool: Bplus_frontier
+  accessed_on: 2026-08-18
+  original_text_obtained: true
+  evidence_status: verified
+  likely_memorized: false
+  memorization_note: |
+    研究者自己的前沿研究计划，非公开题库; 模型无从"背答案"。本包是 charter 蒸馏模板的演示。
+
+selection_record:
+  mathematical_area: 辛拓扑 / Fukaya–Seidel 范畴 / Hochschild 同调
+  proof_structure: key_lemma
+  narrow_slot_design_rationale: |
+    探针任务 = charter Stage I: 把 P0–P7 证明义务组织成决策包（定理阶梯、依赖 DAG、claim 账本、
+    ≤3 条架构、推荐头号定理、单一下一步模块）。不要求证明猜想本身; 测的是"能否按义务清单
+    诚实组织前沿证明计划"。
+  known_failure_modes:
+    - 声称证明了未证定理（越过 Stage I 起草论文）
+    - 把技术卷宗当已验证事实（违反 charter 权威条款）
+    - 目标写成错误的 variance 版本（非 RHom_{A^e}(A,P_φ)）
+    - 报告缺 DAG / 缺单一下一步模块 / 超过 8 页
+  rejection_risk:
+    - 无（探针题; 只需 judge 能按 charter 完成标准评审）
+
+de_answering_record:
+  stripped:
+    - charter §4 的首选证明架构链（diagonal–graph 路线）与保守回退（降为 global monodromy 等）
+    - 技术卷宗中的候选构造细节（卷宗不随包发放）
+  retained:
+    - 精确数学目标与定理阶梯（§1）; P0–P7 义务与 completion tests（§3）; 六态与写作纪律（§5/§7）
+  audit_note: 写手包只含 charter 的"义务清单"形态; judge 锚点 = charter 本身的完成标准。
+
+writer_bundle:
+  statement: |
+    任务类型: 前沿研究计划审计（Stage I），**不要求证明下述猜想**。
+    背景目标: 设 π: E → C 为实 2n 维正合辛 Lefschetz 纤维化，带正则 Liouville 纤维与一组
+    有序正合 thimble L_1,...,L_m。设 φ: E → E 为满足 Seidel 平移无穷远假设的正合分次自同构。
+    记 A = FS(E,π) 为由 thimble 生成的有向严格单位 A∞-范畴; 记
+      P_{φ,δ,ε}(L_i,L_j) = CF*(φ(L_i),L_j;δ,ε)
+    为 Seidel 系数双模（含其高阶双模运算）。设 thimble 高度 o_1 > ... > o_m，
+    记 δ_wall = max_{i,j}(o_i − o_j) = o_1 − o_m。
+    研究目标是证明下述形式的最强诚实定理:
+      "对显式给定的自同构类 φ、每个允许的充分小 ε > 0、每个 δ > δ_wall（满足任何附加的
+      显式解析界），Seidel 扭曲闭开映射 CO_{φ,δ,ε}: HF*(φ;δ,ε) → HH*(A, P_{φ,δ,ε}) 是拟同构";
+    并在单独验证的完美对偶与定向包下恢复 Seidel 的 OC 版本（带正确次数平移）。
+    本包任务: 产出 charter Stage I 决策包（六项 deliverables，见下），最多 8 页。
+  proof_spine:
+    - step_id: P0
+      objective: |
+        固定定理范围与全部承重约定（graph 与逆 graph、乘积辛形式、双模对象变量序、
+        右/左 Yoneda、对角 push-off、Hamilton 符号、分次平移、系数假设）;
+        核验 Seidel 猜想的精确版本与将使用的每个外部定理。
+      completion_test: |
+        目标无歧义地写为 RHom_{A^e}(A, P_φ); 无任何后续步骤依赖未决的 variance 选择。
+    - step_id: P1
+      objective: |
+        建立把合适的对角 resolution 转换为两两比较 CW*(Δ,Γ_φ) ≃ RHom_{A^e}(A, P_φ) 的形式机制。
+      completion_test: |
+        形式定理完整得证; "有限/完美"理由（Hochschild 上链与所选 telescope 可交换）显式给出;
+        代数陈述中不隐藏任何几何断言。
+    - step_id: P2
+      objective: |
+        几何实现对角与 graph 双模（粗 stopped 模型中有限 bar 对象 resolve 方差正确的对角;
+        graph 对象的拉回 Yoneda 双模为 P_{φ,δ,ε}; 必要时 fine stopped 增强; stop removal 与
+        graph 对相应 kernel 的右正交性）。只证两两定理所需，不多证。
+      completion_test: |
+        Kunneth、生成、admissibility、stop removal 的精确假设全部核验;
+        两两态射复形被严格等同于 Hochschild 上链。
+    - step_id: P3
+      objective: |
+        证明所选 Floer data 对对角 resolution 中出现的有限对集合充分（纤维 slope 保持为
+        小参数 ε）; 建立实际使用的所有零/一/二参数族的 no-escape、紧性、continuation 估计。
+      completion_test: |
+        相关对象的每个可达 end 方向要么被 stop、要么被解析控制; 不援引未经证明的全局 cofinality。
+    - step_id: P4
+      objective: |
+        构造对角–graph 乘积 Floer 复形与 Seidel 不动点 Floer 复形的链级比较，
+        闭合所有影响定理的特征（生成元、方程、能量/作用、紧性、Fredholm 指标、
+        分次、行列式线到声明的系数级、continuation 相容性）。
+      completion_test: |
+        得到带精确约定的链同构或规范 continuation 拟同构，而非仅生成元或上同调秩的匹配。
+    - step_id: P5
+      objective: |
+        把几何对角–graph/Yoneda 映射与 Seidel 穿孔圆盘扭曲闭开映射比较
+        （首选显式单参数插值与 continuation 相容的双参数增强）。
+      completion_test: |
+        两个链映射被证明同伦（含 continuation 相干性）; 不得仅因两者都是同构而推断相等。
+    - step_id: P6
+      objective: |
+        必要时使用 continuation 复形与映射 telescope（显式同伦交换方块），
+        在终端正腔证明不动点侧与双模侧的稳定化，用链级论证恢复有限阶段定理。
+      completion_test: |
+        最终定理关于有限 δ 的 CO_{φ,δ,ε}，而非仅 wrapped 极限。
+    - step_id: P7
+      objective: |
+        证明从 CO 定理过渡到 OC 定理所需的完美性与定向陈述（带精确平移）;
+        若积分包无法闭合，则只在严格支持的域上陈述定理并删除更强的系数断言;
+        用单临界点、identity、global-monodromy、depth-zero 情形核对约定并冻结最终范围。
+      completion_test: |
+        头号定理、证明、系数、自同构类与例子相互一致。
+  allowed_dependencies:
+    - id: D1
+      kind: definition
+      statement: |
+        （非协商数学承诺，FIXED 约束，共 8 条，逐条须满足）
+        1. 有限阶段结论: telescope/直极限拟同构不是最终定理，须在终端正腔恢复单一有限阶段;
+        2. 正确范畴目标: Hochschild 目标由所选 thimble 范畴 A 计算，而非扩大的 fine partially
+           wrapped 范畴; variance 约定必须给出 RHom_{A^e}(A, P_φ)，而非未声明的反/对偶/φ^{-1} 版本;
+        3. Seidel 的真实映射: 构造的比较必须在链级等同于 Seidel 扭曲闭开运算（或同等精确的
+          continuation 相容比较），抽象的同调群同构不够;
+        4. 不证不必要的全局定理: 若用 diagonal–graph 策略，只证 (Δ,Γ_φ) 所需的两两比较;
+        5. 精确 stop-removal 义务: 只需证 graph 对 stop-removal kernel 右正交，
+          不证添加 stop 的 linking disk 是零对象;
+        6. 两两而非全局 cofinality: 只需对论证中出现的有限对集合证 cofinality;
+        7. 诚实假设: 自同构类、系数环、brane 数据、完美性假设、紧性假设与定向状态必须
+          显式出现在定理陈述中; 未证解析/范畴输入必须隔离为显式假设;
+        8. 原始来源核验: 每个导入定理必须精确引用并在所选几何模型中核对其假设。
+    - id: D2
+      kind: definition
+      statement: |
+        （定理阶梯，FIXED 范围选择）头号定理的范围只能从以下阶梯中选，论文只陈述实际证明的
+        最强层级: (1) 全局 monodromy: φ=ν 及可能的幂 ν^k，在显式 Weinstein 与 end-相容假设下;
+        (2) 迭代可容许自同构: φ 保持证明所需的递归 stop/end 数据; (3) Seidel 设定中的所有
+        自同构: 仅在证明 φ-适应 stop、stop-独立性或等价形变定理之后。
+        完整的 global-monodromy 定理＋可复用的形式/几何机制是可接受的第一篇论文;
+        除非额外的 stop-相容问题真正解决，不得陈述完整自同构定理。
+    - id: D3
+      kind: definition
+      statement: |
+        （权威与资料来源规则）技术卷宗（work_prompt/research_plan）是非约束性技术材料:
+        它保存候选构造、详细证明义务、来源线索与风险分析，**不得逐条执行**，卷宗中的候选
+        定理与论证不得仅因其写在那里就被视为已建立。数学目标与上述非协商正确性要求是
+        控制性的; 证明路线可在数学要求下重组、缩短、替换或收窄。
+  claim_status_convention: |
+    每个承重断言必须携带以下六态之一:
+    - FIXED: 控制目标的一部分或已选定的约定;
+    - IMPORTED-VERIFIED: 在引用来源中已证且其假设已在所选模型中核对;
+    - PROVED-IN-PROJECT: 附有完整证明;
+    - CONDITIONAL: 在精确陈述的未证输入下成立;
+    - CANDIDATE: 提议的构造或策略，尚未建立;
+    - BLOCKED: 精确障碍阻止在当前假设下闭合。
+  writing_discipline: |
+    1. 一个里程碑回答一个主要数学问题;
+    2. 当前 claim 账本与未决 blocker 放在每份里程碑报告开头;
+    3. 不复制技术卷宗、不叙述每个被弃的尝试;
+    4. 不因长期目标是论文就生成完整论文;
+    5. 避免不必要的命名、分类、图表与辅助文件;
+    6. 详细计算只用于核验承重的符号、约定、紧性估计或定理假设;
+    7. 证明无法闭合时，陈述最小的精确 blocker 与仍然成立的最强定理。
+  closed_book_notice: |
+    仅可使用本 bundle; 不得检索、不得假定未列出的结果、不得查阅技术卷宗。
+
+judge_bundle:
+  theorem_name: Seidel 猜想 Stage-I 审计探针（研究者自有计划）
+  reference_proof: |
+    本探针无参考证明（open problem）; judge 锚点 = charter 本身的完成标准:
+    Stage I 决策包必须包含且只包含六项 deliverables:
+      (1) global-monodromy、iterated-admissible、general 三层级的精确候选定理陈述;
+      (2) P0–P7 的依赖图（DAG）;
+      (3) 区分导入事实与新定理的 claim/source/risk 账本;
+      (4) 至多三条可行证明架构，各带决定性障碍或优势;
+      (5) 推荐的头号定理与首选架构;
+      (6) 人工审查后运行的单一"下一个证明模块"。
+    主报告 ≤ 8 页; 只有实质性影响推荐的补充计算才可放单独注记; Stage I 完成后必须停下
+    呈交人工审查，不得继续。判分要点: 目标是否无歧义写成 RHom_{A^e}(A, P_φ);
+    结论范围是否只陈述实际已证层级; 是否把卷宗当已证事实; 六态账本是否区分 imported/new;
+    八条非协商承诺是否逐条落实; 写作纪律是否遵守。
+  key_lemmas:
+    - lemma: 八条非协商承诺（D1）
+      why_key: 唯一能判定"组织得对不对"的硬标准
+      applicability_conditions: 适用于任何候选证明架构
+  spine_answer_key:
+    - step_id: P0
+      full_closure: |
+        目标 = RHom_{A^e}(A, P_φ)（无 unresolved variance）; 全部约定逐一列明并核验来源。
+    - step_id: P1
+      full_closure: |
+        有限正规双侧 bar resolution 与两两 diagonal–graph 判据; 有限/完美理由显式。
+    - step_id: P2
+      full_closure: |
+        粗/细 stopped 模型 + graph 右正交性; 两两态射复形 = Hochschild 上链。
+    - step_id: P3
+      full_closure: |
+        两两 cofinality; 全部零/一/二参数族估计闭合; 无未证全局断言。
+    - step_id: P4
+      full_closure: |
+        链同构或规范 continuation 拟同构（生成元/方程/能量/指标/分次/行列式线逐项）。
+    - step_id: P5
+      full_closure: |
+        两链映射同伦（含 continuation 相干性）。
+    - step_id: P6
+      full_closure: |
+        终端正腔稳定化 + 链级有限阶段恢复; 定理关于有限 δ。
+    - step_id: P7
+      full_closure: |
+        对偶/定向/系数闭合或显式收窄; 约定与例子一致。
+  failure_mode_annotations:
+    - 声称证明拟同构而非组织义务 -> 越过 Stage I，重罚
+    - 把卷宗内容当 IMPORTED-VERIFIED -> 违反 D3
+    - 目标写成对偶/相反版本 -> P0 completion test 不过
+    - 架构超过三条或没有单一下一步模块 -> 不满足 Stage I deliverables
+  variants:
+    - variant_id: full
+      modification: "无修改"
+      writer_bundle_patch: {}
+      expected_outcome: 产出 Stage-I 决策包（六项 deliverables，≤8 页），judge 按 charter 完成标准评审
+
+run_policy:
+  variants_to_run: [full]
+  writer_models: []
+  repetitions: 1
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol
