@@ -1,0 +1,17 @@
+{
+  "paper_id": "demo-egz",
+  "ok": true,
+  "warnings": [],
+  "errors": [],
+  "symbols": {
+    "card": [
+      "n",
+      "F_p",
+      "a_1,...,a_{2n−1}",
+      "D1",
+      "D2",
+      "D3"
+    ],
+    "local": []
+  }
+}
