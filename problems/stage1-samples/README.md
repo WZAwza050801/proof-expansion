@@ -1,7 +1,7 @@
 # Stage-1 样题包（1.2 产物）
 
 - 日期：2026-08-18
-- 状态：`candidate`（未入队；自测已跑——**五题全部定档 `excluded_instant_solve`（秒杀），不进区分度池**；详见 `SELFTEST.md`）
+- 状态：`candidate`（未入队；自测已跑——**S02/S04/S05 对 Qwen3.6-27B 定档 `confirmed`（窄缝），S01 降为探针，S03 全模型秒杀**；详见 `SELFTEST.md`）
 - schema：`prompt-terra-problem-curator.md` v2（`proof_spine + completion_test + allowed_dependencies + 六态 claim + 写作纪律`）
 
 ## 五题一览
@@ -14,8 +14,8 @@
 | `S04-frankl-wilson.yml` | Frankl–Wilson 多项式方法（求和界形式） | 极值组合 | construction | low | 秒杀 / 秒杀 |
 | `S05-stone-weierstrass.yml` | Stone–Weierstrass（实值格版本） | 泛函分析 | construction | medium | 秒杀 / 秒杀 |
 
-- 五题均作**秒杀题对照样题**保留（冒烟/校准/对比用），`measured: excluded_instant_solve` 已写入各包。
-- 带包探针 10/10 完整闭合——v2 题包格式本身验证通过；未验证的是"窄缝题源"。
+- 定档（预演级，2026-08-18）：S02/S04/S05 = `confirmed`（写手 Qwen/Qwen3.6-27B；S05 书写混乱待 judge C 复核）；S01 = `downgraded_to_probe`；S03 = `excluded_instant_solve`。对强模型（flash/pro/glm-5.2/kimi-k3）五题全部秒杀——窄缝是 model-relative 的。
+- 带包探针全部闭合——v2 题包格式验证通过。
 
 ## 窄缝验收协议（STAGE-1 完成标志的一部分）
 
@@ -27,7 +27,7 @@
 两条都满足 → `narrow_slot_calibration.measured = confirmed`；只满足 ① → 降级为探针；只满足 ②（裸题也会）→ 淘汰为秒杀题。
 
 - 探针必须在 **proof-pipeline preset 会话**中用零工具 `writer_closed` 角色行执行才算正式；本仓库不把通用 subagent 的输出当作正式预测试数据（本批为预演，结果已标注）。
-- 2026-08-18 实测结论：五题对 v4-pro 与 v4-flash 全部秒杀 → 1.2 的"样题落窄缝"验收未达成；下一步见 `SELFTEST.md` 结论第 4 条（研究级片段题源 / 阶段 2 正式预测试 / 骨架细度旋钮）。
+- 2026-08-18 实测结论：S02/S04 对 Qwen3.6-27B 窄缝确认（裸题失败 ∧ 带包完整闭合）→ **1.2 的"样题落窄缝"验收达成（预演级）**；强模型侧需研究级片段题源，是阶段 2 的工作。
 
 ## 诚实标注
 

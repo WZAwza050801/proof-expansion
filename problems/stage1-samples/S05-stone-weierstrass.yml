@@ -17,7 +17,7 @@ narrow_slot_calibration:
     补不出、带包可补; pro 若裸题秒杀则对 pro 淘汰。
   pretest_protocol: |
     阶段2: ① 裸题探针(仅 statement)应失败或仅部分有效; ② 带包探针应 judge C>=3; 两条都满足才 confirmed
-  measured: excluded_instant_solve   # 2026-08-18 预演: v4-pro 与 v4-flash 裸题均秒杀(flash 甚至给出二项级数自足证法); 保留为秒杀对照题
+  measured: confirmed   # 预演(2026-08-18): 27B 裸题失败+带包实质正确但书写混乱(C预计3, judge复核若C<3降为探针); 强模型裸题秒杀
 
 source_record:
   authors: Stone, M. H.

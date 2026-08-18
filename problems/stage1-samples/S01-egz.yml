@@ -17,7 +17,7 @@ narrow_slot_calibration:
     预计带包可补（judge C>=3 待实测）。
   pretest_protocol: |
     阶段2: ① 裸题探针(仅 statement)应失败或仅部分有效; ② 带包探针应 judge C>=3; 两条都满足才 confirmed
-  measured: excluded_instant_solve   # 2026-08-18 预演: v4-pro 与 v4-flash 裸题均秒杀(flash 连 D1 计数定理本身都从零证出); 保留为冒烟/校准对照题
+  measured: downgraded_to_probe   # 预演(2026-08-18): 27B 裸题失败+带包未闭合(度数条件), 诚实报最小blocker; 强模型裸题秒杀(excluded_instant_solve)
 
 source_record:
   authors: Erdős, P.; Ginzburg, A.; Ziv, A.

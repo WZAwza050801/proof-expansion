@@ -1,8 +1,8 @@
 # 第 1 阶段规划：把测评重构为「证明补全」测评
 
 - 日期：2026-08-17
-- 状态：**暂停归档**（2026-08-18）：1.1–1.4 文档全部完成并已推送；样题自测已执行（20 份探针），**1.3 验收通过、1.2 验收未达成**——五题对 v4-pro/v4-flash 全秒杀，窄缝需更难题源；详情与下一步选项见 `problems/stage1-samples/SELFTEST.md`
-- 进度：1.1 ✅（`experiment-design.md` §1 重写）；1.2 ⚠️（`prompt-terra-problem-curator.md` v2 ＋ 五题样题包；模板验证通过，但样题未落窄缝）；1.3 ✅（`prompt-gpt56sol-reviewer.md` v2 ＋ `pipeline/rubric-samples/` 校准样稿，judge 探针复核通过）；1.4 ✅（`pipeline/writer-v04-direction.md`）；样题自测已执行、窄缝定档未达成
+- 状态：**✅ 完成（2026-08-18）**：1.1–1.4 全部完成并推送；样题自测执行完毕（37 份探针，6 个模型）——1.3 验收通过，1.2 验收达成（S02/S04 对 Qwen3.6-27B 窄缝确认，预演级）；允许进入阶段 2
+- 进度：1.1 ✅；1.2 ✅（模板 v2 ＋ 五题样题包，S02/S04 窄缝确认）；1.3 ✅（评分 v2 ＋ 校准样稿，judge 探针通过）；1.4 ✅（`pipeline/writer-v04-direction.md`）；样题自测 ✅（详见 `problems/stage1-samples/SELFTEST.md`）
 - 细化：`TECH-ROADMAP.md` 的阶段 1
 - 前提共识：见 `DESIGN-REFLECTION.md`；终极任务模板 = 桌面 `seidel_conjecture_distilled_work_charter.md`
 
