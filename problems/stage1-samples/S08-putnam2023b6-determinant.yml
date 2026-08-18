@@ -1,0 +1,183 @@
+# 样题包 S08：Putnam 2023 B6 整除计数矩阵行列式（benchmark 难题）
+# v2 schema；STAGE-1 1.2 产物（题源升级：Putnam-AXIOM 数据集）。status=candidate
+package_id: P-S08_putnam2023b6-determinant-v2
+status: candidate
+split: dev
+probe_only: false
+created_by: terra
+created_at: 2026-08-18
+frozen_at: null
+
+narrow_slot_calibration:
+  expected_standalone_solvability: low
+  rationale: |
+    Putnam B6 级行列式题。官方解法依赖精心设计的行列变换（用第 n−1、n 行/列消掉带状
+    之外的元素）+ 逐次 strike out 到 3×3/4×4 子式。变换的具体系数几乎不可能裸题猜出;
+    给 D1–D3（行列式操作保持性、strike-out 引理、小矩阵计算）与脊柱（S 的结构事实 +
+    "用后两行/列把中间行消成带状"）后，验证步是逐项代数，预计强模型带包可补。
+  pretest_protocol: |
+    阶段2: ① 裸题探针(仅 statement)应失败或仅部分有效; ② 带包探针应 judge C>=3; 两条都满足才 confirmed
+  measured: excluded_instant_solve   # 2026-08-18 预演: flash/pro 裸题秒杀(Mobius/Cauchy-Binet 法默写); 27B 裸题得答案但证明缺、带包主链对但符号未核实(待 judge 复核, 倾向 probe)
+
+source_record:
+  authors: Putnam Mathematical Competition
+  title: 2023 Problem B6
+  year: 2023
+  url_or_doi_or_arxiv: https://kskedlaya.org/putnam-archive/2023.pdf（题 B6；本包取自 HuggingFace 数据集 Putnam-AXIOM/putnam-axiom-dataset-ICML-2025-522, id=2023_B6, 官方解答随包）
+  source_type: primary
+  source_pool: A_competition
+  accessed_on: 2026-08-18
+  original_text_obtained: true
+  evidence_status: verified
+  likely_memorized: true
+  memorization_note: |
+    公开 Putnam 真题（2023 年，很新），网上有答案; 官方解答的变换序列细节记忆率低。
+    写手包不出现题号与答案。
+
+selection_record:
+  mathematical_area: 数论 / 线性代数（整除计数、行列式恒等变换）
+  proof_structure: construction
+  narrow_slot_design_rationale: |
+    gap = 变换设计（哪些行/列作轴、乘什么系数）与 strike out 顺序的合法性论证。
+    D2（strike-out 引理）给"消元后唯一非零 1 的剥离"规则，脊柱 S2 给出变换定义，
+    S3/S4 让写手逐项算 T 的条目并验证剥离顺序。代数量大但每步机械。
+  known_failure_modes:
+    - 变换系数写错（S_{nd} 与 S_{i(n−1)} 的搭配）
+    - 忘记验证 strike out 时"该行其余非零元在已剥离列中"
+    - 奇偶分支（n 奇/偶）的最终子式大小搞错
+    - 符号（(−1)^{⌊n/2⌋−1} 与再取负）数错
+  rejection_risk:
+    - 计算量大，带包也可能卡在 S3 的逐项验证 -> 则降为探针
+
+de_answering_record:
+  stripped:
+    - 变换定义（用第 n−1、n 行/列作轴的系数）
+    - 逐次 strike out 的顺序
+    - 最终答案的闭式
+  retained:
+    - 脊柱 S2 只给目标: "做保行列式的行/列变换把 S 变成带状"
+    - 依赖 D1–D3 精确陈述
+  audit_note: 写手包内无题号、无答案、无变换系数。
+
+writer_bundle:
+  statement: |
+    命题: 设 n 为正整数。对 i, j ∈ {1, 2, ..., n}，记 s(i,j) 为满足 ai + bj = n 的
+    非负整数对 (a,b) 的个数。设 S 为 n×n 矩阵，其 (i,j) 元为 s(i,j)。
+    计算 S 的行列式（用 n 的闭式表示）。
+  proof_spine:
+    - step_id: S1
+      objective: |
+        读出 S 的结构事实: S 对称; S_{11} = n+1; 对角元 s(i,i) 与"i | n 的计数"的关系;
+        对 n/2 < i ≤ n 时 s(i,j) 的公式（此时 ai + bj = n 中 a ≤ 1）。
+      completion_test: |
+        各公式正确且给出推导（a=0 与 a=1 两种解对应的 j 可整除性）。
+    - step_id: S2
+      objective: |
+        构造保行列式的变换 T: 用第 n−1 行/列与第 n 行/列作轴，消掉中间行的多余元素
+        （对 d = 2,...,n−2 行/列 d 减去第 n−1 行/列的倍数; 再处理第 n 行/列）。
+      completion_test: |
+        变换定义明确（乘的系数来自 S 的哪些条目写清）; det T = det S 的依据（D1）已引用。
+    - step_id: S3
+      objective: |
+        逐项计算 T 的条目，证明 T 除少数行/列外成为带状（每行只有 O(1) 个非零元），
+        并验证可以用允许依赖 D2 从 (2, n−2) 到 (⌊n/2⌋, n−⌊n/2⌋) 依次剥离 1 元。
+      completion_test: |
+        T_{ij} 的计算表正确（含 n/2 < i < n−1 行的全部条目）;
+        每次剥离时"该 1 元是所在行/列唯一剩余非零元"的验证完整; 符号累积正确。
+    - step_id: S4
+      objective: |
+        把行列式化到 3×3（n 奇）或 4×4（n 偶）子式，算出闭式。
+      completion_test: |
+        最终子式写对; 结果 = (−1)^{⌈n/2⌉−1} · 2⌈n/2⌉; 小情形（如 n=1,2,3）可代入核对。
+  allowed_dependencies:
+    - id: D1
+      kind: standard_result
+      statement: |
+        （行列式初等变换）行列式的行/列基本操作: 某行（列）减去另一行（列）的常数倍，
+        行列式不变; 交换两行（列）行列式变号。
+    - id: D2
+      kind: lemma
+      statement: |
+        （strike-out 引理）若矩阵某元素等于 1，且它是其所在行或所在列中唯一的非零元，
+        则删去该行与该列后，行列式乘以 (−1)^{i+j}（该元素在 (i,j) 位）。反复对合法的
+        1 元施行此操作可逐步降阶（不重排行列时符号按原位计算）。
+    - id: D3
+      kind: standard_result
+      statement: |
+        （小矩阵行列式）2×2 与 3×3 行列式的展开公式。
+  claim_status_convention: |
+    对证明中每个承重断言标注六态之一: FIXED / IMPORTED-VERIFIED / PROVED-IN-PROJECT /
+    CONDITIONAL / CANDIDATE / BLOCKED。BLOCKED 须附最小 blocker 与最强已证结论。
+  writing_discipline: |
+    1. 一个证明只回答一个主问题; 不复述题目包背景。
+    2. 不使用"工作流/审计"类词汇，只写数学正文。
+    3. 详细计算只出现在承重处（T 的条目、剥离验证）; 例行步骤一笔带过。
+    4. 补不动时: 报告最小 blocker 与最强已证定理，不堆砌"显然/标准论证"。
+    5. 保守专业的数学文风: 自然段推进，公式与解释文字配比适度。
+  closed_book_notice: |
+    仅可使用本 bundle; 不得检索、不得假定未列出的结果。
+
+judge_bundle:
+  theorem_name: Putnam 2023 B6（整除计数矩阵行列式）
+  reference_proof: |
+    （官方解答，压缩自 Putnam-AXIOM 数据集 2023_B6）
+    S 的结构: S 对称（(a,b)↔(b,a)）; S_{11} = n+1（(0,n),(1,n−1),...,(n,0)）。
+    对 n/2 < i ≤ n: ai+bj = n 只有 a ∈ {0,1}，故 s(i,j) = #{x ∈ {n/j, (n−i)/j} ∩ Z≥0}
+    （j | n 或 j | n−i 时计 1 或 2）。
+    变换 T: 对 d = 2,...,n−2，行 d ← 行 d − S_{nd}·行(n−1)，列 d 同理;
+    再行 n ← 行 n − 行(n−1)，列 n 同理。则 det T = det S（D1）。
+    对 n/2 < i < n−1 逐项算 T 的条目:
+      T_{i1} = S_{i1} − S_{in}·S_{(n−1)1} = 2 − 1·2 = 0;
+      对 1 < j < n−1: T_{ij} = S_{ij} − S_{in}·S_{(n−1)j} − S_{nj}·S_{i(n−1)} = [ j | n−i ]（即 1 若 j 整除 n−i，否则 0）;
+      T_{i(n−1)} = 0;  T_{in} = 0。
+    于是 T 的中间部分只剩"反对角"上的 1: 对 i = 2,...,⌊n/2⌋ 依次剥离 (i, n−i) 与
+    (n−i, i) 两处的 1（当处理到 (n−i,i) 时，其所在行其余非零元都在已剥离的列上——即
+    j | n−i 且 j > i 的列，均已处理）。每剥离一对（两次操作）符号乘 (−1)。共剥离
+    ⌊n/2⌋−1 对，剩余行/列为 {1, ⌊n/2⌋(若 n 偶), n−1, n}。
+    n 奇: 剩 3×3 子式 [[n+1, −1, 0], [−1, 0, 1], [0, 1, 0]]，再剥离后两行/列（一次符号），
+    得 (−1)^{⌊n/2⌋−1}·(−1)·(n+1)·… 逐步算出 = (−1)^{⌈n/2⌉−1}·2⌈n/2⌉（⌈n/2⌉ = (n+1)/2）。
+    n 偶: 剩 4×4（行列为 1, n/2, n−1, n）子式 [[n+1,−1,2,0],[−1,−1,1,−1],[2,1,0,1],[0,−1,1,0]]，
+    行/列 (n/2) ← (n/2)+(n−1) 后得 [[n+1,1,2,0],[1,1,1,0],[2,1,0,1],[0,0,1,0]]，
+    再剥离后两行/列，得 (−1)^{⌈n/2⌉}·2·(n/2)。
+    综上 det S = (−1)^{⌈n/2⌉−1}·2⌈n/2⌉。
+    （n=1,2,3 代入核对: 2, 2, −4 ✓）
+  key_lemmas:
+    - lemma: D2 strike-out 引理
+      why_key: 把带状矩阵逐项剥离成小矩阵的唯一合法工具
+      applicability_conditions: 1 元所在行/列其余全零; 符号按原位置计
+    - lemma: S1 的结构公式（i > n/2 时 a ≤ 1）
+      why_key: 变换系数（S_{nd} 等）与 T_{ij} 计算的全部依据
+      applicability_conditions: 非负整数解计数; 整除性
+  spine_answer_key:
+    - step_id: S1
+      full_closure: |
+        S 对称; S_{11}=n+1; i>n/2 时 s(i,j)=[j|n]+[j|n−i]。
+    - step_id: S2
+      full_closure: |
+        T: 行/列 d ← d − S_{nd}·(n−1)（d=2..n−2）; 行/列 n ← n − (n−1)。
+    - step_id: S3
+      full_closure: |
+        T_{i1}=0; T_{ij}=[j|n−i]（1<j<n−1）; T_{i(n−1)}=T_{in}=0（n/2<i<n−1）;
+        从 i=2 起成对剥离 (i,n−i),(n−i,i)，验证行剩余非零元在已剥离列。
+    - step_id: S4
+      full_closure: |
+        3×3/4×4 子式; det S = (−1)^{⌈n/2⌉−1}·2⌈n/2⌉。
+  failure_mode_annotations:
+    - 变换系数或方向写反 -> T_{ij} 不带状
+    - 剥离顺序不合法（未验证唯一非零）-> 符号/因子错
+    - 奇偶分支子式维度错 -> 答案差符号或因子
+  variants:
+    - variant_id: full
+      modification: "无修改"
+      writer_bundle_patch: {}
+      expected_outcome: 完整补出证明（答案 (−1)^{⌈n/2⌉−1}·2⌈n/2⌉）; judge 按 spine_answer_key 核补全度
+
+run_policy:
+  variants_to_run: [full]
+  writer_models: []
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol

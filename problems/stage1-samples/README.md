@@ -13,8 +13,11 @@
 | `S03-fisher-inequality.yml` | 2-设计中 b ≥ v | 组合设计 | construction | medium | 秒杀 / 秒杀 |
 | `S04-frankl-wilson.yml` | Frankl–Wilson 多项式方法（求和界形式） | 极值组合 | construction | low | 秒杀 / 秒杀 |
 | `S05-stone-weierstrass.yml` | Stone–Weierstrass（实值格版本） | 泛函分析 | construction | medium | 秒杀 / 秒杀 |
+| `S06-putnam2019b6-lattice.yml` | Putnam 2019 B6 格点完美支配集 | 数论/组合 | construction | low | 秒杀（flash/pro/27B） |
+| `S07-putnam2022a5-tiling.yml` | Putnam 2022 A5 铺砖博弈 | 组合博弈 | induction | low | **窄缝确认（flash）**；pro 秒杀 |
+| `S08-putnam2023b6-determinant.yml` | Putnam 2023 B6 行列式 | 数论/线代 | construction | low | 秒杀（flash/pro）；27B 待复核 |
 
-- 定档（预演级，2026-08-18）：S02/S04/S05 = `confirmed`（写手 Qwen/Qwen3.6-27B；S05 书写混乱待 judge C 复核）；S01 = `downgraded_to_probe`；S03 = `excluded_instant_solve`。对强模型（flash/pro/glm-5.2/kimi-k3）五题全部秒杀——窄缝是 model-relative 的。
+- 定档（预演级，2026-08-18）：S02/S04/S05 = `confirmed`（写手 Qwen/Qwen3.6-27B）；**S07 = `confirmed`（写手 deepseek-v4-flash，benchmark 难题档）**；S01 = `downgraded_to_probe`；S03/S06/S08 = `excluded_instant_solve`。窄缝是 model-relative 的。
 - 带包探针全部闭合——v2 题包格式验证通过。
 
 ## 窄缝验收协议（STAGE-1 完成标志的一部分）

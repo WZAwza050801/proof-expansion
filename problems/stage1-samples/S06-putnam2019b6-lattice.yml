@@ -1,0 +1,164 @@
+# 样题包 S06：Putnam 2019 B6 格点完美支配集（benchmark 难题）
+# v2 schema；STAGE-1 1.2 产物（题源升级：Putnam-AXIOM 数据集）。status=candidate
+package_id: P-S06_putnam2019b6-lattice-v2
+status: candidate
+split: dev
+probe_only: false
+created_by: terra
+created_at: 2026-08-18
+frozen_at: null
+
+narrow_slot_calibration:
+  expected_standalone_solvability: low
+  rationale: |
+    Putnam B6 级难题。核心一步是"模 2n+1 的线性函数 f(x)=Σ i·x_i 使 {±i} 恰好遍历全部
+    非零剩余类"——这个构造与完美码理论相关，模型不太可能裸题想出完整论证。给 D1（剩余类
+    完整表示引理）与脊柱（"找一个模 2n+1 的线性同余方程"）后，验证步是机械的，预计带包可补。
+  pretest_protocol: |
+    阶段2: ① 裸题探针(仅 statement)应失败或仅部分有效; ② 带包探针应 judge C>=3; 两条都满足才 confirmed
+  measured: excluded_instant_solve   # 2026-08-18 预演: flash/pro/27B 裸题全部秒杀(完美Lee码构造被完整默写); 保留为强模型对照题
+
+source_record:
+  authors: Putnam Mathematical Competition
+  title: 2019 Problem B6
+  year: 2019
+  url_or_doi_or_arxiv: https://kskedlaya.org/putnam-archive/2019.pdf（题 B6；本包取自 HuggingFace 数据集 Putnam-AXIOM/putnam-axiom-dataset-ICML-2025-522, id=2019_B6, 官方解答随包）
+  source_type: primary
+  source_pool: A_competition
+  accessed_on: 2026-08-18
+  original_text_obtained: true
+  evidence_status: verified
+  likely_memorized: true
+  memorization_note: |
+    公开 Putnam 真题，答案与解答在网络上可查，强模型可能见过；但 B6 级构造细节记忆率低。
+    写手包不出现题号与答案；judge 锚点用官方解答。
+
+selection_record:
+  mathematical_area: 数论 / 组合（格点编码、完美支配集）
+  proof_structure: construction
+  narrow_slot_design_rationale: |
+    gap = 构造本身（线性同余 f 的系数怎么选）。钥匙 D1（{±1..±n} 完整表示 mod 2n+1）给足后，
+    写手只需把"条件(2)的唯一性"翻译成"每个非零剩余类恰对应一个邻居方向"。验证步短而机械，
+    构造步是真正的窄缝。
+  known_failure_modes:
+    - 构造非周期或非线性的 S，验证条件时卡住
+    - 选了系数但未验证 {±c_i} 遍历全部非零剩余类
+    - 条件 (2) 只证存在性不证唯一性
+    - lazy stop: 构造完成后不写全验证
+  rejection_risk:
+    - 若 flash/pro 裸题秒杀 -> 按协议淘汰（预期不会：B6 级）
+
+de_answering_record:
+  stripped:
+    - 线性函数的系数选择（1,2,...,n）
+    - "完美码 / 循环码"视角与构造灵感
+    - 官方解答的整体框架
+  retained:
+    - 脊柱 S1 只给目标: "找一个模 2n+1 的线性同余方程，S=解集"
+    - 依赖 D1/D2 以精确陈述给足
+  audit_note: 写手包内无题号、无答案、无"完美码"等术语提示。
+
+writer_bundle:
+  statement: |
+    命题: 设 Z^n 为 R^n 中的整数格点。Z^n 中两点称为相邻，若它们恰在一个坐标处相差 1、
+    其余坐标相同。求"前 k 个满足下列条件的正整数 n 的和"：存在集合 S ⊆ Z^n 使
+      (1) 若 p ∈ S，则 p 的每个邻居都不在 S 中;
+      (2) 若 p ∈ Z^n \ S，则 p 恰有一个邻居在 S 中。
+    符号约定: 对每个 n ≥ 1，分别回答"是否存在这样的 S"；最终求和的是前 k 个成立的 n。
+  proof_spine:
+    - step_id: S1
+      objective: |
+        对任意 n ≥ 1 构造一个满足条件的 S。做法框架: 找一个 Z^n → Z/(2n+1)Z 的线性同余
+        函数 f（即 f(x_1,...,x_n) ≡ c_1 x_1 + ... + c_n x_n (mod 2n+1)，c_i ∈ Z），
+        令 S = {p : f(p) ≡ 0}。关键是选出一组系数，使"沿任一坐标方向走一步"导致的
+        f 值变化 ±c_i，恰好遍历全部非零剩余类且互不重复。
+      completion_test: |
+        显式写出系数 c_1,...,c_n; 验证 {±c_1,...,±c_n} (mod 2n+1) 恰好是全部非零剩余类
+        且两两不同（此步可用允许依赖 D1）; S 的定义明确。
+    - step_id: S2
+      objective: |
+        验证条件 (1): S 中任意两点不相邻。
+      completion_test: |
+        论证完整: 相邻点的 f 值差为 ±c_i ≠ 0 (mod 2n+1)，故不能同在 S。
+    - step_id: S3
+      objective: |
+        验证条件 (2): S 外的每个点恰有一个邻居在 S 中。用 S1 的系数性质说明:
+        对任意非零剩余类 r，恰存在唯一的一对 (i, 符号) 使 ±c_i ≡ r (mod 2n+1)。
+      completion_test: |
+        唯一性论证完整（对 p ∉ S，f(p) ≡ r ≠ 0，恰有一个方向/符号组合把 f 调成 0）;
+        并且明确写出那个邻居是"第 i 坐标加/减 1"。
+    - step_id: S4
+      objective: |
+        由 S1–S3 得: 每个 n ≥ 1 都成立，故前 k 个成立的 n 就是 1,2,...,k，求和完成。
+      completion_test: |
+        结论写对（和 = k(k+1)/2）; 与命题一致，无遗漏的 n。
+  allowed_dependencies:
+    - id: D1
+      kind: lemma
+      statement: |
+        （剩余类的完整表示）对整数 n ≥ 1: 集合 {±1, ±2, ..., ±n} 模 2n+1 恰好给出全部
+        2n 个非零剩余类，且每个恰出现一次（即对 1 ≤ i < j ≤ n: i ≢ ±j (mod 2n+1)，
+        且 i ≢ −i 即 2i ≢ 0 (mod 2n+1)）。
+    - id: D2
+      kind: standard_result
+      statement: |
+        （线性同余的邻居变化）设 f(x) = c_1 x_1 + ... + c_n x_n (mod 2n+1)，p, q 相邻
+        且只在第 i 坐标处差 ±1，则 f(q) ≡ f(p) ± c_i (mod 2n+1)。
+  claim_status_convention: |
+    对证明中每个承重断言标注六态之一: FIXED / IMPORTED-VERIFIED / PROVED-IN-PROJECT /
+    CONDITIONAL / CANDIDATE / BLOCKED。BLOCKED 须附最小 blocker 与最强已证结论。
+  writing_discipline: |
+    1. 一个证明只回答一个主问题; 不复述题目包背景。
+    2. 不使用"工作流/审计"类词汇，只写数学正文。
+    3. 详细计算只出现在承重处（系数验证、邻居唯一性）; 例行步骤一笔带过。
+    4. 补不动时: 报告最小 blocker 与最强已证定理，不堆砌"显然/标准论证"。
+    5. 保守专业的数学文风: 自然段推进，公式与解释文字配比适度。
+  closed_book_notice: |
+    仅可使用本 bundle; 不得检索、不得假定未列出的结果。
+
+judge_bundle:
+  theorem_name: Putnam 2019 B6（格点完美支配集）
+  reference_proof: |
+    取 f(x_1,...,x_n) = x_1 + 2x_2 + ... + n x_n (mod 2n+1)，令 S = f^{-1}(0)。
+    条件 (1): p ∈ S 且 q 与 p 相邻（第 i 坐标差 ±1）时，f(q) ≡ f(p) ± i ≡ ±i ≢ 0
+    (mod 2n+1)（因 1 ≤ i ≤ n < 2n+1），故 q ∉ S。
+    条件 (2): p ∉ S 时 f(p) ≡ r ≠ 0。由 D1，恰存在唯一 i ∈ {1,...,n} 与唯一符号使
+    r ≡ ±i (mod 2n+1)。于是恰有一个邻居 q（第 i 坐标 ∓1 方向）使 f(q) ≡ r ∓ i ≡ 0，
+    即 q ∈ S; 其余邻居的 f 值 ≡ r ∓ j（j ≠ i 或符号不匹配）均 ≢ 0。
+    故每个 n ≥ 1 都满足条件; 前 k 个成立的 n 之和 = 1 + 2 + ... + k = k(k+1)/2。
+  key_lemmas:
+    - lemma: D1 剩余类完整表示
+      why_key: 条件 (2) 唯一性的全部来源——每个非零剩余类恰由一个邻居方向覆盖
+      applicability_conditions: 模数为 2n+1; 系数取 1,...,n 时适用
+  spine_answer_key:
+    - step_id: S1
+      full_closure: |
+        c_i = i; {±1,...,±n} 模 2n+1 两两不同且覆盖全部非零剩余类（D1）。
+    - step_id: S2
+      full_closure: |
+        相邻点 f 值差 ±i ≢ 0 (mod 2n+1)，S 内不相邻。
+    - step_id: S3
+      full_closure: |
+        r ≠ 0 恰唯一表示 r ≡ ±i; 唯一邻居 = 第 i 坐标 ∓1 方向，f 归零。
+    - step_id: S4
+      full_closure: |
+        所有 n 成立; 和 = k(k+1)/2。
+  failure_mode_annotations:
+    - 系数未验证 {±c_i} 完整性 -> S1 completion_test 不过
+    - (2) 只证存在不证唯一 -> S3 不过
+    - 忘排除 i ≢ −j 情形（如 2i ≡ 0）-> 唯一性断裂
+  variants:
+    - variant_id: full
+      modification: "无修改"
+      writer_bundle_patch: {}
+      expected_outcome: 完整补出证明（答案 k(k+1)/2）; judge 按 spine_answer_key 核补全度
+
+run_policy:
+  variants_to_run: [full]
+  writer_models: []
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol

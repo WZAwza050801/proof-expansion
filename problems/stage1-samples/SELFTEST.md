@@ -49,3 +49,20 @@
    - 脚手架有效：v2 题包格式 10/10 带包闭合；qwen27b 在 S01 的诚实 blocker 报告实证了护栏条款（最小 blocker＋最强已证定理）可被执行；
    - 经典定理蒸馏池（S01–S05）对强模型整体失效，阶段 2 对强模型需研究级片段题源（Putnam-AXIOM 风格）。
 4. **遗留（正式化前必做）**：proof-pipeline 会话零工具角色行复核；S05 的 judge C 复核；各包 `original_text_obtained: true` 补原文。
+
+## 第三轮：benchmark 难题档（Putnam-AXIOM 数据集真题，官方解答作锚点）
+
+- 题源：HuggingFace 数据集 `Putnam-AXIOM/putnam-axiom-dataset-ICML-2025-522`（522 道 Putnam 真题 1938–2023，含官方解答），经 hf-mirror 下载、pyarrow 读取，`original_text_obtained: true`。
+- 选题：2019 B6（格点完美支配集）、2022 A5（铺砖博弈）、2023 B6（整除计数矩阵行列式）——均为近年最难档（A5/B6 级）。
+
+| 包 | 裸题（flash） | 带包（flash） | 裸题（pro） | 带包（pro） | 裸题（27B） | 带包（27B） | 定档（预演） |
+|---|---|---|---|---|---|---|---|
+| S06 2019B6 | ❌ 秒杀 | ✅ | ❌ 秒杀 | ✅ | ❌ 秒杀 | — | excluded_instant_solve（三模型） |
+| S07 2022A5 | ❌ 失败（r1 空答、r2 错答 404，引理为假） | ✅ **完整解出 290** | ❌ 秒杀（均值分析法） | ✅ | ❌ 失败（错答 2，论证崩溃） | ❌ 未闭合（b 递推式写反、a(5) 对不上表） | **confirmed（写手=flash）**；pro=秒杀；27B=downgraded_to_probe |
+| S08 2023B6 | ❌ 秒杀（Möbius/Cauchy–Binet 法） | ✅ | ❌ 秒杀 | ✅ | ⚠️ 答案对但一般性证明缺 | ⚠️ 主链对（另一套合法变换）、符号论证未核实 | excluded_instant_solve（flash/pro）；27B 待 judge 复核（倾向 probe） |
+
+## 结论补充（benchmark 档）
+
+1. **S07（Putnam 2022 A5）对 deepseek-v4-flash 窄缝确认**——benchmark 难题档的第一个窄缝实证：flash 裸题解不出（一次空答、一次错答 404），给脊柱＋pass 引理后完整解出 290。这直接回应了"挑 benchmark 难一点的"的要求。
+2. **更硬的题也被强模型秒杀**：2019 B6 与 2023 B6 连 27B 都近乎默写。结论：公开 benchmark（含 Putnam 最难档）对 flash/pro 整体仍在秒杀区——对强模型的窄缝必须用**非公开研究级片段**（FrontierMath 风格，题目私有拿不到，只能从近期论文手切片段，即阶段 2 主池 B 的工作）。
+3. 阶段 2 的题池策略由此清晰：flash 档用 Putnam 难题（如 S07 类），pro 档必须上论文片段。

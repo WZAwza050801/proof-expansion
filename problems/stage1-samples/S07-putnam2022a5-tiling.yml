@@ -1,0 +1,186 @@
+# 样题包 S07：Putnam 2022 A5 Alice/Bob 铺砖博弈（benchmark 难题）
+# v2 schema；STAGE-1 1.2 产物（题源升级：Putnam-AXIOM 数据集）。status=candidate
+package_id: P-S07_putnam2022a5-tiling-v2
+status: candidate
+split: dev
+probe_only: false
+created_by: terra
+created_at: 2026-08-18
+frozen_at: null
+
+narrow_slot_calibration:
+  expected_standalone_solvability: low
+  rationale: |
+    Putnam A5 级博弈题，答案 290（周期 7 递推 + 六张小情形表 + minimax 上下界归纳）。
+    裸题几乎不可能完整解出; 给 D1–D3（子游戏独立拆分、pass 引理、奇数段计数）与脊柱
+    （周期 7 递推的目标 + 开局手段"留 1 与 n−3"/"留 2 与 n−4"）后闭合路径明确，
+    预计强模型带包可补、弱模型困难。
+  pretest_protocol: |
+    阶段2: ① 裸题探针(仅 statement)应失败或仅部分有效; ② 带包探针应 judge C>=3; 两条都满足才 confirmed
+  measured: confirmed   # 2026-08-18 预演: flash 裸题失败(空答/错答404)+带包完整解出290 -> 窄缝确认(写手=deepseek-v4-flash); pro 裸题秒杀; 27B 裸题带包均失败(downgraded_to_probe)
+
+source_record:
+  authors: Putnam Mathematical Competition
+  title: 2022 Problem A5
+  year: 2022
+  url_or_doi_or_arxiv: https://kskedlaya.org/putnam-archive/2022.pdf（题 A5；本包取自 HuggingFace 数据集 Putnam-AXIOM/putnam-axiom-dataset-ICML-2025-522, id=2022_A5, 官方解答随包）
+  source_type: primary
+  source_pool: A_competition
+  accessed_on: 2026-08-18
+  original_text_obtained: true
+  evidence_status: verified
+  likely_memorized: true
+  memorization_note: |
+    公开 Putnam 真题; 答案 290 与周期 7 结构网上可查，强模型可能见过结论;
+    完整 minimax 归纳证明记忆率低。写手包不出现题号与答案。
+
+selection_record:
+  mathematical_area: 组合博弈
+  proof_structure: induction
+  narrow_slot_design_rationale: |
+    gap = "周期 7 为什么是 7"（开局留 (1,n−3) / 留 (2,n−4) 导致 −7 位移）与上下界
+    minimax 表达式的成立。D1（拆分子游戏求和）与 D3（末态=奇数段数）把局面语言翻译成
+    数值语言，D2（pass 引理）处理"跟随策略"的边角。闭合需要把六张小表与归纳步拼齐。
+  known_failure_modes:
+    - 小情形表算错（a(4)=2 / b(4)=0 等）
+    - 上界只写 max 忘 min（或反之），minimax 方向反
+    - pass 引理未用导致跟随策略的合法性存疑
+    - 忘了 n≡6 (mod 7) 时代入 2022 的余数
+  rejection_risk:
+    - 弱模型带包也可能补不出（博弈归纳繁琐）-> 则降为探针
+
+de_answering_record:
+  stripped:
+    - 周期 7 与"留 1 和 n−3"/"留 2 和 n−4"的开局手段
+    - 小情形表的具体数值
+    - 答案 290
+  retained:
+    - 脊柱给"证明 a(n)=a(n−7)+1 型递推"的目标与上下界方向
+    - 依赖 D1–D3 精确陈述
+  audit_note: 写手包内无题号、无答案 290、无周期 7 字样（骨架只说"递推式 a(n)=a(n−r)+1 中找出 r"？——不，为保持窄缝，骨架 S3 直接给目标等式 a(n)=a(n−7)+1 而不给怎么证的路线）。
+
+writer_bundle:
+  statement: |
+    命题: Alice 和 Bob 在一个由 2022 个连续方格组成的 1×2022 长条上玩游戏。两人轮流
+    放置恰好覆盖两个相邻方格的骨牌，Alice 先手; 骨牌不得覆盖已被覆盖的方格。当无法再
+    放置骨牌时游戏结束。Alice 的目标是使结束时未被覆盖的方格数尽量多，Bob 的目标是
+    使它尽量少。求 Alice 无论 Bob 如何应对都能保证的、结束时未被覆盖方格数的最大值。
+  proof_spine:
+    - step_id: S1
+      objective: |
+        一般化: 对 n 个连续方格，记 a(n) 为 Alice 先手时的最优终局分数（Alice 最大化）、
+        b(n) 为 Bob 先手时的最优终局分数（Bob 最小化）。放一块骨牌把局面拆成两段
+        长度 i 与 n−2−i 的独立子游戏; 写出 a(n)、b(n) 用 a(i),b(i),a(n−2−i),b(n−2−i)
+        表示的 minimax 递推式（含对 i 的 max/min）。
+      completion_test: |
+        递推式形式正确（a 为 max/min 组合、b 为 min/max 组合，先手选拆法、后手选段）。
+    - step_id: S2
+      objective: |
+        求出 n ≤ 6 的小情形表 a(n)、b(n)。
+      completion_test: |
+        表正确: a = (0,1,0,1,2,1,2)，b = (0,1,0,1,0,1,0)（n = 0,...,6），并给出每个
+        值的取到方式与不可能更好的理由（可用允许依赖 D3 的末态刻画）。
+    - step_id: S3
+      objective: |
+        对 n ≥ 7 归纳证明 a(n) = a(n−7) + 1 且 b(n) = b(n−7) + 1。
+        上界方向: 先手开局把局面拆成两段后，后手可挑选在其中一段"跟随先手策略"，
+        用允许依赖 D2 说明跟随合法; 下界方向: 给出一个具体开局拆分使先手保证到目标值。
+        两个方向都要写全。
+      completion_test: |
+        上下界两个不等式都完整: 下界给出开局（拆成的两段长度）与归纳值的衔接;
+        上界把后手的所有应对都收进 max/min 表达式并化简为 a(n−7)+1 / b(n−7)+1。
+        并说明为什么 a(n−7)=b(n−3)、b(n−7)=a(n−4) 这类衔接成立（由 S2 的表与归纳假设）。
+    - step_id: S4
+      objective: |
+        用 S2/S3 的递推代入 n = 2022，给出最终答案。
+      completion_test: |
+        2022 ≡ 6 (mod 7) 的余数算对; 答案 = 2 + ⌊2022/7⌋ = 290。
+  allowed_dependencies:
+    - id: D1
+      kind: standard_result
+      statement: |
+        （子游戏独立性）放一块骨牌把长条拆成两段后，两段互不影响: 终局未覆盖数 = 两段
+        各自的终局未覆盖数之和。先手可选择骨牌位置（即选择 i），落子后双方在后手选定的
+        段内继续，段内谁先手取决于该段当前轮到谁。
+    - id: D2
+      kind: lemma
+      statement: |
+        （pass 引理）若对一切 m < n 有 a(m) ≥ b(m)，则允许玩家在"对方在本段内的最后
+        合法落子"之后跳过自己在该段的回合，不改变双方的最优值（双方仍存在从不 pass 的
+        最优策略）。因此"跟随策略"（对方在哪段落子就在哪段回应）是合法的分析工具。
+    - id: D3
+      kind: lemma
+      statement: |
+        （末态刻画）终局时每条剩余段长度至多为 1（长度 ≥2 的段还能再放骨牌）;
+        因此终局未覆盖方格数 = 终局奇数长度段的个数。下棋过程中奇数段个数只增不减:
+        在奇数段放骨牌，拆出的两段一奇一偶（奇数个数不变）; 在偶数段放骨牌，
+        拆出两段奇偶性相同（奇数个数 +2 或不变）。
+  claim_status_convention: |
+    对证明中每个承重断言标注六态之一: FIXED / IMPORTED-VERIFIED / PROVED-IN-PROJECT /
+    CONDITIONAL / CANDIDATE / BLOCKED。BLOCKED 须附最小 blocker 与最强已证结论。
+  writing_discipline: |
+    1. 一个证明只回答一个主问题; 不复述题目包背景。
+    2. 不使用"工作流/审计"类词汇，只写数学正文。
+    3. 详细计算只出现在承重处（小情形、上下界化简）; 例行步骤一笔带过。
+    4. 补不动时: 报告最小 blocker 与最强已证定理，不堆砌"显然/标准论证"。
+    5. 保守专业的数学文风: 自然段推进，公式与解释文字配比适度。
+  closed_book_notice: |
+    仅可使用本 bundle; 不得检索、不得假定未列出的结果。
+
+judge_bundle:
+  theorem_name: Putnam 2022 A5（铺砖博弈）
+  reference_proof: |
+    （官方解答，压缩自 Putnam-AXIOM 数据集 2022_A5）
+    一般化到 n 格: a(n)、b(n) 定义同脊柱。末态分数 = 奇数段数（D3），
+    故 a(n), b(n) ≥ n − 2⌊n/2⌋，且在 n = 0,1,2,3,5 取等; n = 4,6 时 Alice 先手可拆成
+    两个奇数段保证至少 2 个奇数段，Bob 可拆成两个长度 2 的段保证 0 个奇数段。
+    故小表: a = (0,1,0,1,2,1,2)，b = (0,1,0,1,0,1,0)。
+    归纳步 n ≥ 7（假设 m < n 全部成立; 由表得 a(m) ≥ b(m)，故 D2 pass 引理可用）:
+    Alice 先手拆成 (1, n−3): a(n) ≥ 1 + b(n−3)。另一方面拆成 (i, n−2−i) 后 Bob 可选段
+    并跟随，得 a(n) ≤ max_i min{a(i)+b(n−2−i), b(i)+a(n−2−i)}。
+    由归纳假设该 max-min = a(n−7) + 1（关键等式: 对 n ≡ 6 (mod 7) 型余数逐项核对，
+    利用 a(n−7)=b(n−3)−… 的衔接: b(n−3) = ⌊(n−3)/7⌋ + b(3) = ⌊(n−3)/7⌋ + 1，
+    a(n−7)+1 = ⌊(n−7)/7⌋ + a(6) + 1 = ⌊(n−7)/7⌋ + 3 = ⌊(n−3)/7⌋ + 2 = b(n−3) + 1）。
+    故 a(n) = a(n−7) + 1。Bob 先手拆成 (2, n−4): b(n) ≤ a(n−4) = b(n−7) + 1;
+    反向对称得 b(n) = b(n−7) + 1。归纳完成。
+    2022 = 7·288 + 6: a(2022) = 288 + a(6) = 288 + 2 = 290。
+  key_lemmas:
+    - lemma: D2 pass 引理
+      why_key: 使"跟随策略"合法，是上下界两侧归纳不等式的共同地基
+      applicability_conditions: a(m) ≥ b(m) 对一切 m < n（由小表与归纳保证）
+    - lemma: D3 末态刻画
+      why_key: 把"未覆盖数"翻译成可递推的"奇数段数"
+      applicability_conditions: 任意骨牌局面
+  spine_answer_key:
+    - step_id: S1
+      full_closure: |
+        a(n) = max_i { [Alice 拆成 i, n−2−i 后，Bob 选段]: min{ a(i)+b(n−2−i), b(i)+a(n−2−i) } } 形式; b(n) 对偶。
+    - step_id: S2
+      full_closure: |
+        a=(0,1,0,1,2,1,2), b=(0,1,0,1,0,1,0)（含取到方式与最优性理由）。
+    - step_id: S3
+      full_closure: |
+        下界: 拆 (1,n−3) 得 a(n) ≥ 1+b(n−3) = a(n−7)+1; 拆 (2,n−4) 得 b(n) ≤ a(n−4) = b(n−7)+1;
+        上界: 后手跟随策略收进 max/min，用归纳假设化简为同值。b 的下界对称处理。
+    - step_id: S4
+      full_closure: |
+        2022 ≡ 6 (mod 7); a(2022) = ⌊2022/7⌋ + a(6) = 288 + 2 = 290。
+  failure_mode_annotations:
+    - minimax 方向反（a 用 min 取外层）-> S1 不过
+    - 小表数值错 -> S3 化简错
+    - pass 引理未引用即断言跟随 -> 扣严谨性
+  variants:
+    - variant_id: full
+      modification: "无修改"
+      writer_bundle_patch: {}
+      expected_outcome: 完整补出证明（答案 290）; judge 按 spine_answer_key 核补全度
+
+run_policy:
+  variants_to_run: [full]
+  writer_models: []
+  repetitions: 3
+  writer_turns: 1
+  writer_tools_allowed: false
+  judge_row: judge_blind
+  judge_provider: micu
+  judge_model: gpt-5.6-sol
