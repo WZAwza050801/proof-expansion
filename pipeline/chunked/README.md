@@ -7,6 +7,7 @@
   - `SPLITTER.md`：**阶段 0 拆题 agent 提示词**——把精简证明（如 Seidel charter）拆成命题依赖树；
   - `dep-tree.template.json`：命题依赖树规格（节点/依赖 DAG/全局约定卡/拓扑序）；
   - `splice.py`：确定性拼接器＋一致性检查器（stdlib，无外部依赖；接受依赖树拓扑序）；
+  - `../prompt-splicer.md`：拼接/学术编辑 agent（任务二）——把已证引理粘成论文（章节/衔接/导言/编号/去重），与 splice.py 分工。
   - `demo/egz-paper.spec.json`：切割规格示例（论文 = 头号定理，切成 3 个证明义务块，含全局约定卡与块间依赖 DAG）；
   - `demo/outputs/`：各块写手输出（正文/结论/依赖与未决 三段）；
   - `demo/assembled-paper.md` 与 `demo/check-report.json`：拼接产物与检查报告（由 splice.py 生成）。
