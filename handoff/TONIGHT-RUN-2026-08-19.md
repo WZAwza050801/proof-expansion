@@ -30,6 +30,7 @@ K=runs/pretest/seidel/taskbooks
 python3 $S next $T --blocks $B            # ① 本批该写哪些（只吐前置全落盘的）
 python3 $S taskbook $T --blocks $B --node N00 --out $K   # ② 生成任务书
                                           # ③ 把 $K/N00.taskbook.md 全文喂给 block_writer
+                                          #   （任务书含【前置证明选录】：构造级依赖的前置正文，已按审图播种 N25/N28；块写手申报缺料时补 detail_deps）
                                           # ④ 把返回的文本原样存成 $B/N00.md（operator 落盘）
 python3 $S status $T --blocks $B           # ⑤ 查降级 / I3 违规
                                           # ⑥ 过人门 → 回 ①

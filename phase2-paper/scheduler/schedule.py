@@ -247,6 +247,11 @@ def cmd_validate(g: Graph) -> int:
         for a in n.get('allowed', []):
             if g.allowed_deps and a not in g.allowed_deps:
                 errs.append(f'{i}: allowed 中的 {a} 不在全局 allowed_dependencies')
+        for dd in n.get('detail_deps', []):
+            if dd not in g.nodes:
+                errs.append(f'{i}: detail_deps 中的 {dd} 不存在')
+            elif dd not in n.get('deps', []):
+                errs.append(f'{i}: detail_deps 中的 {dd} 不在 deps 内（选录正文者必须同时是声明的依赖）')
         # D4: completion_test 空转 —— 与 statement 高度重合
         st, ct = str(n.get('statement', '')), str(n.get('completion_test', ''))
         if ct and st and (ct.strip() == st.strip()):
@@ -446,6 +451,10 @@ TASKBOOK_TMPL = """<!-- 任务书 自动生成 by schedule.py | node={node} laye
 【前置结论】
 {predecessors}
 
+【前置证明选录】
+{details}
+（选录仅为提供构造与性质细节，供你实际引用；**不得复述进你的正文**——拼接时逐句查重。）
+
 【允许依赖】
 {allowed}
 
@@ -460,10 +469,12 @@ TASKBOOK_TMPL = """<!-- 任务书 自动生成 by schedule.py | node={node} laye
    未被引用的前置会被 status 标记为违规——列了前置却不用，等于自己从头推了一遍，上下游可能不一致。
 2. **不得假设任何未在【前置结论】中出现的结论。** 若确实需要包外事实，写进【依赖与未决】做最小 blocker，
    不要用「按约定视为已声明」把洞糊过去。
-3. 六态标注（就地标在句末）：**(PROVED-IN-PROJECT)** 本项目内已证 / **(CONDITIONAL)** 仅在你写明的附加假设下成立 /
+3. 【结论】必须是一句**完整的引理陈述**：把你构造的对象、它满足的全部关键性质写进这一句，
+   使下游仅凭这句话即可引用你，无需回看你的正文。
+4. 六态标注（就地标在句末）：**(PROVED-IN-PROJECT)** 本项目内已证 / **(CONDITIONAL)** 仅在你写明的附加假设下成立 /
    **(FIXED)** 按约定视为已声明义务 / **(CANDIDATE)** 仅候选陈述 / **(BLOCKED)** 卡住。
    诚实优先：证不出来就报 BLOCKED + 最小 blocker + 你能证到的最强结论，这比编造更有价值。
-4. 数学内容用 LaTeX（$...$ 与 \\begin{{...}}）。定理/引理用 amsthm 环境。
+5. 数学内容用 LaTeX（$...$ 与 \\begin{{...}}）。定理/引理用 amsthm 环境。
 
 【输出格式 —— 严格三段，段名照抄】
 【正文】
@@ -496,6 +507,13 @@ def cmd_taskbook(g: Graph, blocks_dir: str, node: str, out_dir: str | None) -> i
         if eff[d] != 'PROVED-IN-PROJECT':
             preds.append('  ↳ 注意：该前置的有效状态为 **%s**，你的结论至多同级。' % eff[d])
     pred_txt = '\n'.join(preds) or '（本块是叶子，无前置结论；只能用全局约定卡与允许依赖）'
+    # 第二层上下文：声明式选录的前置正文（构造级依赖）
+    details = []
+    for dd in n.get('detail_deps', []):
+        b = blocks[dd]
+        details.append('- %s（%s）的【正文】原文：\n<<<\n%s\n>>>' % (dd, g.nodes[dd]['title'], b['body'].strip()))
+    detail_txt = '\n'.join(details) or '（无。若你发现确实需要某前置的构造细节，在【依赖与未决】里申报，由 operator 决定是否补 detail_deps。）'
+
     allow = []
     for a in n.get('allowed', []):
         d = g.allowed_deps.get(a)
@@ -505,7 +523,7 @@ def cmd_taskbook(g: Graph, blocks_dir: str, node: str, out_dir: str | None) -> i
 
     text = TASKBOOK_TMPL.format(
         node=node, layer=g.levels()[node], gate=gate, contam=contam,
-        conventions=conv, predecessors=pred_txt, allowed=allow_txt,
+        conventions=conv, predecessors=pred_txt, details=detail_txt, allowed=allow_txt,
         title=n['title'], statement=n['statement'], completion_test=n['completion_test'],
         ex_dep=(n.get('deps') or ['N00'])[0],
     )
