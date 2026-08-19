@@ -44,6 +44,9 @@ NOT_LANDED = 'NOT-LANDED'
 
 SECTIONS = ('正文', '结论', '依赖与未决')
 
+# 人门档位严格度（GATES.md §2）
+GATE_RANK = {'yolo': 0, 'per-batch': 1, 'manual': 2}
+
 
 def die(msg: str, code: int = 2):
     print('FATAL: ' + msg, file=sys.stderr)
@@ -149,6 +152,22 @@ class Graph:
         if c >= 0.1 * n:
             return 'per-batch', c     # 整层一起过目
         return 'yolo', c              # 自动推进
+
+    def policy(self) -> str:
+        """dep-tree 顶层 confirm_policy = 人类愿意接受的最松档位（GATES.md §2）。"""
+        p = str(self.tree.get('confirm_policy', 'manual'))
+        return p if p in GATE_RANK else 'manual'
+
+    def effective_gate(self, i: str) -> tuple[str, str, int]:
+        """取严：人类 confirm_policy 与算法建议中更严的一个胜出。
+
+        confirm_policy 是"最松档位"而非覆盖开关：声明 yolo 不能让污染 36/37 的
+        节点免检——上一轮全程 yolo 恰好把最该看人的地方放过了。
+        返回 (生效档位, 算法建议, 污染数)。
+        """
+        suggested, c = self.gate_of(i)
+        eff = suggested if GATE_RANK[suggested] >= GATE_RANK[self.policy()] else self.policy()
+        return eff, suggested, c
 
 
 # ── 块输出解析 ──────────────────────────────────────────────────────
@@ -284,12 +303,13 @@ def cmd_plan(g: Graph, out_json: str | None) -> int:
     print('=== plan ===')
     print(f'串行深度 {max(layers) + 1} 层 | 最宽 {max(len(v) for v in layers.values())} '
           f'| 理论最优加速比 {len(g.ids) / (max(layers) + 1):.2f}x（并行收益上限）')
+    print(f'confirm_policy = {g.policy()}（人类允许的最松档位）；下表档位 = 取严(policy, 污染半径建议)')
     print()
     print('层  节点数  人门   节点（★=关键路径）')
     for k in sorted(layers):
         row = sorted(layers[k])
-        gates = [g.gate_of(i)[0] for i in row]
-        gate = 'manual' if 'manual' in gates else ('per-batch' if 'per-batch' in gates else 'yolo')
+        gates = [g.effective_gate(i)[0] for i in row]
+        gate = max(gates, key=lambda x: GATE_RANK[x])
         tag = ' '.join(('★' + i if i in cpset else ' ' + i) for i in row)
         print(f'L{k:<3}{len(row):^7}{gate:<10}{tag}')
     print()
@@ -301,8 +321,9 @@ def cmd_plan(g: Graph, out_json: str | None) -> int:
     for c, i in risk:
         if c < 0.1 * len(g.ids):
             break
-        gate, _ = g.gate_of(i)
-        print(f'  {i}  污染 {c:2d}/{len(g.ids) - 1}  [{gate}]  {g.nodes[i]["title"]}')
+        gate, sug, _ = g.effective_gate(i)
+        mark = gate if gate == sug else '%s<-%s' % (gate, sug)
+        print(f'  {i}  污染 {c:2d}/{len(g.ids) - 1}  [{mark}]  {g.nodes[i]["title"]}')
 
     if out_json:
         payload = {
@@ -311,7 +332,9 @@ def cmd_plan(g: Graph, out_json: str | None) -> int:
             'max_width': max(len(v) for v in layers.values()),
             'layers': {str(k): sorted(v) for k, v in layers.items()},
             'critical_path': cp,
-            'gates': {i: {'gate': g.gate_of(i)[0], 'contamination': g.gate_of(i)[1]} for i in g.ids},
+            'confirm_policy': g.policy(),
+            'gates': {i: {'gate': g.effective_gate(i)[0], 'suggested': g.effective_gate(i)[1],
+                          'contamination': g.effective_gate(i)[2]} for i in g.ids},
         }
         with open(out_json, 'w', encoding='utf-8') as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
@@ -375,12 +398,13 @@ def cmd_next(g: Graph, blocks_dir: str, limit: int | None) -> int:
     batch = [i for i, _ in frontier if lv[i] == batch_level]
     if limit:
         batch = batch[:limit]
-    gates = [g.gate_of(i) for i in batch]
-    gate = 'manual' if any(x[0] == 'manual' for x in gates) else (
-        'per-batch' if any(x[0] == 'per-batch' for x in gates) else 'yolo')
+    effs = [g.effective_gate(i) for i in batch]
+    gate = max((e[0] for e in effs), key=lambda x: GATE_RANK[x])
+    sug = max((e[1] for e in effs), key=lambda x: GATE_RANK[x])
 
     print('=== next ===')
     print(f'本批 = L{batch_level}，{len(batch)} 个节点，可并行派发。人门档位: {gate.upper()}')
+    print(f'  依据: confirm_policy={g.policy()}（人类最松档位） + 污染半径建议={sug} -> 取严={gate}')
     if gate == 'manual':
         print('  ！这批含高污染节点，按 I4 必须人工过目后才能进下一层')
     print()
@@ -458,7 +482,7 @@ def cmd_taskbook(g: Graph, blocks_dir: str, node: str, out_dir: str | None) -> i
         d = g.allowed_deps.get(a)
         allow.append('- %s [%s]：%s' % (a, d.get('kind', ''), d['statement']) if d else '- ' + a)
     allow_txt = '\n'.join(allow) or '（本块不引用任何外部依赖）'
-    gate, contam = g.gate_of(node)
+    gate, _sug, contam = g.effective_gate(node)
 
     text = TASKBOOK_TMPL.format(
         node=node, layer=g.levels()[node], gate=gate, contam=contam,
