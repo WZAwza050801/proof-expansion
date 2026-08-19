@@ -1,6 +1,7 @@
 # Proof Expansion Evaluation Harness Runbook
 
 > ⚠️ **v2 过渡标注（2026-08-18）**：本 runbook 中的评分维度（H/D/R/C）与题目包 schema 为 v1 旧口径，已由 `experiment-design.md` v2 §5/§6 与 `prompt-terra-problem-curator.md` v2 / `prompt-gpt56sol-reviewer.md` v2 取代；执行链（validator、stats、匿名流程）已于阶段 3（2026-08-18）同步到 C/G/R/L 与 v2 题包 schema。
+> **写手 token 预算（P001 教训，写死）**：写手角色行 `maxTokens` 必须覆盖 **reasoning + 输出**（deepseek 系 reasoning 计入 maxTokens，`16384` 曾导致 3/4 冒烟任务截断，现固定 `65536`）；冻结新写手模型前先用 dev 候选实测单份 job usage 再定预算（`experiment-design.md` §5.2b）。长输出题包在 `selection_record.expected_output_scale` 标注，供预算与存储规划。
 
 ## Purpose
 
