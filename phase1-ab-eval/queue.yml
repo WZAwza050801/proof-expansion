@@ -1,0 +1,280 @@
+---
+queue:
+- package_id: P001-smoke-harmonic-v1
+  package_path: phase1-ab-eval/packages/P001-smoke-harmonic-v1.yml
+  package_sha256: 999956025f9272d101e06f61dc3f2f2f7989a7ef5b722036f74b24b08d91d8a0
+  source: manual-smoke
+  split: dev
+  status: aggregated
+  priority: 100
+  writer_models:
+  - deepseek-official/deepseek-v4-flash
+  repetitions: 1
+  created_at: 2026-08-17
+  frozen_at: 2026-08-17
+  claim: 
+  active_run_ids: []
+  completed_run_ids:
+  - RUN-20260817-002-smoke
+  blocked_reason: 
+  retry_of: RUN-20260817-001-smoke
+  state_history:
+  - at: 2026-08-17
+    from: 
+    to: ready
+    actor: owner
+    reason: mechanics-only smoke package approved
+  - at: 2026-08-17 06:03:14.000000000 Z
+    from: ready
+    to: claimed
+    actor: session-operator
+    reason: P001 smoke claimed by RUN-20260817-001-smoke
+  - at: 2026-08-17 06:06:00.000000000 Z
+    from: claimed
+    to: running
+    actor: session-operator
+    reason: 4 closed-book writer jobs dispatched
+  - at: 2026-08-17 06:11:00.000000000 Z
+    from: running
+    to: blocked
+    actor: session-operator
+    reason: writer maxTokens truncation (3/4 jobs); see phase1-ab-eval/archive/P001-SMOKE-BLOCKER.md
+      §9
+  - at: 2026-08-17 06:49:30.000000000 Z
+    from: blocked
+    to: claimed
+    actor: session-operator
+    reason: retry as RUN-20260817-002-smoke after writer maxTokens fix (65536); probe
+      anomaly resolved per BLOCKER §10; human-confirmed
+  - at: 2026-08-17 06:52:00.000000000 Z
+    from: claimed
+    to: running
+    actor: session-operator
+    reason: 'RUN-002: 4 closed-book writer jobs dispatched (maxTokens 65536)'
+  - at: 2026-08-17 07:12:00.000000000 Z
+    from: running
+    to: reviewed
+    actor: session-operator
+    reason: 4/4 writers + 4/4 blind judges completed; aggregate_stats.rb exit 0, validation.ok=true
+  - at: 2026-08-17 07:20:00.000000000 Z
+    from: reviewed
+    to: aggregated
+    actor: session-operator
+    reason: aggregate.data.json + aggregate.md written (analyst_stats verbatim); smoke
+      complete, dev_validation_only
+  notes: 冒烟测试专用：验证角色硬限制、匿名审稿 JSON、确定性统计与只读分析。judge=judge_blind(micu/gpt-5.6-sol)，writer=writer_closed(deepseek-v4-flash)。任何结论不得作为提示词有效性证据。
+- package_id: P007_putnam2023-divisor-determinant-v1
+  package_path: phase1-ab-eval/packages/P007-putnam2023-divisor-determinant-v1.yml
+  package_sha256: 19feb4cabf42799614d33eec3103b25220db9bb0c98ab53a406f4713603a744d
+  source: terra-putnam-archive
+  split: dev
+  status: aggregated
+  priority: 50
+  writer_models:
+  - deepseek-official/deepseek-v4-pro
+  repetitions: 3
+  created_at: 2026-08-17
+  frozen_at: 2026-08-17
+  claim: 
+  active_run_ids: []
+  completed_run_ids:
+  - RUN-20260817-003-pilot-dev
+  blocked_reason: 
+  retry_of: 
+  state_history:
+  - at: 2026-08-17
+    from: 
+    to: ready
+    actor: owner
+    reason: dev 先导题集：Putnam B6/A6 高难度低分题，owner 选定并批准
+  - at: '2026-08-17T08:19:56Z'
+    from: ready
+    to: claimed
+    actor: session-operator
+    reason: claimed by RUN-20260817-003-pilot-dev (A/B pilot)
+  - at: '2026-08-17T14:06:32Z'
+    from: claimed
+    to: reviewed
+    actor: session-operator
+    reason: 'RUN-20260817-003-pilot-dev: 30/30 blind reviews saved (judge micu/gpt-5.6-sol),
+      manifest review_status=done'
+  - at: '2026-08-17T14:06:32Z'
+    from: reviewed
+    to: aggregated
+    actor: session-operator
+    reason: aggregate_stats.rb bootstrap=10000 seed=60404505410206610718694094318209586699
+      + analyst_stats (read-only) -> aggregate.md; conclusion dev_inconclusive (dev
+      split; 1 invalid pair P011-r1 excluded, unscorable P011 r1A)
+  notes: A/B 提示词对比先导题。full 变体。writer=writer_dsv4pro_closed(deepseek-v4-pro 65536)，judge=judge_blind(micu/gpt-5.6-sol)。
+- package_id: P008_putnam2022-functional-equation-v1
+  package_path: phase1-ab-eval/packages/P008-putnam2022-functional-equation-v1.yml
+  package_sha256: 9bb70c41f2e17b5f0aaa4f892dfc10cf5f8a5f9c56f0e3bcb33f6fe91b564b2e
+  source: terra-putnam-archive
+  split: dev
+  status: aggregated
+  priority: 50
+  writer_models:
+  - deepseek-official/deepseek-v4-pro
+  repetitions: 3
+  created_at: 2026-08-17
+  frozen_at: 2026-08-17
+  claim: 
+  active_run_ids: []
+  completed_run_ids:
+  - RUN-20260817-003-pilot-dev
+  blocked_reason: 
+  retry_of: 
+  state_history:
+  - at: 2026-08-17
+    from: 
+    to: ready
+    actor: owner
+    reason: dev 先导题集：Putnam B6/A6 高难度低分题，owner 选定并批准
+  - at: '2026-08-17T08:19:56Z'
+    from: ready
+    to: claimed
+    actor: session-operator
+    reason: claimed by RUN-20260817-003-pilot-dev (A/B pilot)
+  - at: '2026-08-17T14:06:32Z'
+    from: claimed
+    to: reviewed
+    actor: session-operator
+    reason: 'RUN-20260817-003-pilot-dev: 30/30 blind reviews saved (judge micu/gpt-5.6-sol),
+      manifest review_status=done'
+  - at: '2026-08-17T14:06:32Z'
+    from: reviewed
+    to: aggregated
+    actor: session-operator
+    reason: aggregate_stats.rb bootstrap=10000 seed=60404505410206610718694094318209586699
+      + analyst_stats (read-only) -> aggregate.md; conclusion dev_inconclusive (dev
+      split; 1 invalid pair P011-r1 excluded, unscorable P011 r1A)
+  notes: A/B 提示词对比先导题。full 变体。writer=writer_dsv4pro_closed(deepseek-v4-pro 65536)，judge=judge_blind(micu/gpt-5.6-sol)。
+- package_id: P009_putnam2021-median-trimming-v1
+  package_path: phase1-ab-eval/packages/P009-putnam2021-median-trimming-v1.yml
+  package_sha256: 692227e369ffa48f4ab1da064e4b2430cedd081b87f0e14094229fef9f53dc60
+  source: terra-putnam-archive
+  split: dev
+  status: aggregated
+  priority: 50
+  writer_models:
+  - deepseek-official/deepseek-v4-pro
+  repetitions: 3
+  created_at: 2026-08-17
+  frozen_at: 2026-08-17
+  claim: 
+  active_run_ids: []
+  completed_run_ids:
+  - RUN-20260817-003-pilot-dev
+  blocked_reason: 
+  retry_of: 
+  state_history:
+  - at: 2026-08-17
+    from: 
+    to: ready
+    actor: owner
+    reason: dev 先导题集：Putnam B6/A6 高难度低分题，owner 选定并批准
+  - at: '2026-08-17T08:19:56Z'
+    from: ready
+    to: claimed
+    actor: session-operator
+    reason: claimed by RUN-20260817-003-pilot-dev (A/B pilot)
+  - at: '2026-08-17T14:06:32Z'
+    from: claimed
+    to: reviewed
+    actor: session-operator
+    reason: 'RUN-20260817-003-pilot-dev: 30/30 blind reviews saved (judge micu/gpt-5.6-sol),
+      manifest review_status=done'
+  - at: '2026-08-17T14:06:32Z'
+    from: reviewed
+    to: aggregated
+    actor: session-operator
+    reason: aggregate_stats.rb bootstrap=10000 seed=60404505410206610718694094318209586699
+      + analyst_stats (read-only) -> aggregate.md; conclusion dev_inconclusive (dev
+      split; 1 invalid pair P011-r1 excluded, unscorable P011 r1A)
+  notes: A/B 提示词对比先导题。full 变体。writer=writer_dsv4pro_closed(deepseek-v4-pro 65536)，judge=judge_blind(micu/gpt-5.6-sol)。
+- package_id: P010_putnam2020-beatty-alternation-v1
+  package_path: phase1-ab-eval/packages/P010-putnam2020-beatty-alternation-v1.yml
+  package_sha256: 8b6e4307bc4b013809a3ea20f4c47e9e4c7744de2b227ac48435525492d18ba9
+  source: terra-putnam-archive
+  split: dev
+  status: aggregated
+  priority: 50
+  writer_models:
+  - deepseek-official/deepseek-v4-pro
+  repetitions: 3
+  created_at: 2026-08-17
+  frozen_at: 2026-08-17
+  claim: 
+  active_run_ids: []
+  completed_run_ids:
+  - RUN-20260817-003-pilot-dev
+  blocked_reason: 
+  retry_of: 
+  state_history:
+  - at: 2026-08-17
+    from: 
+    to: ready
+    actor: owner
+    reason: dev 先导题集：Putnam B6/A6 高难度低分题，owner 选定并批准
+  - at: '2026-08-17T08:19:56Z'
+    from: ready
+    to: claimed
+    actor: session-operator
+    reason: claimed by RUN-20260817-003-pilot-dev (A/B pilot)
+  - at: '2026-08-17T14:06:32Z'
+    from: claimed
+    to: reviewed
+    actor: session-operator
+    reason: 'RUN-20260817-003-pilot-dev: 30/30 blind reviews saved (judge micu/gpt-5.6-sol),
+      manifest review_status=done'
+  - at: '2026-08-17T14:06:32Z'
+    from: reviewed
+    to: aggregated
+    actor: session-operator
+    reason: aggregate_stats.rb bootstrap=10000 seed=60404505410206610718694094318209586699
+      + analyst_stats (read-only) -> aggregate.md; conclusion dev_inconclusive (dev
+      split; 1 invalid pair P011-r1 excluded, unscorable P011 r1A)
+  notes: A/B 提示词对比先导题。full 变体。writer=writer_dsv4pro_closed(deepseek-v4-pro 65536)，judge=judge_blind(micu/gpt-5.6-sol)。
+- package_id: P011-putnam2022-odd-power-intervals-v1
+  package_path: phase1-ab-eval/packages/P011-putnam2022-odd-power-intervals-v1.yml
+  package_sha256: 8861ec2864d8b93e3864b420ef3aa1bb2f13e224138bcaf5f95898933681c865
+  source: terra-putnam-archive
+  split: dev
+  status: aggregated
+  priority: 50
+  writer_models:
+  - deepseek-official/deepseek-v4-pro
+  repetitions: 3
+  created_at: 2026-08-17
+  frozen_at: 2026-08-17
+  claim: 
+  active_run_ids: []
+  completed_run_ids:
+  - RUN-20260817-003-pilot-dev
+  blocked_reason: 
+  retry_of: 
+  state_history:
+  - at: 2026-08-17
+    from: 
+    to: ready
+    actor: owner
+    reason: dev 先导题集：Putnam B6/A6 高难度低分题，owner 选定并批准
+  - at: '2026-08-17T08:19:56Z'
+    from: ready
+    to: claimed
+    actor: session-operator
+    reason: claimed by RUN-20260817-003-pilot-dev (A/B pilot)
+  - at: '2026-08-17T14:06:32Z'
+    from: claimed
+    to: reviewed
+    actor: session-operator
+    reason: 'RUN-20260817-003-pilot-dev: 30/30 blind reviews saved (judge micu/gpt-5.6-sol),
+      manifest review_status=done'
+  - at: '2026-08-17T14:06:32Z'
+    from: reviewed
+    to: aggregated
+    actor: session-operator
+    reason: aggregate_stats.rb bootstrap=10000 seed=60404505410206610718694094318209586699
+      + analyst_stats (read-only) -> aggregate.md; conclusion dev_inconclusive (dev
+      split; 1 invalid pair P011-r1 excluded, unscorable P011 r1A)
+  notes: A/B 提示词对比先导题。full 变体。writer=writer_dsv4pro_closed(deepseek-v4-pro 65536)，judge=judge_blind(micu/gpt-5.6-sol)。

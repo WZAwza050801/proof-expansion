@@ -1,5 +1,49 @@
 # Proof Expansion：从证明简述到完整证明
 
+> **目录约定**：本仓库所有文档内的路径一律**相对仓库根**书写。
+
+## 0. 项目结构：两期分工
+
+项目分两条独立流水线，各有自己的目录、契约与产物。**两期不共享判分口径，也不互相阻塞。**
+
+| | **一期** `phase1-ab-eval/` | **二期** `phase2-paper/` |
+|---|---|---|
+| 问 | 精细化提示词（B）是否真的优于普通提示词（A） | 能否把一篇长证明分块写出来并拼成论文 |
+| 单位 | 一道题（定理＋去答案化骨架＋允许依赖） | 一个证明义务（依赖 DAG 的一个节点） |
+| 任务书 | 冻结题包 → 机械 materialize | 调度器按 DAG 生成，前置结论来自上游块产物 |
+| 判分 | C 门槛 ＋ G/R/L 主指标，盲评＋bootstrap | 确定性检查（引用/闭合/符号/重复）＋一次全局审读 |
+| 核心产物 | `queue.yml`、`runs/RUN-*/`、`aggregate.data.json` | `dep-tree.json`、`blocks/N*.md`、`paper.tex` |
+| 状态 | 基础设施就绪，待正式预测试 | 调度器已重构，Seidel 冒烟从 L0 重跑 |
+
+```
+proof-expansion/
+├── README.md                  ← 本文件：项目定位与评测原则
+├── phase1-ab-eval/            ← 一期：A/B 对照测评
+│   ├── experiment-design.md       预注册设计（判分口径唯一事实源）
+│   ├── skill-contract.md          条件 B 的过程干预规范
+│   ├── prompts/                   writer-A / writer-B / judge / terra / analyst
+│   ├── contracts/                 EXECUTION / STATISTICS / CALIBRATION / RUNBOOK
+│   ├── tools/                     aggregate_stats.rb  validate_package.rb  calibration_kappa.rb
+│   ├── problems/                  12 道题池 ＋ SELFTEST 定档记录
+│   ├── packages/  rubric-samples/  queue.yml
+│   └── archive/                   已作废或已完成的阶段文档
+├── phase2-paper/              ← 二期：分块论文写作
+│   ├── DESIGN.md                  分块设计（块接口/拼接/成本论证）
+│   ├── GATES.md                   人门状态机 manual / per-batch / yolo
+│   ├── scheduler/                 ★ 调度算法（schedule.py ＋ SCHEDULER.md）
+│   ├── prompts/                   splitter（拆题）/ splicer（拼接编辑）
+│   ├── tools/                     splice.py  dep-tree.template.json
+│   └── demo/                      EGZ 三块端到端示例
+├── common/                    ← 两期共用规范
+│   ├── MATH-WRITING-GUIDE.md      Halmos/Tao/Evan Chen 写作范式
+│   ├── ASK-HUMAN-CONVENTION.md    agent 向人提问的大白话规范
+│   └── AGENT_HARNESS.md  PRETEST-RUNS.md  TECH-ROADMAP.md
+├── handoff/                   ← 历次交接文档
+└── runs/                      ← 运行产物（gitignored，只在本机）
+```
+
+**共用的只有三样**：写作范式、提问规范、preset 角色行。其余一律分开。
+
 ## 1. 项目定位
 
 本项目研究一种面向数学科研写作的辅助能力：
@@ -266,7 +310,7 @@ Skill 只有在相对 Baseline 至少显著改善以下两项，并且不明显�
 ```text
 proof-expansion/
 ├── README.md
-├── skill-contract.md
+├── phase1-ab-eval/skill-contract.md
 ├── style-corpus/
 ├── benchmarks/
 │   ├── problems/

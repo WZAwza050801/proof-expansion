@@ -1,0 +1,165 @@
+# Proof Expansion private run manifest
+# Copy to runs/<run-id>/manifest.yml before writer dispatch.
+# SECURITY: this is the ONLY artefact that maps anonymous IDs to A/B.
+# Never give this file to writer_closed, judge_blind, or terra_curator.
+
+run_id: RUN-YYYYMMDD-###
+created_at: YYYY-MM-DDTHH:MM:SSZ
+owner_session_id: SESSION-ID
+status: planned # planned | running | reviewed | aggregated | blocked
+split: dev # dev | eval
+package_id: P###_<slug>-v1
+package_path: phase1-ab-eval/packages/P###_<slug>-v1.yml
+package_frozen_at: YYYY-MM-DD
+package_sha256: REPLACE_WITH_SHA256
+
+routing:
+  terra:
+    role: terra_curator
+    provider: micu
+    model: gpt-5.6-terra
+  judge:
+    role: judge_blind
+    provider: micu
+    model: gpt-5.6-sol
+    max_tokens: 16384
+  analyst:
+    role: analyst_stats
+  writer_role_registry:
+    # Every requested package/queue writer route must exactly match one row.
+    - role: writer_closed
+      provider: deepseek-official
+      model: deepseek-v4-flash
+      max_tokens: 16384
+
+prompt_versions:
+  baseline:
+    path: phase1-ab-eval/prompts/writer-A-baseline.md
+    version: v0.2-dev
+    sha256: REPLACE_WITH_SHA256
+  skill:
+    path: phase1-ab-eval/prompts/writer-B-skill.md
+    version: v0.2-dev
+    sha256: REPLACE_WITH_SHA256
+  judge:
+    path: phase1-ab-eval/prompts/judge-reviewer.md
+    version: v0.3-dev
+    sha256: REPLACE_WITH_SHA256
+  analyst:
+    path: phase1-ab-eval/prompts/analyst.md
+    version: v0.2-dev
+    sha256: REPLACE_WITH_SHA256
+  contract:
+    path: phase1-ab-eval/skill-contract.md
+    version: v0.2-dev
+    sha256: REPLACE_WITH_SHA256
+
+claim:
+  queue_item_id: P###_<slug>-v1
+  claimed_at: YYYY-MM-DDTHH:MM:SSZ
+  lease_expires_at: YYYY-MM-DDTHH:MM:SSZ
+  prior_queue_state: ready
+
+capability_evidence:
+  preset_id: proof-pipeline
+  preset_validation: valid
+  writer_probe:
+    child_session_id: null
+    role: writer_closed
+    configured_allow: []
+    max_depth: 0
+    observed_at: null
+    raw_response_path: null
+    expected_visible_tools: []
+    passed: false
+  judge_probe:
+    child_session_id: null
+    role: judge_blind
+    configured_allow: []
+    max_depth: 0
+    observed_at: null
+    raw_response_path: null
+    expected_visible_tools: []
+    passed: false
+  judge_config:
+    role: judge_blind
+    configured_allow: []
+    max_depth: 0
+    provider: micu
+    model: gpt-5.6-sol
+
+randomization:
+  algorithm: Fisher-Yates
+  seed: REPLACE_WITH_INTEGER_SEED
+  private_order: [] # private_id values in lexicographic order before permutation
+  permutation: []   # [{position, private_id, anonymous_id}]
+  reviewer_order: [] # anonymous_id order supplied to judge_blind
+
+submissions:
+  # Exactly two entries (A and B) share each pair_id.
+  - pair_id: P###-full-writer_closed-deepseek-v4-flash-r01
+    private_id: P###-full-writer_closed-deepseek-v4-flash-r01-A
+    anonymous_id: ANON-001
+    condition: A # PRIVATE — never copy beyond this file
+    problem_id: P###_<slug>-v1
+    variant_id: full
+    repetition: 1
+    writer:
+      role: writer_closed
+      provider: deepseek-official
+      model: deepseek-v4-flash
+      max_tokens: 16384
+      actual_provider: null
+      actual_model: null
+      model_version: null
+      child_session_id: null
+      started_at: null
+      completed_at: null
+    prompt:
+      condition_prompt_path: phase1-ab-eval/prompts/writer-A-baseline.md
+      condition_prompt_sha256: REPLACE_WITH_SHA256
+      materialized_bundle_sha256: REPLACE_WITH_SHA256
+      selected_variant_record_sha256: REPLACE_WITH_SHA256
+      judge_bundle_sha256: REPLACE_WITH_SHA256
+      full_input_sha256: REPLACE_WITH_SHA256
+      judge_input_non_submission_sha256: REPLACE_WITH_SHA256
+    judge:
+      role: judge_blind
+      provider: micu
+      model: gpt-5.6-sol
+      actual_provider: null
+      actual_model: null
+      model_version: null
+      child_session_id: null
+      started_at: null
+      completed_at: null
+    artefacts:
+      writer_input_path: jobs/P###-full-r01-A.md
+      writer_output_path: writers/P###-full-r01-A.md
+      writer_output_sha256: null
+      anonymous_input_path: anonymous/ANON-001.md
+      anonymous_input_sha256: null
+      review_path: reviews/ANON-001.json
+      review_output_sha256: null
+    writer_status: pending # pending | completed | failed
+    review_status: pending # pending | completed | failed | unscorable
+
+quality_gates:
+  package_visibility_checked: false
+  package_patch_checked: false
+  route_precedence_checked: false
+  matched_pairing_checked: false
+  anonymous_leak_checked: false
+  writer_tool_lock_checked: false
+  review_json_checked: false
+  deterministic_stats_checked: false
+  analyst_handoff_ready: false
+
+state_history:
+  - at: YYYY-MM-DDTHH:MM:SSZ
+    from: null
+    to: planned
+    actor: owner_session_id
+    reason: run materialized
+
+notes: []
