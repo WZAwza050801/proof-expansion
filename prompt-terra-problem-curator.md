@@ -81,7 +81,7 @@
 
 **writer_bundle（写手可见的全部内容）：**
 
-1. `statement`：定理陈述＋符号约定（完整、精确、自足；**不出现定理名/人名**——定理名只在 `judge_bundle` 与 `source_record` 出现）。
+1. `statement`：定理陈述＋符号约定（完整、精确、自足；**不出现定理名/人名**——定理名只在 `judge_bundle` 与 `source_record` 出现）。**数学用 LaTeX**（行内 `$...$`、独立公式 `\[ ... \]`）。
 2. `proof_spine`：分步脊柱，3–6 步。每步三字段：
    - `step_id`：S1, S2, …；
    - `objective`：这一步要建立**什么结论**（去答案化：给目标、不给方法、不给关键构造）；
