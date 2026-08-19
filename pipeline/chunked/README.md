@@ -4,10 +4,19 @@
 - 状态：原型 v0（可运行；写手派发暂由 operator 经 DSH 角色/subagent 执行，正式接入 proof-pipeline preset 列入阶段 3）
 - 设计依据：`../CHUNKED-PAPER-WRITING-DESIGN.md`
 - 文件地图：
-  - `splice.py`：确定性拼接器＋一致性检查器（stdlib，无外部依赖）；
+  - `SPLITTER.md`：**阶段 0 拆题 agent 提示词**——把精简证明（如 Seidel charter）拆成命题依赖树；
+  - `dep-tree.template.json`：命题依赖树规格（节点/依赖 DAG/全局约定卡/拓扑序）；
+  - `splice.py`：确定性拼接器＋一致性检查器（stdlib，无外部依赖；接受依赖树拓扑序）；
   - `demo/egz-paper.spec.json`：切割规格示例（论文 = 头号定理，切成 3 个证明义务块，含全局约定卡与块间依赖 DAG）；
   - `demo/outputs/`：各块写手输出（正文/结论/依赖与未决 三段）；
   - `demo/assembled-paper.md` 与 `demo/check-report.json`：拼接产物与检查报告（由 splice.py 生成）。
+
+## 总流程
+
+```
+精简证明 ──SPLITTER.md──► 命题依赖树(dep-tree.json) ──逐块写手──► 各块输出 ──splice.py──► 完整论文
+   ①拆题                    ②每个小引理一个独立 agent 扩写          ③按拓扑序整体处理拼接
+```
 
 ## 一、切块规格（spec JSON）
 
