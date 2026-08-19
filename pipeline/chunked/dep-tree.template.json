@@ -1,5 +1,6 @@
 {
   "paper_id": "demo",
+  "confirm_policy": "manual",
   "headline_theorem": "论文要证的最终定理（一句话，自足陈述）",
   "headline_node": "根节点 id",
   "conventions": {
@@ -15,9 +16,11 @@
       "statement": "自足命题陈述（对象、假设、结论、量词齐全）",
       "deps": [],
       "allowed": ["D1"],
-      "completion_test": "扩写完成的客观验收标准"
+      "completion_test": "扩写完成的客观验收标准",
+      "status": "pending"
     }
   ],
   "order": ["B1"],
   "audit_note": "树的形状理由：为什么这样切（一句话）"
 }
+
