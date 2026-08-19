@@ -2,7 +2,7 @@
 
 - 版本：`v0.2`
 - 执行者：父 Harness 运行 `pipeline/aggregate_stats.rb`；`analyst_stats` 仅解释输出。
-- > ⚠️ **v2 过渡标注（2026-08-18）**：本契约的维度字母（H/D/R/C）为 v1 旧口径，已按 `pipeline/DESIGN-REFLECTION.md` R2 作废。v2 口径 = C（门槛）＋G 补全度/R 严谨性/L 可读性（主指标，权重 40/30/30）＋诚实护栏，见 `experiment-design.md` §1/§6 与 `prompt-gpt56sol-reviewer.md` v2。本契约与 `aggregate_stats.rb`/`aggregate.template.md`/`calibration_kappa.rb` 的维度改名列入**阶段 3 基础设施**同步；在同步完成前不开启任何新 run。
+- > ⚠️ **v2 过渡标注（2026-08-18）**：本契约的维度字母（H/D/R/C）为 v1 旧口径，已按 `pipeline/DESIGN-REFLECTION.md` R2 作废。v2 口径 = C（门槛）＋G 补全度/R 严谨性/L 可读性（主指标，权重 40/30/30）＋诚实护栏，见 `experiment-design.md` §1/§6 与 `prompt-gpt56sol-reviewer.md` v2。本契约与 `aggregate_stats.rb`/`aggregate.template.md`/`calibration_kappa.rb` 已于 **阶段 3（2026-08-18）同步**到 C/G/R/L，正文即当前口径。
 
 ## 1. 可评分 submission 与 pair
 
@@ -13,7 +13,7 @@
 
 ## 2. 统计层级（固定）
 
-对每个写手模型与指标 H/D/R/C：
+对每个写手模型与指标 C/G/R/L（C=门槛，G/R/L=主指标）：
 
 1. **pair level**：每个合法 pair 计算 `d = score(B) - score(A)`；
 2. **variant level**：对同一 `model × problem × variant` 的所有合法 repetitions 等权平均 d；
@@ -37,7 +37,7 @@ improved(m,x) = estimable
 guardrail(m,C) = estimable AND mean_diff(m,C) >= -0.25
 ```
 
-- 一个主指标 x（H/D/R）在 run 级别“达改善”当且仅当至少两个模型满足 `improved(m,x)`；
+- 一个主指标 x（G/R/L）在 run 级别“达改善”当且仅当至少两个模型满足 `improved(m,x)`；
 - 跨模型方向一致 = 至少两个模型对该 x 的 `mean_diff > 0`，且这两个模型均达改善；
 - `overallImproved` 禁用，禁止产生该模糊字段；
 - eval 的 `initial_effectiveness` 还需要 `experiment-design.md §1.2` 的全部条件；否则 `not_shown`；

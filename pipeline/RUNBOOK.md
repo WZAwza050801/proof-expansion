@@ -1,6 +1,6 @@
 # Proof Expansion Evaluation Harness Runbook
 
-> ⚠️ **v2 过渡标注（2026-08-18）**：本 runbook 中的评分维度（H/D/R/C）与题目包 schema 为 v1 旧口径，已由 `experiment-design.md` v2 §5/§6 与 `prompt-terra-problem-curator.md` v2 / `prompt-gpt56sol-reviewer.md` v2 取代；执行链同步（validator、stats、匿名流程）列入阶段 3 基础设施，同步前不开启新 run。
+> ⚠️ **v2 过渡标注（2026-08-18）**：本 runbook 中的评分维度（H/D/R/C）与题目包 schema 为 v1 旧口径，已由 `experiment-design.md` v2 §5/§6 与 `prompt-terra-problem-curator.md` v2 / `prompt-gpt56sol-reviewer.md` v2 取代；执行链（validator、stats、匿名流程）已于阶段 3（2026-08-18）同步到 C/G/R/L 与 v2 题包 schema。
 
 ## Purpose
 
@@ -54,7 +54,7 @@ Never mutate a completed run. A rerun gets a new run ID.
 3. Dispatch writers through the preset's `writer_closed` role row (hard zero-tool closed-book child; launch several in background in parallel). Never use the generic `subagent` or `workflow` tools for writers or judges, because those paths cannot enforce tool filters. Do not let any writer see another writer output.
 4. Store private A/B labels in `manifest.yml`; generate anonymous IDs and randomize review order.
 5. For each anonymous output, dispatch `judge_blind` (hard zero-tool child pinned to `micu/gpt-5.6-sol`) with `prompt-gpt56sol-reviewer.md`, the patched writer bundle, the selected variant's ground truth, and `judge_bundle`.
-6. Validate that each judge response is JSON with H/D/R/C scores, step audit, and honesty assessment.
+6. Validate that each judge response is JSON with C/G/R/L scores, spine_completion_audit, step audit, and honesty_flags.
 7. Run `ruby pipeline/aggregate_stats.rb --run runs/<run-id> --output runs/<run-id>/aggregate.data.json --bootstrap 10000 --seed <recorded-seed>`; if it exits nonzero, keep the derived JSON and mark the run blocked/not-shown.
 8. Dispatch read-only `analyst_stats` with manifest + `aggregate.data.json`; parent writes its returned `aggregateMarkdown` verbatim to `aggregate.md`.
 9. Update queue status through the claim/state-transition rules in `EXECUTION_CONTRACT.md`; write only a link to the immutable run artefact in `experiment-design.md`.
@@ -86,7 +86,7 @@ The queue currently holds `P001-smoke-harmonic-v1`, a hand-approved dev package 
 4. Acceptance checklist:
    - writer and judge probes both report zero visible tools; judge route is pinned correctly;
    - writer outputs differ between A and B only through the prompt path;
-   - every judge response is valid JSON with H/D/R/C, failure_modes, and a step audit;
+   - every judge response is valid JSON with C/G/R/L, failure_modes (含 lazy_stop), and a step audit;
    - manifest contains pair ids, patch hashes, route metadata and complete anonymous permutation;
    - `runs/<run-id>/` contains manifest, jobs, writers, anonymous, reviews, aggregate.data.json, aggregate.md;
    - `aggregate.md` is labelled `dev_validation_only` and makes no effectiveness claim.

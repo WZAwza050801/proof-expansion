@@ -2,11 +2,11 @@
 
 - 版本：`v0.2`
 - 状态：D4 已具体化；必须在正式 eval 前完成。
-- > ⚠️ **v2 过渡标注（2026-08-18）**：本协议维度（H/D/R/C）为 v1 旧口径。v2 口径 = C/G/R/L（G/R/L ≥0.60，C ≥0.50，主指标无 <0.40），见 `experiment-design.md` §7.2 与 `pipeline/rubric-samples/`（首批可读性锚点）。协议正文与 `calibration_kappa.rb` 的维度改名列入**阶段 3 基础设施**同步。
+- > ⚠️ **v2 过渡标注（2026-08-18）**：本协议维度（H/D/R/C）为 v1 旧口径。v2 口径 = C/G/R/L（G/R/L ≥0.60，C ≥0.50，主指标无 <0.40），见 `experiment-design.md` §7.2 与 `pipeline/rubric-samples/`（首批可读性锚点）。协议正文与 `calibration_kappa.rb` 已于**阶段 3（2026-08-18）**同步到 C/G/R/L；L 允许 0.5 步进，`calibration_kappa.rb` 统一折半记分（0..8）后算加权 kappa。
 
 ## 1. 目标
 
-验证 `micu/gpt-5.6-sol` 的 H/D/R/C 评分与人工评分具有足够一致性。校准不证明提示词有效；它只决定 judge 是否可以批量评分。（v2 中该句的 H/D/R/C 应读作 C/G/R/L，见上方标注。）
+验证 `micu/gpt-5.6-sol` 的 C/G/R/L 评分与人工评分具有足够一致性。校准不证明提示词有效；它只决定 judge 是否可以批量评分。
 
 ## 2. 校准样本
 

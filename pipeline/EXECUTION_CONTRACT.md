@@ -1,6 +1,6 @@
 # Proof Expansion Execution Contract
 
-- 版本：`v0.2`
+- 版本：`v0.3`（阶段 3 同步，2026-08-18：题包 schema 改 v2（`proof_spine`/`spine_answer_key`/六态/窄缝标定）；评分维度 C/G/R/L；写手输出为纯证明正文，无 `<response>` 信封）
 - 目的：把“由 agent 临场理解”的流程变成可机械审计的执行规则。
 - 优先级：本文件高于 `RUNBOOK.md` 的简写说明；实验判定仍以 `experiment-design.md` 为准。
 
@@ -74,7 +74,7 @@ ruby pipeline/validate_package.rb --package <package.yml> --queue pipeline/queue
 
 1. `remove_dependency_ids`：逐个删除同 ID dependency；若目标不存在、重复指定或删除后 dependency ID 不唯一 → hard fail；
 2. `replace_statement`：`null` 表示不变；非 null 必须为非空字符串，完整替换 `writer_bundle.statement`；
-3. `replace_proof_skeleton`：`null` 表示不变；非 null 必须为非空字符串，完整替换 `writer_bundle.proof_skeleton`；
+3. `replace_proof_spine`：`null` 表示不变；非 null 必须为非空字符串，完整替换 `writer_bundle.proof_spine`（v1 的 `replace_proof_skeleton` 已废弃，v2 schema 下 validator 视为非法字段，见 validate_package.rb）；
 4. `append_allowed_dependencies`：追加后所有 ID 必须非空且全局唯一；
 5. 写出 materialized bundle 的 canonical text 和 SHA-256 hash 到 job/manifest；
 6. 不允许任何隐式文本删除、手工改写或“按意图理解”。

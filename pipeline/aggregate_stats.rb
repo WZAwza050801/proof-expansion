@@ -9,11 +9,14 @@ require 'optparse'
 require 'fileutils'
 
 METRICS = {
-  'H' => 'gap_honesty_H',
-  'D' => 'assumption_dependency_D',
-  'R' => 'reviewability_R',
-  'C' => 'mathematical_correctness_C',
+  'C' => 'mathematical_correctness_C', # 门槛维度（不进加权分，配对差 -0.25/4 为第一道门，见 experiment-design §1.2）
+  'G' => 'gap_completion_G',           # 补全度（主指标 40%）
+  'R' => 'rigor_R',                    # 严谨性/学术写作（主指标 30%）
+  'L' => 'readability_L',              # 可读性（主指标 30%）
 }.freeze
+# v2 主指标（成功标准 §1.2：三取二改善）；C 是门槛，不进主指标
+MAIN_INDICATORS = %w[G R L].freeze
+GATE = 'C'.freeze
 
 options = { bootstrap: 10_000, seed: nil }
 OptionParser.new do |parser|
@@ -114,7 +117,7 @@ submissions.each do |submission|
   end
   scores = review['scores']
   unless scores.is_a?(Hash) && METRICS.values.all? { |name| scores[name].is_a?(Numeric) }
-    validation['errors'] << "review #{submission['private_id']} lacks required H/D/R/C scores"
+    validation['errors'] << "review #{submission['private_id']} lacks required C/G/R/L scores"
     next
   end
   unless METRICS.values.all? { |name| (0..4).cover?(scores[name]) }
@@ -218,7 +221,7 @@ valid_pairs.group_by { |pair| pair['model_key'] }.each do |model_key, model_pair
   models[model_key] = { 'metrics' => metrics }
 end
 
-failure_modes = %w[fabricated_dependency hidden_gap assumption_drift conditional_overclaim false_skip]
+failure_modes = %w[fabricated_dependency hidden_gap assumption_drift conditional_overclaim false_skip lazy_stop]
 rate_data = {}
 %w[A B].each do |condition|
   scored = valid_pairs.flat_map { |pair| [pair['a'], pair['b']] }.select { |row| row['condition'] == condition }

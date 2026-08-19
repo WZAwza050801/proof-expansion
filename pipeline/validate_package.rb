@@ -41,16 +41,55 @@ else
 end
 
 approval = package.dig('selection_record', 'human_approval') || {}
-required_approval = package['split'] == 'eval' ? 'approved_for_eval' : 'approved_for_dev'
-errors << "human approval missing #{required_approval}" unless approval[required_approval] == true
+if %w[dev eval].include?(package['split'])
+  required_approval = package['split'] == 'eval' ? 'approved_for_eval' : 'approved_for_dev'
+  errors << "human approval missing #{required_approval}" unless approval[required_approval] == true
+end
 
 writer_bundle = package['writer_bundle'] || {}
 errors << 'writer_bundle.statement empty' if writer_bundle['statement'].to_s.empty?
-errors << 'writer_bundle.proof_skeleton empty' if writer_bundle['proof_skeleton'].to_s.empty?
+# v2: proof_spine（每步 objective/idea/completion_test）取代 v1 的 proof_skeleton 字符串
+spine = writer_bundle['proof_spine']
+if spine.is_a?(Array) && !spine.empty?
+  spine.each_with_index do |step, idx|
+    errors << "proof_spine[#{idx}] missing step_id" if step['step_id'].to_s.empty?
+    errors << "proof_spine[#{idx}] missing objective" if step['objective'].to_s.empty?
+    errors << "proof_spine[#{idx}] missing completion_test" if step['completion_test'].to_s.empty?
+  end
+  spine_ids = spine.map { |step| step['step_id'].to_s }
+  errors << 'duplicate proof_spine step_id' if spine_ids.uniq.length != spine_ids.length
+else
+  errors << 'writer_bundle.proof_spine must be a non-empty array (each step: step_id/objective/completion_test)'
+end
+errors << 'writer_bundle.claim_status_convention empty' if writer_bundle['claim_status_convention'].to_s.empty?
+errors << 'writer_bundle.writing_discipline empty' if writer_bundle['writing_discipline'].to_s.empty?
 errors << 'writer_bundle.closed_book_notice empty' if writer_bundle['closed_book_notice'].to_s.empty?
 judge_bundle = package['judge_bundle'] || {}
 errors << 'judge_bundle.reference_proof empty' if judge_bundle['reference_proof'].to_s.empty?
 errors << 'judge_bundle.key_lemmas empty' unless judge_bundle['key_lemmas'].is_a?(Array) && !judge_bundle['key_lemmas'].empty?
+# v2: spine_answer_key 必须覆盖每个脊柱步（judge 判补全度的锚点）
+spine_answer_key = judge_bundle['spine_answer_key']
+if spine_answer_key.is_a?(Array) && !spine_answer_key.empty?
+  keyed = spine_answer_key.map { |row| row['step_id'].to_s }
+  spine_ids = spine.is_a?(Array) ? spine.map { |step| step['step_id'].to_s } : []
+  missing = spine_ids - keyed
+  errors << "spine_answer_key 未覆盖步骤: #{missing.join(',')}" unless missing.empty?
+else
+  errors << 'judge_bundle.spine_answer_key must be a non-empty array covering proof_spine steps'
+end
+
+# v2: 窄缝标定（ready 前必须实测定档；探针题除外）
+unless package['probe_only'] == true || package['split'] == 'probe'
+  nsc = package['narrow_slot_calibration']
+  errors << 'narrow_slot_calibration missing' unless nsc.is_a?(Hash)
+  if nsc.is_a?(Hash)
+    measured = nsc['measured']
+    errors << 'narrow_slot_calibration.measured empty（ready 前必须经裸题/带包预测试定档）' if measured.nil? || measured.to_s.empty?
+  end
+end
+# v2: 去答案化记录（审计：写手包内无关键构造）
+dar = package['de_answering_record']
+errors << 'de_answering_record missing (stripped/retained)' unless dar.is_a?(Hash) && Array(dar['stripped']).any?
 
 deps = package.dig('writer_bundle', 'allowed_dependencies')
 unless deps.is_a?(Array)
@@ -87,7 +126,7 @@ selected.each do |variant_id|
   errors << "variant #{variant_id} duplicate remove_dependency_ids" if remove.uniq.length != remove.length
   unknown = remove - dep_ids
   errors << "variant #{variant_id} removes unknown dependencies #{unknown.join(',')}" unless unknown.empty?
-  %w[replace_statement replace_proof_skeleton].each do |field|
+  %w[replace_statement replace_proof_skeleton replace_proof_spine].each do |field|
     value = patch[field]
     errors << "variant #{variant_id} #{field} must be null or nonempty string" unless value.nil? || (value.is_a?(String) && !value.empty?)
   end

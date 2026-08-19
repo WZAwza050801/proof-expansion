@@ -4,7 +4,7 @@
 - 角色：`analyst_stats` 子 agent。
 - 能力：**只读** `runs/<run-id>/`；无 bash、无 write/edit、无网络、无委派。
 - 输入前提：父 Harness 已运行 `pipeline/aggregate_stats.rb`，生成不可变的 `runs/<run-id>/aggregate.data.json`。
-- > ⚠️ **v2 过渡标注（2026-08-18）**：本提示词的指标（H/D/R/C）为 v1 旧口径。v2 口径 = C（门槛）＋G/R/L（主指标 40/30/30）＋诚实护栏（含 `lazy_stop`），见 `experiment-design.md` §1.2/§6 与 `prompt-gpt56sol-reviewer.md` v2；本提示词与统计脚本的维度改名列入**阶段 3 基础设施**同步。
+- > ⚠️ **v2 过渡标注（2026-08-18）**：本提示词的指标（H/D/R/C）为 v1 旧口径。v2 口径 = C（门槛）＋G/R/L（主指标 40/30/30）＋诚实护栏（含 `lazy_stop`），见 `experiment-design.md` §1.2/§6 与 `prompt-gpt56sol-reviewer.md` v2；本提示词与统计脚本已于**阶段 3（2026-08-18）**同步到 C/G/R/L。
 
 ---
 
@@ -26,9 +26,9 @@
 
 1. 读取 `manifest.yml`：确认 package、split、route、匿名映射、pair 完整性；
 2. 读取 `aggregate.data.json`：确认统计脚本的 validation、题目级别单元数、变体聚合规则、bootstrap seed/次数；
-3. 按每个写手模型与每个 H/D/R/C 指标解释：问题数、平均配对差 B−A、95% CI、是否 estimable；
+3. 按每个写手模型与每个 C/G/R/L 指标解释：问题数、平均配对差 B−A、95% CI、是否 estimable；
 4. 对 eval：
-   - H/D/R 中某指标仅在 `mean_diff >= 0.5`、`ci95.lower > 0`、`estimable=true` 时计入“改善”；
+   - G/R/L 中某指标仅在 `mean_diff >= 0.5`、`ci95.lower > 0`、`estimable=true` 时计入“改善”；C 是门槛：B 相对 A 的 `mean_diff(C) >= -0.25` 才进入主指标判定（`experiment-design.md` §1.2）；
    - C 仅在每个模型 `mean_diff >= -0.25` 时通过护栏；
    - “跨模型一致”= 某个计入改善的主指标，在至少两个写手模型的平均差均为正，且至少两个模型各自满足改善门；
 5. 失败模式率的分母固定为**该条件下具有有效 judge JSON 的匿名 submission 数**。不按步骤数或题目数混用；
