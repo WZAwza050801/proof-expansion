@@ -363,12 +363,29 @@ def cmd_status(g: Graph, blocks_dir: str) -> int:
         bad = [i for i in landed
                if blocks[i]['declared_state'] in ('PROVED-IN-PROJECT', 'CONDITIONAL')
                and any(eff.get(d) == NOT_LANDED for d in g.nodes[i].get('deps', []))]
+
+    # I5：声明的每个 dep 必须被正文/结论实际引用（防止列了前置却自己从头推）
+    cite_bad = []
+    for i in landed:
+        text = blocks[i]['body'] + '\n' + blocks[i]['conclusion']
+        miss = [d for d in g.nodes[i].get('deps', [])
+                if not re.search(r'(?<![A-Za-z0-9])' + re.escape(d) + r'(?![0-9])', text)]
+        if miss:
+            cite_bad.append((i, miss))
         if bad:
             print('!! I3 违规（前置未落盘却声称已证 —— 模型自行假设了前置）:')
             for i in bad:
                 miss = [d for d in g.nodes[i]['deps'] if eff.get(d) == NOT_LANDED]
                 print(f'   {i} 声称 {blocks[i]["declared_state"]}，但 {" ".join(miss)} 未落盘 -> 该块须重写')
             print()
+    if cite_bad:
+        print('!! I5 违规（声明了前置却未在正文引用——等于绕开上游重推，上下游可能不一致）:')
+        for i, miss in cite_bad:
+            print(f'   {i} 未引用 {" ".join(miss)}')
+        print()
+    elif landed:
+        print('I5 引用核对：全部通过（每个 dep 都被正文实际引用）')
+        print()
     hl = eff.get(g.headline, NOT_LANDED)
     print(f'headline {g.headline} 有效状态: {hl}')
     if hl == NOT_LANDED:
@@ -439,6 +456,8 @@ TASKBOOK_TMPL = """<!-- 任务书 自动生成 by schedule.py | node={node} laye
 
 【纪律】
 1. 只写本块的证明正文；引用前置块写「由 {ex_dep} 的结论：……」；引用允许依赖只写编号并核对其前提是否满足。
+   【前置结论】里列出的**每一个**节点都必须在正文/结论中被实际引用（I5：写「由 Nxx 的结论」至少一次）；
+   未被引用的前置会被 status 标记为违规——列了前置却不用，等于自己从头推了一遍，上下游可能不一致。
 2. **不得假设任何未在【前置结论】中出现的结论。** 若确实需要包外事实，写进【依赖与未决】做最小 blocker，
    不要用「按约定视为已声明」把洞糊过去。
 3. 六态标注（就地标在句末）：**(PROVED-IN-PROJECT)** 本项目内已证 / **(CONDITIONAL)** 仅在你写明的附加假设下成立 /
