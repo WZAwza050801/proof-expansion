@@ -52,10 +52,14 @@ def output_text_of(path):
 
 
 def metrics(text):
-    dollars = len(re.findall(r'(?<!\\)\$', text))
+    # 行内数学跨形态归一计数：$...$ 与 \(...\) 等价（成文层允许定界符转换，N01 实证）；
+    # 纯数字（如 \(5\)）是中文源编号习惯，英文成文作普通文本——不计入防丢失闸门（对称豁免）
+    parens = sum(1 for x in re.findall(r'\\\((.+?)\\\)', text)
+                 if not re.fullmatch(r'\d+', x.strip()))
     return {
         'chars_nospace': len(re.sub(r'\s+', '', text)),
-        'inline_math': dollars // 2,
+        'inline_math': sum(1 for x in re.findall(r'(?<!\\)\$(.+?)(?<!\\)\$', text)
+                           if not re.fullmatch(r'\d+', x.strip())) + parens,
         'display_math': len(re.findall(r'\\\[', text))
         + len(re.findall(r'\\begin\{' + DISPLAY_ENVS + r'\}', text)),
         'theorem_envs': len(re.findall(r'\\begin\{' + THEOREM_ENVS + r'\}', text)),
