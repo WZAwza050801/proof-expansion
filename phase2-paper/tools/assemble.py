@@ -94,14 +94,25 @@ def apply_xrefs(bodies, instr, err, warn, rep):
             skipped.append({'xref': x, 'reason': f'macro 无法渲染（label={label}，前缀未映射）'})
             warn.append(f'xref(at {at}, ref {ref}) 跳过：label 前缀无法映射环境名')
             continue
+        # 候选短语探测。裸 NXX 候选必须带守卫（不得匹配 \Nref{NXX} 内部、
+        # label/ref 参数内（前置冒号）、或 R_{29} 之类子串）——v3 组装事故回归：
+        # 守卫缺失时子串替换产出 \Nref{Theorem~\ref{...}} 双重包裹，编译 Undefined control sequence。
+        guarded = re.compile(r'(?<!\\Nref\{)(?<![A-Za-z0-9:])' + re.escape(ref) + r'(?![0-9])')
         for cand in (f'conclusion of {ref}', f'of {ref}', ref):
-            n = body.count(cand)
-            if n >= 1:
-                target = cand.replace(ref, rendered) if cand != ref else rendered
-                bodies[at] = body.replace(cand, target, 1)
-                applied.append({'at': at, 'protocol': 'legacy-auto', 'ref': ref,
-                                'label': label, 'phrase': cand, 'occurrences': n})
-                break
+            if cand == ref:
+                m = guarded.search(body)
+                if not m:
+                    continue
+                bodies[at] = body[:m.start()] + rendered + body[m.end():]
+                n = 1
+            else:
+                n = body.count(cand)
+                if n < 1:
+                    continue
+                bodies[at] = body.replace(cand, cand.replace(ref, rendered), 1)
+            applied.append({'at': at, 'protocol': 'legacy-auto', 'ref': ref,
+                            'label': label, 'phrase': cand, 'occurrences': n})
+            break
         else:
             skipped.append({'xref': x, 'reason': '正文未找到可定位短语'})
             warn.append(f'xref(at {at}, ref {ref}) 跳过：正文无可定位短语')
@@ -120,7 +131,8 @@ def primary_labels_from_inventory(inv):
 
 
 def resolve_nrefs(bodies, labels_map, warn, rep):
-    """\\Nref{NXX} → Theorem~\\ref{主label}（splicer v0.4 语义宏，闭合成文引用环）。"""
+    """\\Nref{NXX} → Theorem~\\ref{主label}（splicer v0.4 语义宏，闭合成文引用环）。
+    bodies 与 rep['_extra_resolve']（附录等附加文本）各解析一次。"""
     resolved = unresolved = 0
 
     def sub(m):
@@ -137,7 +149,43 @@ def resolve_nrefs(bodies, labels_map, warn, rep):
 
     for nid in bodies:
         bodies[nid] = re.sub(r'\\Nref\{(N\d+)\}', sub, bodies[nid])
+    rep['_extra_resolve'] = [re.sub(r'\\Nref\{(N\d+)\}', sub, t) for t in rep.get('_extra_resolve', [])]
     rep['nrefs'] = {'resolved': resolved, 'unresolved': unresolved}
+
+
+def wrap_raw_mentions(bodies, warn, rep):
+    """nref_wrap：把存量 v0.3 fragment 中残余的裸 NXX 提及包成 \\Nref{NXX}（机械，v0.4 回溯适用）。
+    排除：已在 \\Nref{} 内、label/ref 参数内（前置冒号）、自身块注释。"""
+    pat = re.compile(r'(?<!\\Nref\{)(?<![A-Za-z0-9:])N\d\d(?![0-9])')
+    total = 0
+    per = {}
+    for nid in bodies:
+        n = len(pat.findall(bodies[nid]))
+        if n:
+            bodies[nid] = pat.sub(lambda m: '\\Nref{' + m.group(0) + '}', bodies[nid])
+            per[nid] = n
+            total += n
+    rep['nref_wrap'] = {'wrapped': total, 'per_node': per}
+    if total:
+        print(f'  nref_wrap: {total} 处裸提及已包裹（{len(per)} 块）')
+
+
+def extract_deps_appendix(bodies, warn, rep):
+    """deps_appendix：把 rem:NXX-deps / rem:NXX-deps-open 记账 remark 整体移入文末附录（S3 裁决族②）。"""
+    pat = re.compile(r'\\begin\{remark\}(?:\[[^\]]*\])?\s*\\label\{rem:(N\d+)-deps[^}]*\}.*?\\end\{remark\}', re.S)
+    moved = []
+    for nid in list(bodies):
+        m = pat.search(bodies[nid])
+        if not m:
+            continue
+        moved.append({'node': nid, 'label': re.search(r'\\label\{([^}]+)\}', m.group(0)).group(1),
+                      'text': m.group(0)})
+        bodies[nid] = pat.sub('', bodies[nid]).strip()
+    moved.sort(key=lambda e: e['node'])
+    rep['deps_appendix'] = {'moved': [e['node'] for e in moved]}
+    rep['_extra_resolve'] = [e['text'] for e in moved]
+    rep['_deps_entries'] = moved
+    return moved
 
 
 def render_bibliography(instr):
@@ -221,6 +269,9 @@ def main():
         for k, v in primary_labels_from_inventory(inv).items():
             labels_map.setdefault(k, v)
     apply_xrefs(bodies, instr, err, warn, rep)
+    if instr.get('nref_wrap'):
+        wrap_raw_mentions(bodies, warn, rep)
+    deps_entries = extract_deps_appendix(bodies, warn, rep) if instr.get('deps_appendix') else []
     resolve_nrefs(bodies, labels_map, warn, rep)
 
     body_parts = []
@@ -243,10 +294,30 @@ def main():
             warn.append(f'{nid}: 疑似数学模式 over-escape 下标 \\_{{ 共 {n_over} 处（能编译但排版语义错误，回 S1 修）')
 
     intro = instr.get('intro_outline', []); concl = instr.get('conclusion_outline', [])
-    head_comment = '% 引言/结论正文不由组装器产生（DESIGN §4.0 规则④）：此处仅注释占位大纲。\n'
-    for o in intro: head_comment += f'% INTRO-TODO: {o}\n'
-    tail_comment = ''
-    for o in concl: tail_comment += f'% CONCL-TODO: {o}\n'
+    intro_text = str(instr.get('intro_text') or '').strip()
+    concl_text = str(instr.get('conclusion_text') or '').strip()
+    if intro_text:
+        head_comment = '% 引言：小派发产物（输入=大纲＋账本统计，未接触证明正文——规则④）。\n' + intro_text + '\n'
+    else:
+        head_comment = '% 引言/结论正文不由组装器产生（DESIGN §4.0 规则④）：此处仅注释占位大纲。\n'
+        for o in intro: head_comment += f'% INTRO-TODO: {o}\n'
+    if concl_text:
+        tail_comment = concl_text + '\n'
+    else:
+        tail_comment = ''
+        for o in concl: tail_comment += f'% CONCL-TODO: {o}\n'
+
+    # deps 附录（S3 裁决族②）：记账 remark 集中移至文末（文本原样，仅位置移动）
+    appendix_tex = ''
+    if deps_entries:
+        parts = ['\\section*{Dependency and Open-Item Ledger}\\label{sec:deps-ledger}',
+                 'The following remarks record, for each block, the predecessor blocks actually '
+                 'invoked, the newly introduced local notation, the minimal blockers, and the '
+                 'strongest unaffected conclusions. They are reproduced verbatim from the '
+                 'block-level writing stage.']
+        for e in rep.get('_extra_resolve', []):
+            parts.append(e)
+        appendix_tex = '\n\n'.join(parts) + '\n'
 
     meta = instr.get('meta', {})
     front = [f"\\title{{{meta.get('title', 'Untitled')}}}",
@@ -255,7 +326,7 @@ def main():
     rep['bibliography'] = {'entries': bib_n}
     tex = ('\n'.join(pre) + '\n' + '\n'.join(front) + '\n' + head_comment + '\n'
            + '\n\n'.join(body_parts) + '\n' + tail_comment + '\n'
-           + bib_tex + '\\end{document}\n')
+           + appendix_tex + bib_tex + '\\end{document}\n')
 
     # 4. 角标闭合（fragments 互相引用 + 节 label）
     full = '\n'.join(all_text) + '\n' + '\n'.join(f'\\label{{sec:{s["id"]}}}' for s in instr['sections'])
@@ -272,6 +343,8 @@ def main():
     if rep['ok']:
         open(out_path, 'w', encoding='utf-8').write(tex)
         print('assembled ->', out_path, f'({len(tex)} bytes)')
+    for k in ('_extra_resolve', '_deps_entries'):
+        rep.pop(k, None)
     if report_path:
         json.dump(rep, open(report_path, 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
         print('report ->', report_path)

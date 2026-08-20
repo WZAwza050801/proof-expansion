@@ -361,6 +361,86 @@ def test_assemble_renders_bibliography():
         assert json.load(open(rep, encoding='utf-8'))['bibliography']['entries'] == 2
 
 
+def test_assemble_renders_intro_conclusion_text():
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', FRAG_N00)
+        write_frag(fd, 'N01', FRAG_N01)
+        i = instr()
+        i['intro_text'] = 'This is the intro prose.'
+        i['conclusion_text'] = '\\section*{Conclusion}\nThis is the conclusion prose.'
+        ip = write_json(d, 'instr.json', i)
+        tex = os.path.join(d, 'p.tex')
+        rc, out = run(ASM, ip, fd, tree, tex)
+        assert rc == 0, out
+        body = open(tex, encoding='utf-8').read()
+        assert 'This is the intro prose.' in body and 'INTRO-TODO' not in body
+        assert '\\section*{Conclusion}' in body and 'CONCL-TODO' not in body
+
+
+def test_assemble_moves_deps_remarks_to_appendix():
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', FRAG_N00 +
+                   '\n\\begin{remark}\\label{rem:N00-deps}Invoke N01 stuff.\\end{remark}')
+        write_frag(fd, 'N01', FRAG_N01)
+        i = instr()
+        i['deps_appendix'] = True
+        ip = write_json(d, 'instr.json', i)
+        tex = os.path.join(d, 'p.tex'); rep = os.path.join(d, 'r.json')
+        rc, out = run(ASM, ip, fd, tree, tex, '--report', rep)
+        assert rc == 0, out
+        body = open(tex, encoding='utf-8').read()
+        assert '\\section*{Dependency and Open-Item Ledger}' in body
+        assert body.index('sec:deps-ledger') > body.index('sec:P0}')          # 附录在正文后
+        assert 'rem:N00-deps' in body.split('sec:deps-ledger')[1]             # remark 只在附录
+        r = json.load(open(rep, encoding='utf-8'))
+        assert r['deps_appendix']['moved'] == ['N00']
+
+
+def test_assemble_xref_bare_candidate_guarded_against_nref():
+    r"""回归（v3 组装事故）：xref 裸 NXX 候选不得碰 \Nref{NXX} 内部子串。"""
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', FRAG_N00)
+        write_frag(fd, 'N01', 'By the conclusion of \\Nref{N00} we proceed.')
+        i = instr()
+        i['labels'] = {'N00': 'lem:N00'}
+        i['xrefs'] = [{'at': 'N01', 'ref': 'N00', 'macro': '\\ref{lem:N00}'}]
+        ip = write_json(d, 'instr.json', i)
+        tex = os.path.join(d, 'p.tex'); rep = os.path.join(d, 'r.json')
+        rc, out = run(ASM, ip, fd, tree, tex, '--report', rep)
+        assert rc == 0, out
+        body = open(tex, encoding='utf-8').read()
+        assert '\\Nref{Theorem' not in body and '\\Nref{Lemma' not in body   # 无双重包裹
+        assert 'of Lemma~\\ref{lem:N00} we proceed' in body                    # \Nref 正常解析
+        r = json.load(open(rep, encoding='utf-8'))
+        assert len(r['xrefs']['skipped']) == 1     # 裸候选被守卫拦下→跳过
+
+
+def test_assemble_nref_wrap_wraps_raw_mentions():
+    """nref_wrap：存量 v0.3 裸提及机械包裹；label 内 NXX 不误包。"""
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', FRAG_N00)
+        write_frag(fd, 'N01', 'By the conclusion of N00 and the N00 model in \\ref{lem:N00}.')
+        i = instr()
+        i['nref_wrap'] = True
+        i['labels'] = {'N00': 'lem:N00'}
+        ip = write_json(d, 'instr.json', i)
+        tex = os.path.join(d, 'p.tex'); rep = os.path.join(d, 'r.json')
+        rc, out = run(ASM, ip, fd, tree, tex, '--report', rep)
+        assert rc == 0, out
+        body = open(tex, encoding='utf-8').read()
+        assert body.count('Lemma~\\ref{lem:N00}') == 2        # 两处均解析
+        r = json.load(open(rep, encoding='utf-8'))
+        assert r['nref_wrap']['wrapped'] == 2 and r['nrefs']['resolved'] == 2
+
+
 # ── coverage_check.py ─────────────────────────────────────────────────
 
 def cov_files(d, in_body, out_body):
