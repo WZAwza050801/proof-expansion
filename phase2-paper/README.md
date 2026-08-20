@@ -1,6 +1,7 @@
 # 二期：分块论文写作流水线
 
-- 状态：**调度器已重构（2026-08-19）**。上一轮"operator 凭感觉派块"已替换为确定性程序。
+- 状态：**调度器已重构（2026-08-19）；后半段成文/组装已重构为 S1–S4（2026-08-20，DESIGN §4 v4）**。
+- Seidel 预试：**全链首次全绿**（38/38 块 → S1 fragments → S2 组装 → S4 编译门 0 errors / 70 页）；S3 格式审查待裁决。运行区导览：`runs/pretest/seidel/README.md`；本轮交接：`handoff/HANDOFF-PAPER-AND-AGENT-REPAIR.md`
 - 设计依据：`phase2-paper/DESIGN.md`；人门状态机：`phase2-paper/GATES.md`
 - 与一期的关系：本期测**拼接级/工程级**质量，**不产生 A/B 分数**，不与 `phase1-ab-eval/` 的统计混用。
 
@@ -12,10 +13,15 @@
    │ ② 审图   独立模型审 漏边/假边/粒度/判据空转  → dep-tree.v2.json  ★ 扩写前必做
    │ ③ 调度   scheduler/schedule.py            → 分层 + 人门档位 + 任务书
    │ ④ 扩写   零工具块写手角色（一节点一 agent） → blocks/N*.md（三段式）
-   │ ⑤ 拼接   prompts/splicer.md + tools/splice.py → paper.tex + check-report.json
+   │ ⑤a 成文  prompts/splicer.md v0.3（一块一 fragment；逐字节输入契约） → fragments/N*.md
+   │ ⑤b 调度  prompts/coordinator.md（只出装配指令 JSON，不出正文）  → instructions-*.json
+   │ ⑤c 组装  tools/assemble.py（DAG 序校验＋角标闭合）             → paper.tex
+   │ ⑤d 终检  tools/coverage_check.py paper 模式 ＋ xelatex×2 编译门 → paper.pdf
    ▼
 完整论文
 ```
+
+⑤ 是 2026-08-20 重构的后半段（S1–S4 四步，取代旧"拼接器整篇粘合"）；旧 splice-v1 拼接链的产物已归档（`runs/archive/seidel-superseded-20260820/`），`splice.py` 工具保留可再生机拼稿。
 
 ② 是这轮新增的一步。理由见下。
 
@@ -73,8 +79,16 @@ python3 $S plan     $T --json plan.json    # 分层、关键路径、污染半�
 python3 $S next     $T --blocks $B         # 本批可派发节点（只吐前置全落盘的）
 python3 $S taskbook $T --blocks $B --node N00 --out runs/pretest/seidel/taskbooks/
 python3 $S status   $T --blocks $B         # 六态账本 + I3 违规检测
-python3 $S spec     $T --out spec.json     # 导出 splice.py 兼容 spec
-python3 phase2-paper/tools/splice.py spec.json $B paper.md check-report.json
+python3 $S spec     $T --out spec.json     # 导出 splice.py 兼容 spec（splice-v1，产物已归档）
+
+# 后半段 S1–S4（现行；完整口径见 DESIGN.md §4）
+python3 phase2-paper/tools/coverage_check.py segment fragments/N00.md frag-inputs/N00.input.md \
+  --report cov-N00.json                    # S1 门：长度比≥0.8＋公式/定理/状态计数不降
+python3 phase2-paper/tools/assemble.py instructions-full.json runs/pretest/seidel/fragments \
+  $T paper.tex --report asm-full-report.json   # S2/S3：DAG 序校验＋组装（消费装配指令）
+python3 phase2-paper/tools/coverage_check.py paper paper.tex baseline-full.md \
+  --report coverage-full-paper.json           # S4：全文覆盖断言（vs 基准拼接）
+# S4 编译门：xelatex×2，exit=0 且 0 errors（英文 amsart；中文回退 ctexart 绿灯配方见 RUN-LOG）
 ```
 
 标准循环：`next` → 为该批每个节点 `taskbook` → 派发 → 落盘 `blocks/N*.md` → `status` 查降级 → 过人门 → 回到 `next`。
