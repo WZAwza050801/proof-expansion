@@ -170,6 +170,87 @@ def wrap_raw_mentions(bodies, warn, rep):
         print(f'  nref_wrap: {total} 处裸提及已包裹（{len(per)} 块）')
 
 
+# ── blocker 框化 pass（2026-08-21 格式轮，operator 拍板：学 Gao–Lou–Wu–Zhang 的克制）──
+# 只框正文级"minimal blocker 主语句"（deps 记账 remark 内的不框——它们整体住附录）。
+# fragment 源形态不变（保持可 grep 的 [STATUS: ...]）；框化只发生在组装输出。
+
+# 小状态行内特殊字符渲染（正文轻量标注；框内不适用——框自身即视觉信号）
+STATUS_GLYPH = {
+    'BLOCKED': '\\textcolor{blockerred}{$\\blacksquare$}',
+    'CONDITIONAL': '$\\circ$',
+    'CANDIDATE': '$\\vartriangle$',
+    'FIXED': '$\\bullet$',
+    'PROVED': '$\\bullet$',
+    'PROVED-IN-PROJECT': '$\\bullet$',
+    'IMPORTED-VERIFIED': '$\\diamond$',
+    'UNVERIFIED': '$\\star$',
+}
+
+def glyph_status(text):
+    """[STATUS: X] → 特殊字符＋缩写脚注式渲染（可 grep 源形态只在 fragment；输出层美化）。"""
+    def sub(m):
+        st = m.group(1).strip()
+        g = STATUS_GLYPH.get(st)
+        if g is None:
+            return m.group(0)  # 未知状态保守保留原样（词表单源原则）
+        return f'{g}\\,{{\\scriptsize[{st}]}}'
+    return re.sub(r'\[STATUS:\s*([A-Za-z\-]+)\]', sub, text)
+
+def box_blockers(bodies, warn, rep, deps_labels):
+    """正文 minimal blocker 主语句 → blockerbox 红框（标题 = BLOCKER G#：<块内主题词>）。
+    匹配单位＝句子（到句号止，含跨行）；deps remark 已先行移出，不在此范围。
+    追随句（[STATUS: BLOCKED] 及同句号后的限定语）一并入框。"""
+    sent_pat = re.compile(
+        r'(?:The minimal blocker (?:is|for)|Minimal blocker:)[^.]*\.(?:\s*\\linebreak\[4\]\s*)?\s*\[STATUS:\s*BLOCKED\]?'
+        r'|(?:The minimal blocker (?:is|for)|Minimal blocker:)[^.]*\.',
+        re.S)
+    total = 0
+    per = {}
+    gid_counter = 0  # 全局 G 编号（跨块递增，学 Gao–Lou–Wu–Zhang 的 G1–G9 连续序）
+    for nid in bodies:
+        text = bodies[nid]
+        matches = list(sent_pat.finditer(text))
+        if not matches:
+            continue
+        out, last, n = [], 0, 0
+        for m in matches:
+            seg = m.group(0)
+            # 句内已有 [STATUS: BLOCKED] 则剥离（框标题承载状态）
+            inner = re.sub(r'\s*\[STATUS:\s*BLOCKED\]\s*$', '', seg).strip()
+            n += 1
+            gid_counter += 1
+            gid = f'G{gid_counter}'
+            # 标题：取主语句前 6 个实义词（去掉 The minimal blocker is/for）
+            topic = re.sub(r'^(?:The minimal blocker (?:is|for)|Minimal blocker:)\s*', '', inner)
+            # 标题只用纯文字词：数学与引用整体剔除（\ref 解析后的 "Proposition~X.Y"
+            # / 裸 label / 任何 \命令 / $...$ / \(...\)），只留普通英文词
+            topic = re.sub(r'\$[^$]*\$', ' ', topic)
+            topic = re.sub(r'\\\([^\\]*\\\)', ' ', topic)
+            topic = re.sub(r'(?:Theorem|Lemma|Proposition|Corollary|Definition|Remark|Section)~?[0-9.]*', ' ', topic)
+            topic = re.sub(r'[A-Za-z]+:[A-Za-z0-9\-]+', ' ', topic)  # label 残骸（thm:xxx）
+            topic = re.sub(r'\\[a-zA-Z]+', ' ', topic)
+            topic = re.sub(r'[{}^_~]', ' ', topic)
+            # 引导残句剥离（"the following:", "to supply, for each of ..." 等）＋停用词过滤
+            topic = re.sub(r'^(?:the following\s*:|to\s+|that\s+|the\s+)', '', topic.strip(), flags=re.I)
+            STOP = {'the','and','for','each','of','is','to','that','with','together','one','least',
+                    'following','supply','provide','actual','all','its','this','are','been','from'}
+            seen = set()
+            words = [w for w in topic.split()
+                     if len(w) > 2 and w.isalpha() and w.lower() not in STOP
+                     and not (w.lower() in seen or seen.add(w.lower()))][:6]
+            title = f'UNPROVED INPUT {gid}: {" ".join(words)}'
+            out.append(text[last:m.start()])
+            out.append(f'\\begin{{blockerbox}}{{{title}}}\n{inner}\n\\end{{blockerbox}}')
+            last = m.end()
+        out.append(text[last:])
+        bodies[nid] = ''.join(out)
+        per[nid] = n
+        total += n
+    rep['blocker_boxes'] = {'boxed': total, 'per_node': per}
+    if total:
+        print(f'  blocker_box: {total} 处最小 blocker 已框化（{len(per)} 块）')
+
+
 def extract_deps_appendix(bodies, warn, rep):
     """deps_appendix：把 rem:NXX-deps / rem:NXX-deps-open 记账 remark 整体移入文末附录（S3 裁决族②）。"""
     pat = re.compile(r'\\begin\{remark\}(?:\[[^\]]*\])?\s*\\label\{rem:(N\d+)-deps[^}]*\}.*?\\end\{remark\}', re.S)
@@ -258,7 +339,31 @@ def main():
                           '\\usepackage{microtype}', '\\usepackage{mathtools}',
                           '\\usepackage{booktabs}', '\\usepackage{url}',
                           '\\usepackage[hidelinks]{hyperref}'],
+        # 复刻 Gao–Lou–Wu–Zhang (2026-08-19) 版式（operator 2026-08-21 拍板：迁 article 11pt）：
+        # 11pt 正文、margin=1in 宽版心、蓝色可点链接、tcolorbox 红框、按节定理编号。
+        # geometry 属"operator 批准的配方"，非 lint 意义上的版面干预（R3 白名单语义）。
+        'sibling-wu': [
+            '\\usepackage[letterpaper,margin=1in]{geometry}',
+            '\\usepackage{lmodern}', '\\usepackage{microtype}',
+            '\\usepackage{mathtools}', '\\usepackage{booktabs}',
+            # 注：不加载 array——本机 ~/texmf 有 v2.7b array.sty 与 TeX Live 2026 basic
+            # 内核不兼容（vcenter@text 未定义，最小复现 26 errors）；LaTeX 内置 array
+            # 环境已够本文使用（全文 1 处 \begin{array}，无 array 包特性）。
+            '\\usepackage{xcolor}',
+            '\\usepackage[most]{tcolorbox}',
+            '\\definecolor{blockerred}{RGB}{155,35,35}',
+            '\\definecolor{blockerback}{RGB}{255,247,247}',
+            '\\newtcolorbox{blockerbox}[1]{enhanced, breakable, colback=blockerback,'
+            ' colframe=blockerred, boxrule=0.7pt, arc=0pt, left=7pt, right=7pt,'
+            ' top=6pt, bottom=6pt, before skip=10pt, after skip=10pt,'
+            ' title={#1}, coltitle=blockerred, fonttitle=\\bfseries}',
+            '\\usepackage[colorlinks=true, linkcolor=blue!60!black,'
+            ' citecolor=blue!60!black, urlcolor=blue!60!black]{hyperref}'],
     }
+    # docclass 传参（如 article 11pt）：meta.docclass_options
+    dco = meta.get('docclass_options')
+    if dco:
+        pre[0] = f'\\documentclass[{dco}]{{{docclass}}}'
     tpl = meta.get('template')
     if tpl:
         if tpl not in TEMPLATES:
@@ -268,8 +373,21 @@ def main():
     for line in meta.get('preamble_extra', []):
         pre.append(line)
     declared = []
-    for env in num.get('newtheorems', ['theorem','lemma','proposition','corollary','conjecture','definition','example','remark']):
-        pre.append(f'\\newtheorem{{{env}}}{{{env.capitalize()}}}' if env not in ('definition','example') else f'\\theoremstyle{{definition}}\n\\newtheorem{{{env}}}{{{env.capitalize()}}}')
+    # 定理编号策略：numbering.style == 'per-section' → 按节编号（Theorem 3.1 式），
+    # 与共享计数器（首个环境为基准）；默认保持连续编号（现行行为）。
+    per_section = str(num.get('style', '')).lower() in ('per-section', 'persection', 'by-section')
+    for i, env in enumerate(num.get('newtheorems', ['theorem','lemma','proposition','corollary','conjecture','definition','example','remark'])):
+        # 共享计数器：非首环境挂 [基准]；基准自身挂 [section]（per-section 时）
+        if i == 0:
+            decl = f'\\newtheorem{{{env}}}{{{env.capitalize()}}}' + ('[section]' if per_section else '')
+        else:
+            base = num["newtheorems"][0]
+            decl = f'\\newtheorem{{{env}}}[{base}]{{{env.capitalize()}}}'
+        if env in ('definition', 'example'):
+            decl = '\\theoremstyle{definition}\n' + decl
+        elif env == 'remark':
+            decl = '\\theoremstyle{remark}\n' + decl
+        pre.append(decl)
         declared.append(env)
     # 3.5 预载全部正文（xref/Nref 需要块内定位；stray preamble 此处剥除记账）
     bodies, dropped_map = {}, {}
@@ -294,6 +412,15 @@ def main():
         wrap_raw_mentions(bodies, warn, rep)
     deps_entries = extract_deps_appendix(bodies, warn, rep) if instr.get('deps_appendix') else []
     resolve_nrefs(bodies, labels_map, warn, rep)
+
+    # 视觉 pass（仅 sibling-wu 配方启用；其他配方零行为变化——渐进发布原则）
+    visual = str(meta.get('template', '')).strip() == 'sibling-wu'
+    if visual:
+        box_blockers(bodies, warn, rep, {e['node'] for e in deps_entries})
+        boxed_nodes = set(rep.get('blocker_boxes', {}).get('per_node', {}))
+        for nid in bodies:
+            # 状态字形化：整块做（框内已被 box_blockers 剥离 STATUS 尾注；框外轻量标注）
+            bodies[nid] = glyph_status(bodies[nid])
 
     body_parts = []
     all_text = []
@@ -344,21 +471,46 @@ def main():
     # 回溯实证（2026-08-21 格式轮）：全题进页眉 = 112.5pt 逐页超宽 ×36 处；
     # 缺省回落现行为（无 optional 参数）。
     title_cmd = (f"\\title[{meta['short_title']}]" + "{" + meta.get('title', 'Untitled') + "}"
-                 if meta.get('short_title')
+                 if meta.get('short_title') and docclass == 'amsart'
                  else f"\\title{{{meta.get('title', 'Untitled')}}}")
-    front = [title_cmd,
-             f"\\author{{{meta.get('author', 'OPERATOR-FILL')}}}"]
-    if meta.get('date') is not None:
-        front.append(f"\\date{{{meta['date']}}}")
+    # article 类页眉：markboth（作者 / 短题）——学 Gao–Lou–Wu–Zhang 的偶奇分布
     abstract = str(meta.get('abstract') or '').strip()
-    if abstract:
+    front = []
+    if abstract and docclass != 'amsart':
+        # article 顺序：maketitle → abstract → toc（amsart 是 abstract→maketitle）
+        front = [title_cmd,
+                 f"\\author{{{meta.get('author', 'OPERATOR-FILL')}}}"]
+        if meta.get('date') is not None:
+            front.append(f"\\date{{{meta['date']}}}")
         front.append('\\begin{document}')
-        front.append('\\begin{abstract}\n' + abstract + '\n\\end{abstract}')
         front.append('\\maketitle')
+        front.append('\\begin{abstract}\n' + abstract + '\n\\end{abstract}')
         rep['abstract'] = {'rendered': True, 'chars': len(abstract)}
+        if visual:
+            front.append(f'\\markboth{{{meta.get("short_title", meta.get("title", ""))}}}{{{meta.get("running_author", meta.get("author", "OPERATOR-FILL"))}}}')
+            front.append('\\tableofcontents')
+            front.append('\\newpage')
     else:
-        front.append('\\begin{document}\\maketitle')
+        front = [title_cmd,
+                 f"\\author{{{meta.get('author', 'OPERATOR-FILL')}}}"]
+        if meta.get('date') is not None:
+            front.append(f"\\date{{{meta['date']}}}")
+        if abstract:
+            front.append('\\begin{document}')
+            front.append('\\begin{abstract}\n' + abstract + '\n\\end{abstract}')
+            front.append('\\maketitle')
+            rep['abstract'] = {'rendered': True, 'chars': len(abstract)}
+        else:
+            front.append('\\begin{document}\\maketitle')
     bib_tex, bib_n = render_bibliography(instr)
+    if visual and bib_tex:
+        # References 进目录（article 类 thebibliography 默认不进）
+        bib_tex = '\\addcontentsline{toc}{section}{References}\n' + bib_tex
+    # deps 附录进目录（编号 section 自进，无需处理；此处 \section* 需手动加）
+    if visual and appendix_tex:
+        appendix_tex = appendix_tex.replace(
+            '\\section*{Dependency and Open-Item Ledger}',
+            '\\section*{Dependency and Open-Item Ledger}\n\\addcontentsline{toc}{section}{Dependency and Open-Item Ledger}', 1)
     rep['bibliography'] = {'entries': bib_n}
     tex = ('\n'.join(pre) + '\n' + '\n'.join(front) + '\n' + head_comment + '\n'
            + '\n\n'.join(body_parts) + '\n' + tail_comment + '\n'
