@@ -1,0 +1,408 @@
+#!/usr/bin/env python3
+"""闸门脚本回归测试（schedule.py / assemble.py / coverage_check.py / splice.py）
+
+设计原则：
+  - CLI 级集成：通过 subprocess 调真实脚本，断言真实退出码与输出——测的就是
+    管线实际依赖的行为（含 exit code：I1 拒发=3，FAIL=1/2）。
+  - 合成夹具：两节点小树 + 手写块/fragment，全部落临时目录，不碰真实运行数据。
+  - 无第三方依赖：`python3 phase2-paper/tests/test_gates.py` 直接跑；
+    兼容 pytest（函数均为 test_*，无 fixture）。
+
+背景：2026-08-20 评估指出"闸门代码零测试"是最大工程缺口；本套件是缺口①的
+落地（金样由夹具充当，负测试保证坏输入必须让门变红）。
+"""
+import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(os.path.dirname(HERE))
+SCHED = os.path.join(ROOT, 'phase2-paper', 'scheduler', 'schedule.py')
+ASM = os.path.join(ROOT, 'phase2-paper', 'tools', 'assemble.py')
+COV = os.path.join(ROOT, 'phase2-paper', 'tools', 'coverage_check.py')
+SPL = os.path.join(ROOT, 'phase2-paper', 'tools', 'splice.py')
+
+PY = sys.executable or 'python3'
+
+
+def run(script, *args):
+    p = subprocess.run([PY, script, *args], capture_output=True, text=True)
+    return p.returncode, p.stdout + p.stderr
+
+
+# ── 夹具 ──────────────────────────────────────────────────────────────
+
+def make_tree(d, policy='manual', headline='N01'):
+    tree = {
+        'paper_id': 't', 'headline_node': headline, 'confirm_policy': policy,
+        'nodes': [
+            {'id': 'N00', 'title': 'leaf lemma', 'statement': '建立 X。',
+             'completion_test': 'X 成立。', 'deps': []},
+            {'id': 'N01', 'title': 'top theorem', 'statement': '由 X 建立 Y。',
+             'completion_test': 'Y 成立。', 'deps': ['N00']},
+        ],
+        'allowed_dependencies': [
+            {'id': 'D1', 'kind': 'theorem', 'statement': '外部标准事实。'}],
+    }
+    p = os.path.join(d, 'tree.json')
+    with open(p, 'w', encoding='utf-8') as f:
+        json.dump(tree, f, ensure_ascii=False)
+    return p
+
+
+def write_block(d, nid, state, cite=(), body_extra=''):
+    cites = ' '.join(f'由 {c} 的结论：引用之。' for c in cite)
+    text = (f"【正文】\n我们在此证明 {nid}。{cites} 计算得 $a+b$。\n{body_extra}\n"
+            f"【结论】\n{nid} 的目标成立 ({state})。\n"
+            f"【依赖与未决】\n- 引用：{' '.join(cite) or '无'}\n")
+    p = os.path.join(d, nid + '.md')
+    with open(p, 'w', encoding='utf-8') as f:
+        f.write(text)
+    return p
+
+
+def write_frag(d, nid, body):
+    p = os.path.join(d, nid + '.md')
+    with open(p, 'w', encoding='utf-8') as f:
+        f.write(f'【块正文】\n{body}\n')
+    return p
+
+
+def write_json(d, name, obj):
+    p = os.path.join(d, name)
+    with open(p, 'w', encoding='utf-8') as f:
+        json.dump(obj, f, ensure_ascii=False)
+    return p
+
+
+def instr(nodes=('N00', 'N01')):
+    return {'meta': {'title': 'T', 'language': 'English', 'docclass': 'amsart'},
+            'numbering': {'newtheorems': ['theorem', 'lemma']},
+            'sections': [{'id': 'P0', 'title': 'Sec', 'nodes': list(nodes)}]}
+
+
+# ── schedule.py ───────────────────────────────────────────────────────
+
+def test_validate_pass():
+    with tempfile.TemporaryDirectory() as d:
+        rc, out = run(SCHED, 'validate', make_tree(d))
+        assert rc == 0, out
+        assert 'PASS' in out and 'ERROR' not in out, out
+
+
+def test_validate_cycle():
+    with tempfile.TemporaryDirectory() as d:
+        p = make_tree(d)
+        t = json.load(open(p, encoding='utf-8'))
+        t['nodes'][0]['deps'] = ['N01']          # N00 <-> N01 成环
+        json.dump(t, open(p, 'w', encoding='utf-8'), ensure_ascii=False)
+        rc, out = run(SCHED, 'validate', p)
+        assert rc == 1 and '有环' in out, out
+
+
+def test_validate_dangling_dep():
+    with tempfile.TemporaryDirectory() as d:
+        p = make_tree(d)
+        t = json.load(open(p, encoding='utf-8'))
+        t['nodes'][1]['deps'] = ['NXX']
+        json.dump(t, open(p, 'w', encoding='utf-8'), ensure_ascii=False)
+        rc, out = run(SCHED, 'validate', p)
+        assert rc == 1 and '不存在' in out, out
+
+
+def test_taskbook_i1_refuses_with_exit_3():
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        b = os.path.join(d, 'blocks'); os.makedirs(b)
+        rc, out = run(SCHED, 'taskbook', tree, '--blocks', b, '--node', 'N01')
+        assert rc == 3 and '拒发' in out, out
+
+
+def test_taskbook_embeds_predecessor_conclusion():
+    """I3：任务书的【前置结论】必须来自前置块真实落盘的【结论】原文。"""
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        b = os.path.join(d, 'blocks'); os.makedirs(b)
+        write_block(b, 'N00', 'FIXED')
+        rc, out = run(SCHED, 'taskbook', tree, '--blocks', b, '--node', 'N01')
+        assert rc == 0, out
+        assert '由 N00' in out and 'N00 的目标成立' in out, out
+
+
+def test_status_i5_violation():
+    """列了前置却绕开重推：N01 声明 deps=[N00] 但正文不提 N00。"""
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        b = os.path.join(d, 'blocks'); os.makedirs(b)
+        write_block(b, 'N00', 'FIXED')
+        write_block(b, 'N01', 'CONDITIONAL')      # 不引用 N00
+        rc, out = run(SCHED, 'status', tree, '--blocks', b)
+        assert rc == 0 and 'I5 违规' in out and 'N01' in out, out
+
+
+def test_status_i3_violation():
+    """前置未落盘却声称已证：N01 落盘称 PROVED-IN-PROJECT，N00 不存在。"""
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        b = os.path.join(d, 'blocks'); os.makedirs(b)
+        write_block(b, 'N01', 'PROVED-IN-PROJECT', cite=('N00',))  # 引用空气
+        rc, out = run(SCHED, 'status', tree, '--blocks', b)
+        assert rc == 0 and 'I3 违规' in out, out
+
+
+def test_status_i2_downgrade_propagation():
+    """有效状态 = worst(自己, 前置)：N00 BLOCKED ⇒ N01 CONDITIONAL 降为 BLOCKED。"""
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        b = os.path.join(d, 'blocks'); os.makedirs(b)
+        write_block(b, 'N00', 'BLOCKED')
+        write_block(b, 'N01', 'CONDITIONAL', cite=('N00',))
+        rc, out = run(SCHED, 'status', tree, '--blocks', b)
+        assert rc == 0 and '降级' in out, out
+        row = [ln for ln in out.splitlines() if ln.startswith('N01')][0]
+        assert 'BLOCKED' in row, row
+
+
+def test_status_empty_blocks_dir_must_not_crash():
+    """回归：空 blocks 目录曾触发 NameError（bad 未定义）。"""
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        b = os.path.join(d, 'blocks'); os.makedirs(b)
+        rc, out = run(SCHED, 'status', tree, '--blocks', b)
+        assert rc == 0, out
+        assert 'NOT-LANDED' in out and '尚未闭合' in out, out
+
+
+def test_next_frontier_and_gate_strictness():
+    """I1 拒发 + I4 取严：policy=yolo 也不改高污染节点的 manual 档。"""
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d, policy='yolo')
+        b = os.path.join(d, 'blocks'); os.makedirs(b)
+        write_block(b, 'N00', 'FIXED')
+        rc, out = run(SCHED, 'next', tree, '--blocks', b)
+        assert rc == 0 and 'N01' in out and 'I1' in out, out
+        # 空目录：批 = L0 {N00}，N00 污染 1/2 ≥ 50% ⇒ manual（policy yolo 不得放宽）
+        empty = os.path.join(d, 'empty'); os.makedirs(empty, exist_ok=True)
+        rc, out = run(SCHED, 'next', tree, '--blocks', empty)
+        assert rc == 0 and 'MANUAL' in out, out
+
+
+# ── assemble.py ───────────────────────────────────────────────────────
+
+FRAG_N00 = (r'\begin{lemma}\label{lem:N00} X holds. \end{lemma}'
+            '\n' r'Proof of $x$.' )
+FRAG_N01 = (r'\begin{equation}\label{eq:N01-x} y = x \end{equation}'
+            '\n' r'By \ref{lem:N00} and \eqref{eq:N01-x}.')
+
+
+def test_assemble_ok():
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', FRAG_N00)
+        write_frag(fd, 'N01', FRAG_N01)
+        ip = write_json(d, 'instr.json', instr())
+        tex = os.path.join(d, 'paper.tex')
+        rep = os.path.join(d, 'rep.json')
+        rc, out = run(ASM, ip, fd, tree, tex, '--report', rep)
+        assert rc == 0, out
+        body = open(tex, encoding='utf-8').read()
+        assert body.count('\\newtheorem') == 2          # preamble 单源
+        assert '\\label{sec:P0}' in body and 'lem:N00' in body
+        assert json.load(open(rep, encoding='utf-8'))['ok'] is True
+
+
+def test_assemble_rejects_topology_violation():
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', FRAG_N00)
+        write_frag(fd, 'N01', FRAG_N01)
+        ip = write_json(d, 'instr.json', instr(nodes=('N01', 'N00')))  # 反序
+        rc, out = run(ASM, ip, fd, tree, os.path.join(d, 'p.tex'))
+        assert rc == 1 and '节序违反' in out, out
+
+
+def test_assemble_rejects_missing_fragment():
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', FRAG_N00)                 # N01 缺文件
+        ip = write_json(d, 'instr.json', instr())
+        rc, out = run(ASM, ip, fd, tree, os.path.join(d, 'p.tex'))
+        assert rc == 1 and '无 fragment' in out, out
+
+
+def test_assemble_rejects_extra_fragment():
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', FRAG_N00)
+        write_frag(fd, 'N01', FRAG_N01)
+        ip = write_json(d, 'instr.json', instr(nodes=('N00',)))       # 少列 N01
+        rc, out = run(ASM, ip, fd, tree, os.path.join(d, 'p.tex'))
+        assert rc == 1 and '未列' in out, out
+
+
+def test_assemble_rejects_unresolved_ref():
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', FRAG_N00)
+        write_frag(fd, 'N01', r'See \ref{lem:NZZ}.')    # 悬空角标
+        ip = write_json(d, 'instr.json', instr())
+        rc, out = run(ASM, ip, fd, tree, os.path.join(d, 'p.tex'))
+        assert rc == 1 and '角标未闭合' in out, out
+
+
+def test_assemble_strips_stray_preamble():
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', '\\newtheorem{theorem}{Theorem}\n' + FRAG_N00)
+        write_frag(fd, 'N01', FRAG_N01)
+        ip = write_json(d, 'instr.json', instr())
+        tex = os.path.join(d, 'paper.tex')
+        rep = os.path.join(d, 'rep.json')
+        rc, out = run(ASM, ip, fd, tree, tex, '--report', rep)
+        assert rc == 0 and '剥除' in out, out
+        body = open(tex, encoding='utf-8').read()
+        assert body.count('\\newtheorem') == 2          # stray 已剥，preamble 单源
+        assert json.load(open(rep, encoding='utf-8'))['dropped_preamble']['N00']
+
+
+# ── coverage_check.py ─────────────────────────────────────────────────
+
+def cov_files(d, in_body, out_body):
+    """夹具：结论段固定无状态词，状态标注由调用方放进正文——保证输入/输出计数对称。"""
+    src = os.path.join(d, 'blk.md')
+    with open(src, 'w', encoding='utf-8') as f:
+        f.write(f'【正文】\n{in_body}\n【结论】\n结论句。\n【依赖与未决】\n无\n')
+    out = os.path.join(d, 'frag.md')
+    with open(out, 'w', encoding='utf-8') as f:
+        f.write(f'【块正文】\n{out_body}\n')
+    return src, out
+
+
+def test_coverage_pass():
+    with tempfile.TemporaryDirectory() as d:
+        body = r'证明 $x+y$ 与 \[ z = w \] 以及 \begin{lemma} L \end{lemma} 结论 (BLOCKED)。'
+        src, out = cov_files(d, body, body + '\n' + '加长但不压缩 ' * 30)
+        rc, _ = run(COV, 'segment', out, src)
+        assert rc == 0
+
+
+def test_coverage_catches_compression():
+    """7 页事故的机械复刻：内容被摘要 ⇒ 必须红。"""
+    with tempfile.TemporaryDirectory() as d:
+        body = ('证明细节 ' * 200) + r' $x$ \[ y \] \begin{lemma} L \end{lemma} (BLOCKED)'
+        src, out = cov_files(d, body, '摘要：结论成立 (BLOCKED)。')
+        rc, o = run(COV, 'segment', out, src)
+        assert rc == 1 and '长度比' in o, o
+
+
+def test_coverage_catches_formula_drop():
+    with tempfile.TemporaryDirectory() as d:
+        body = r'$a$ $b$ \[ c \] \begin{lemma} L \end{lemma} (BLOCKED)'
+        src, out = cov_files(d, body, r'$a$ \[ c \] \begin{lemma} L \end{lemma} (BLOCKED)'
+                             + ' 补足长度的文字 ' * 40)
+        rc, o = run(COV, 'segment', out, src)
+        assert rc == 1 and 'inline_math 计数下降' in o, o
+
+
+def test_coverage_paren_delimiter_regression():
+    r"""N27 盲区回归：\(x+y\) 与 $x+y$ 等价计数；纯数字 \(5\) 豁免。"""
+    with tempfile.TemporaryDirectory() as d:
+        src_body = r'\(x+y\) \(u-v\) \(5\) (BLOCKED)'
+        out_body = r'$x+y$ $u-v$ 5 (BLOCKED)' + ' 等价改写说明文字 ' * 10
+        src, out = cov_files(d, src_body, out_body)
+        rc, o = run(COV, 'segment', out, src)
+        assert rc == 0, o                    # 2=2，纯数字不计
+
+
+def test_coverage_status_variant_counting():
+    """词表无关状态计数：丢 [STATUS: PROVED-IN-PROJECT] 变体必须红。"""
+    with tempfile.TemporaryDirectory() as d:
+        src_body = ('论证 ' * 80) + ' [STATUS: PROVED-IN-PROJECT]'
+        out_body = ('论证 ' * 80)
+        src, out = cov_files(d, src_body, out_body)
+        rc, o = run(COV, 'segment', out, src)
+        assert rc == 1 and 'six_state_tags 计数下降' in o, o
+
+
+def test_coverage_allow_count_drop_flag():
+    with tempfile.TemporaryDirectory() as d:
+        body = r'$a$ $b$ (BLOCKED)'
+        src, out = cov_files(d, body, r'$a$ (BLOCKED)' + ' 补长度 ' * 40)
+        rc, o = run(COV, 'segment', out, src, '--allow-count-drop')
+        assert rc == 0 and '豁免' in o, o
+
+
+# ── splice.py（splice-v1 拼接链仍在库，防回归）────────────────────────
+
+def make_sp_spec():
+    return {'paper_id': 't', 'title': 'T', 'headline_block': 'N01',
+            'conventions': {}, 'allowed_dependencies': [],
+            'blocks': [{'id': 'N00', 'title': 'a', 'objective': 'o', 'completion_test': 'c',
+                        'deps': [], 'allowed': []},
+                       {'id': 'N01', 'title': 'b', 'objective': 'o', 'completion_test': 'c',
+                        'deps': ['N00'], 'allowed': []}]}
+
+
+def test_splice_ok_and_dup_warning():
+    with tempfile.TemporaryDirectory() as d:
+        sp = write_json(d, 'spec.json', make_sp_spec())
+        b = os.path.join(d, 'blocks'); os.makedirs(b)
+        dup = '这是一句足够长的重复句用于跨块重复检测机制回归测试目的而写下的句子。' * 2
+        write_block(b, 'N00', 'FIXED', body_extra=dup)
+        write_block(b, 'N01', 'CONDITIONAL', cite=('N00',), body_extra=dup)
+        rc, out = run(SPL, sp, b, os.path.join(d, 'a.md'), os.path.join(d, 'r.json'))
+        assert rc == 0 and '跨块重复长句' in out, out
+
+
+def test_splice_missing_block_fatal():
+    with tempfile.TemporaryDirectory() as d:
+        sp = write_json(d, 'spec.json', make_sp_spec())
+        b = os.path.join(d, 'blocks'); os.makedirs(b)
+        write_block(b, 'N00', 'FIXED')                   # N01 缺
+        rc, out = run(SPL, sp, b, os.path.join(d, 'a.md'), os.path.join(d, 'r.json'))
+        assert rc == 2 and '缺少块输出' in out, out
+
+
+def test_splice_rejects_non_topological_order():
+    with tempfile.TemporaryDirectory() as d:
+        spec = make_sp_spec()
+        spec['blocks'].reverse()                          # N01 在前
+        sp = write_json(d, 'spec.json', spec)
+        b = os.path.join(d, 'blocks'); os.makedirs(b)
+        write_block(b, 'N00', 'FIXED')
+        write_block(b, 'N01', 'CONDITIONAL', cite=('N00',))
+        rc, out = run(SPL, sp, b, os.path.join(d, 'a.md'), os.path.join(d, 'r.json'))
+        assert rc == 1 and '非拓扑序' in out, out
+
+
+# ── runner ────────────────────────────────────────────────────────────
+
+def main():
+    tests = [(n, f) for n, f in sorted(globals().items())
+             if n.startswith('test_') and callable(f)]
+    failed = 0
+    for name, fn in tests:
+        try:
+            fn()
+            print(f'  PASS  {name}')
+        except AssertionError as e:
+            failed += 1
+            print(f'  FAIL  {name}\n        {e}')
+        except Exception as e:                            # noqa: BLE001
+            failed += 1
+            print(f'  ERROR {name}\n        {type(e).__name__}: {e}')
+    print(f'\n{len(tests) - failed}/{len(tests)} passed')
+    return 1 if failed else 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

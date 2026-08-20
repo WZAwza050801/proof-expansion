@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
-# 内容覆盖断言器（DESIGN.md §4.0 规则③ / §4.1 G2a 段断言 / §4.2 全文内容覆盖断言）
+"""内容覆盖断言器（DESIGN.md §4.0 规则③）：长度比＋公式/定理环境/状态标注计数不降。
+
+用法:
+  segment 模式（G2a 块断言）:
+    python3 coverage_check.py segment <产出.md|tex> <块1.md> [块2.md ...] [--threshold 0.8] [--allow-count-drop] [--report r.json]
+  paper 模式（全文覆盖）:
+    python3 coverage_check.py paper <assembled.tex> <baseline.md> [--threshold 0.8] [--allow-count-drop] [--report r.json]
+
+退出码：0=PASS，1=FAIL，2=用法错误。回归测试：phase2-paper/tests/test_gates.py。
+"""
 # 背景：Seidel 编辑轮事故——7 页降质稿被当成品，因当时无任何"内容被压缩"检查。
 # 本脚本补上：长度比 + 公式/定理环境/六态标注计数，全部机械判定，不信口头保证。
 #

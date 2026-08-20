@@ -353,6 +353,7 @@ def cmd_status(g: Graph, blocks_dir: str) -> int:
     lv = g.levels()
 
     landed = [i for i in g.ids if i in blocks and blocks[i]['complete']]
+    bad: list[str] = []   # I3 违规清单（空目录路径下也必须已初始化——回归测试锁定）
     print('=== status ===')
     print(f'已落盘 {len(landed)}/{len(g.ids)} | blocks 目录: {blocks_dir}')
     print()

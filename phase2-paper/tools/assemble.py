@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-# S2 机械组装器（DESIGN.md §4.2/§4.4）：消费块级 fragments ＋ coordinator 装配指令 JSON → paper.tex
+"""S2 机械组装器（DESIGN.md §4.2/§4.4）：装配指令 JSON ＋ fragments → paper.tex。
+
+用法:
+  python3 assemble.py <instructions.json> <fragments_dir> <dep_tree.json> <out.tex> [--report r.json]
+
+退出码：0=组装成功（报告 ok），1=指令违规（拓扑序/缺块/角标未闭合），2=用法错误。
+职责与检查项见下方注释；回归测试：phase2-paper/tests/test_gates.py。
+"""
 # 职责（纯机械，零 LLM）：
 #   1. 指令合法性：sections 节点必须与落盘 fragments 恰好对齐（缺/多都报错）；
 #   2. 命题图逻辑：节序必须是 dep-tree DAG 的拓扑线性扩展（ restricted 到本次节点）；
