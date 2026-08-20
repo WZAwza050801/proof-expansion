@@ -26,7 +26,7 @@
 3. 【结论行】：每块【结论】各一句话（全论文约 38 行）——这是你理解论文数学脉络的**唯一**材料；
 3b. 【label 清单】：`tools/extract_labels.py` 从 fragments 机械提取的每块 `\label` 与定理环境清单（无损元数据，不携正文）——你的 label 映射与 xref 解析必须**只用清单内的真实 label**，不得发明；
 4. 【账本统计】：六态计数等；
-5. 【成文参数】：`language` / `docclass` / 编号风格。
+5. 【成文参数】：`language` / `docclass` / **`template`（模板配方：`amsart-arxiv`＝lmodern+microtype+hidelinks hyperref；`article-arxiv`＝T1+lmodern+microtype+mathtools+booktabs+hyperref；无目标模板场合由 operator 指定）** / 编号风格。
 
 **硬约束（违反 = 不合格）**：
 
@@ -41,6 +41,12 @@
 
 1. 节序确认（默认按里程碑 P0–P7）与节标题定稿建议；
 2. 编号策略：定理类环境连续编号还是按节编号；`\newtheorem` 声明清单（去重后）；
+2b. **模板与版式定调（2026-08-21 补，v0.2.1——此前视觉职责无工位，回溯实证）**：
+   在 `meta.template` 中选定模板配方并在 `meta` 中回填 `author`/`date`/`abstract` 字段。
+   **整体格式与字体协调是本角色的职责**——块写手只管块内纪律，全篇观感由这里的
+   一次性选择决定；配方可选清单见 assemble.py `TEMPLATES` 与 `phase2-paper/templates/`；
+   不越配方私改字体/版心（改版心属高风险命令，lint R 族会报）。abstract 由小派发
+   产生后填入，author 由 operator 提供前保持占位并在 questions 里催办。
 3. **labels 全表**：从【label 清单】为**每个**节点指定主陈述 label（`labels` 字段，
    node→label 全表；只用清单内真实 label，不得发明）——这是 `\Nref` 解析与 xref 的地基；
 4. **xrefs（协议内尽力而为，不承诺全量）**：给出你能从结论行/元数据**确证定位**的跨块引用。
