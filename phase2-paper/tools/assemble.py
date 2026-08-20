@@ -340,7 +340,13 @@ def main():
             parts.append(e)
         appendix_tex = '\n\n'.join(parts) + '\n'
 
-    front = [f"\\title{{{meta.get('title', 'Untitled')}}}",
+    # meta.short_title：amsart 官方 \title[短题]{全题} 机制（\shorttitle 供页眉用）。
+    # 回溯实证（2026-08-21 格式轮）：全题进页眉 = 112.5pt 逐页超宽 ×36 处；
+    # 缺省回落现行为（无 optional 参数）。
+    title_cmd = (f"\\title[{meta['short_title']}]" + "{" + meta.get('title', 'Untitled') + "}"
+                 if meta.get('short_title')
+                 else f"\\title{{{meta.get('title', 'Untitled')}}}")
+    front = [title_cmd,
              f"\\author{{{meta.get('author', 'OPERATOR-FILL')}}}"]
     if meta.get('date') is not None:
         front.append(f"\\date{{{meta['date']}}}")
