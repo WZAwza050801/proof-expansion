@@ -675,6 +675,75 @@ def test_lint_battery_degrades_gracefully_without_tools():
         assert all(v['status'] == 'skipped' for v in rep['battery'].values()), rep['battery']
 
 
+CANNED_LOG = r"""
+! LaTeX Error: File `foo.sty' not found.
+LaTeX Warning: Reference `eq:x' on page 3 undefined on input line 42.
+LaTeX Warning: Citation `D9' on page 5 undefined on input line 88.
+LaTeX Warning: Label `lem:a' multiply defined.
+Overfull \hbox (238.5pt too wide) in paragraph at lines 11--12
+Overfull \hbox (12.0pt too wide) in paragraph at lines 30--31
+Overfull \vbox (4pt too wide) has occurred while \output is active
+Underfull \hbox (badness 10000) in paragraph at lines 7--9
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+"""
+
+
+def test_lint_log_metrics_parser():
+    """L 族：编译日志指标提取（operator CI 阻断口径的机器化）。"""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('paper_lint',
+              os.path.join(ROOT, 'phase2-paper', 'tools', 'paper_lint.py'))
+    pl = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(pl)
+    m = pl.parse_log_metrics(CANNED_LOG)
+    assert m['compile_errors'] == 1
+    assert m['undefined_references'] == 1
+    assert m['undefined_citations'] == 1
+    assert m['multiply_defined_labels'] >= 1
+    assert m['missing_files'] >= 1
+    assert m['overfull_hbox_count'] == 2
+    assert m['overfull_vbox_count'] == 1
+    assert m['max_overflow_pt'] == 238.5
+    assert m['underfull_badness_10000_count'] == 1
+    assert m['rerun_required_warnings'] >= 1
+
+
+CANNED_PDFFONTS = """name                                 type              encoding         emb sub uni object ID
+------------------------------------ ----------------- ---------------- --- --- --- ---------
+ABCDEZ+CMR10                         Type 1            Builtin          yes yes no       4
+NJKBXP+ NimbusRomNo9L-Medi           CID Type 0C       Identity-H       yes yes yes     9
+AAAAAA+SomeBitmap                    Type 3            Glyphs           no  no  no      2
+"""
+
+
+def test_lint_pdffonts_parser():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('paper_lint',
+              os.path.join(ROOT, 'phase2-paper', 'tools', 'paper_lint.py'))
+    pl = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(pl)
+    f = pl.parse_pdffonts(CANNED_PDFFONTS)
+    assert f['total'] == 3
+    assert f['unembedded'] == ['AAAAAA+SomeBitmap']
+    assert f['type3'] == ['AAAAAA+SomeBitmap']
+
+
+def test_lint_high_risk_scan_and_template_compliance():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('paper_lint',
+              os.path.join(ROOT, 'phase2-paper', 'tools', 'paper_lint.py'))
+    pl = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(pl)
+    hr = pl.high_risk_scan('a \\vspace{-2pt} b \\resizebox{\\textwidth}{!}{$x$} \\tiny c')
+    assert hr['commands'] == {'vspace{-': 1, 'resizebox': 1, 'tiny': 1}
+    assert not hr['geometry_tamper']
+    hr2 = pl.high_risk_scan('\\setlength{\\textwidth}{500pt}')
+    assert len(hr2['geometry_tamper']) == 1
+    tc = pl.template_compliance_scan('\\title{T}\n\\author{OPERATOR-FILL}\n\\maketitle\nx')
+    assert any('OPERATOR-FILL' in i for i in tc)
+    assert any('abstract' in i for i in tc)
+
+
 # ── runner ────────────────────────────────────────────────────────────
 
 def main():

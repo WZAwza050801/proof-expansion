@@ -21,7 +21,7 @@
 
 | 件 | 执行者 | 输入 | 查什么 |
 |---|---|---|---|
-| **G3a 机械自洽**（先跑，零 LLM） | `tools/paper_lint.py` | paper.tex＋compile.log | 内部 E1–E7 刚性判定＋W1–W5 量化，**＋外部开源检查器 battery**（checkcites vendor 于 `tools/vendor/`（LPPL）——bibliography 数据流，带 BibTeX/内联文献模型仲裁；chktex/lacheck 探测到即运行，未装则降级占位并注明启用方式）；**E 级不过则先修再进 G3b** |
+| **G3a 机械自洽**（先跑，零 LLM） | `tools/paper_lint.py` | paper.tex＋compile.log＋paper.pdf | 五检查族＋三级报告（ERROR=CI 阻断/WARNING/REVIEW）：**E** tex 图性质（label/cite/环境/定界符/Nref/账本对账）；**L** 编译日志指标（compile_errors、undefined_references/citations、multiply_defined、missing_files、font_substitution、overfull/underfull、rerun——operator 2026-08-21 指标表全量落地）；**P** PDF 层（pdffonts 字体嵌入与 Type 3、qpdf 结构、PyMuPDF 页面尺寸一致性/内容越框/空白页、pdfimages 分辨率）；**R** 高风险排版命令统计＋版面干预＋模板合规（不判错）；**＋外部开源工具 battery**（checkcites vendor（LPPL）带模型仲裁；chktex/lacheck 探测）。文件自包含可独立部署（拷出 tools/paper_lint.py＋vendor/ 即用）；**E/L 级 ERROR 不过则先修再进 G3b** |
 | **G3b 节级内容审查**（并行，一节一 agent） | 本契约（spawn×8） | 该节正文＋全局约定卡＋六态协议＋该节 lint 摘要 | 见下方职责 1–5 |
 | **G3c 全局对账**（1 agent，不读全文） | 本契约（spawn×1） | 引言＋结论＋lint 报告＋术语报告＋账本统计 | 见下方职责 6–8 |
 
@@ -110,3 +110,10 @@ CANDIDATE=候选陈述 / BLOCKED=精确定位的缺口（附最小blocker） / U
 
 - v1.0（2026-08-21）：随 paper_lint.py（G3a）设立；首次完整轮（R2）待跑——
   R2 的输入快照 = paper-v3.tex @ lint PASS 版。
+- **v1.1 同日增补（operator 调研清单落地）**：G3a 扩为五检查族三级报告
+  （E/L/P/W/R＋battery）；R3 模板合规——字体与排版以**官方模板为准**（本项目=amsart
+  官方文档类；不自造"通用 arXiv 样式"），paper_lint 查占位符/缺失件/版面干预。
+- **路线图（operator 定调，未实现）**：①内容审查的远期形态——证明义务**机器可检验化**
+  （Lean 编译出口：把块级 completion test 逐步转写为 Lean 定理，审查=编译）；
+  ②审查器独立产品化——paper_lint.py＋vendor/ 自包含，可脱离本仓库部署；
+  ③chktex/lacheck/TeXtidote 待环境补装后由 battery 自动激活（零代码改动）。
