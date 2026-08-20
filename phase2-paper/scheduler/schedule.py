@@ -377,12 +377,12 @@ def cmd_status(g: Graph, blocks_dir: str) -> int:
                 if not re.search(r'(?<![A-Za-z0-9])' + re.escape(d) + r'(?![0-9])', text)]
         if miss:
             cite_bad.append((i, miss))
-        if bad:
-            print('!! I3 违规（前置未落盘却声称已证 —— 模型自行假设了前置）:')
-            for i in bad:
-                miss = [d for d in g.nodes[i]['deps'] if eff.get(d) == NOT_LANDED]
-                print(f'   {i} 声称 {blocks[i]["declared_state"]}，但 {" ".join(miss)} 未落盘 -> 该块须重写')
-            print()
+    if bad:
+        print('!! I3 违规（前置未落盘却声称已证 —— 模型自行假设了前置）:')
+        for i in bad:
+            miss = [d for d in g.nodes[i]['deps'] if eff.get(d) == NOT_LANDED]
+            print(f'   {i} 声称 {blocks[i]["declared_state"]}，但 {" ".join(miss)} 未落盘 -> 该块须重写')
+        print()
     if cite_bad:
         print('!! I5 违规（声明了前置却未在正文引用——等于绕开上游重推，上下游可能不一致）:')
         for i, miss in cite_bad:
@@ -474,7 +474,14 @@ TASKBOOK_TMPL = """<!-- 任务书 自动生成 by schedule.py | node={node} laye
 4. 六态标注（就地标在句末）：**(PROVED-IN-PROJECT)** 本项目内已证 / **(CONDITIONAL)** 仅在你写明的附加假设下成立 /
    **(FIXED)** 按约定视为已声明义务 / **(CANDIDATE)** 仅候选陈述 / **(BLOCKED)** 卡住。
    诚实优先：证不出来就报 BLOCKED + 最小 blocker + 你能证到的最强结论，这比编造更有价值。
-5. 数学内容用 LaTeX（$...$ 与 \\begin{{...}}）。定理/引理用 amsthm 环境。
+   状态只反映**本块自身义务**：若本块义务已完成、仅链条级外部依赖（前置的 BLOCKED 或某 D 未核验）未决，
+   不得因此把结论降为 BLOCKED——外部依赖问题写进【依赖与未决】即可；反之亦不得因前置 BLOCKED 而虚报已证。
+   允许依赖的卷宗评级（如「机制锚定」「CANDIDATE-SOURCE」）不得在本块内升级为 IMPORTED-VERIFIED；
+   只有卷宗明示 VERIFIED-ANCHOR 且你逐项核对其前提后，才可在引用该 D 的句末标 IMPORTED-VERIFIED。
+5. 数学内容用 LaTeX（$...$ 与 \\begin{{...}}）。定理/引理用 amsthm 宏包提供的环境
+   （如 \\begin{{lemma}}、\\begin{{proposition}}，需先 \\newtheorem 声明）；**不要**写 \\begin{{amsthm}}——
+   amsthm 是宏包名不是环境名，编译会报 Environment undefined。
+   六态标注一律写成纯文本（如 (FIXED)），**不要**用 \\tag——\\tag 只在数学环境内合法。
 
 【输出格式 —— 严格三段，段名照抄】
 【正文】
@@ -517,7 +524,13 @@ def cmd_taskbook(g: Graph, blocks_dir: str, node: str, out_dir: str | None) -> i
     allow = []
     for a in n.get('allowed', []):
         d = g.allowed_deps.get(a)
-        allow.append('- %s [%s]：%s' % (a, d.get('kind', ''), d['statement']) if d else '- ' + a)
+        if not d:
+            allow.append('- ' + a)
+            continue
+        ent = '- %s [%s]：%s' % (a, d.get('kind', ''), d['statement'])
+        if d.get('dossier'):
+            ent += '\n  ↳ 来源卷宗：%s' % d['dossier']
+        allow.append(ent)
     allow_txt = '\n'.join(allow) or '（本块不引用任何外部依赖）'
     gate, _sug, contam = g.effective_gate(node)
 
