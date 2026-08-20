@@ -628,6 +628,53 @@ def test_lint_warns_on_uncited_bibitem_and_unused_eq_labels():
         assert 'W1' in out and 'W2' in out and 'W5' in out, out
 
 
+CHECKCITES_SAMPLE = """
+--------------------------------------------------------------------------
+Report of unused references in your TeX document (that is, references
+present in bibliography files, but not cited in the TeX source file)
+--------------------------------------------------------------------------
+
+Unused references in your TeX document: 2
+=> D1
+=> WU
+
+--------------------------------------------------------------------------
+Report of undefined references in your TeX document (that is, references
+cited in the TeX source file, but not present in the bibliography files)
+--------------------------------------------------------------------------
+
+Undefined references in your TeX document: 1
+=> D6
+"""
+
+
+def test_lint_battery_parses_checkcites_output():
+    """battery normalization 的纯函数件：checkcites 原始输出 → 结构化结果。"""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('paper_lint',
+              os.path.join(ROOT, 'phase2-paper', 'tools', 'paper_lint.py'))
+    pl = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(pl)
+    parsed = pl.parse_checkcites(CHECKCITES_SAMPLE)
+    assert parsed == {'unused': ['D1', 'WU'], 'undefined': ['D6']}, parsed
+    # 0 段与缺失段不炸
+    assert pl.parse_checkcites('Unused references in your TeX document: 0') == \
+        {'unused': [], 'undefined': []}
+
+
+def test_lint_battery_degrades_gracefully_without_tools():
+    """texlua/chktex/lacheck 均不在 PATH（测试环境默认如此）→ battery 全部 skipped，
+    不影响内部判定的退出码。"""
+    with tempfile.TemporaryDirectory() as d:
+        p = lint_tex(d, 'clean text \\cite{D4}.\n'
+                        '\\begin{thebibliography}{9}\\bibitem{D4} A.\\end{thebibliography}\n')
+        rc, out = run(LINT, p, '--report', os.path.join(d, 'r.json'))
+        assert rc == 0, out
+        rep = json.load(open(os.path.join(d, 'r.json'), encoding='utf-8'))
+        assert set(rep['battery']) == {'checkcites', 'chktex', 'lacheck'}
+        assert all(v['status'] == 'skipped' for v in rep['battery'].values()), rep['battery']
+
+
 # ── runner ────────────────────────────────────────────────────────────
 
 def main():

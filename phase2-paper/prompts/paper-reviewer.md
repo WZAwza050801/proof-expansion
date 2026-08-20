@@ -21,7 +21,7 @@
 
 | 件 | 执行者 | 输入 | 查什么 |
 |---|---|---|---|
-| **G3a 机械自洽**（先跑，零 LLM） | `tools/paper_lint.py` | paper.tex＋compile.log | E1–E7 刚性判定＋W1–W5 量化（见工具头注）；**E 级不过则先修再进 G3b** |
+| **G3a 机械自洽**（先跑，零 LLM） | `tools/paper_lint.py` | paper.tex＋compile.log | 内部 E1–E7 刚性判定＋W1–W5 量化，**＋外部开源检查器 battery**（checkcites vendor 于 `tools/vendor/`（LPPL）——bibliography 数据流，带 BibTeX/内联文献模型仲裁；chktex/lacheck 探测到即运行，未装则降级占位并注明启用方式）；**E 级不过则先修再进 G3b** |
 | **G3b 节级内容审查**（并行，一节一 agent） | 本契约（spawn×8） | 该节正文＋全局约定卡＋六态协议＋该节 lint 摘要 | 见下方职责 1–5 |
 | **G3c 全局对账**（1 agent，不读全文） | 本契约（spawn×1） | 引言＋结论＋lint 报告＋术语报告＋账本统计 | 见下方职责 6–8 |
 
