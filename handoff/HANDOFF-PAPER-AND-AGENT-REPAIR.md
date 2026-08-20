@@ -129,4 +129,24 @@ I5 漂移的内容级处置（§5.6，归 operator/S3——裁决单已列为项
 
 测试 25→30 例全绿；RUN-LOG 第 2 批已记；manifest 再生成（含 drafts/）。
 
+## 10. S3 执行轮（2026-08-21，operator 裁决"可以"照单执行）— paper-v3 定稿
+
+| 裁决项 | 执行 | 证据 |
+|---|---|---|
+| 项 0 I5 闭环 | ✅ N20/N37 v3 微回块（子代理最小干预）＋fragment v0.4 重生成；status **I5 全过** | land-ledger；cov-N20/N37-v3（3.74/2.86 PASS）；gate-ledger #17 |
+| 族① headline | ✅ N37 升格 theorem（thm:N37-main） | fragments/N37 探针 0 errors |
+| 族② 账本段 | ✅ 34 个 rem:NXX-deps 移入文末附录（assemble 新能力 deps_appendix） | asm-v3-report.deps_appendix |
+| 族③ 结论形态 | ✅ N11/N30/N32 粗体段升格 proposition（N12 本就编号） | 三块探针 0 errors |
+| 族④ 术语 | ✅ 报告生成；**4 族变体冲突 7 处**（forward/positive graph 等）按 S3 纪律列 edits 清单待学术编辑轮统一（不自动改词） | drafts/terminology-report.md |
+| 族⑤ 公式编号 | ✅ 维持最小编号（无动作） | — |
+| 引言/结论 | ✅ 小派发成文（大纲＋统计输入，未接触正文）；TODO 占位清零 | paper-v3 引言＋\section*{Conclusion} |
+| 全量引用转换 | ✅ nref_wrap 428＋\Nref 41＝**解析 469/469**；legacy xref 9/9（剔除 v0.1 越权条目 N19→N18） | asm-v3-report |
+| 编译门 | ✅ **paper-v3.pdf 73 页，0 errors / 0 undefined**；coverage PASS（3.36） | paper-v3.compile.log；coverage-v3-paper.json |
+
+- **组装事故 1 起（当场拦截＋修复＋回归锁定）**：legacy xref 裸候选匹配 \Nref{NXX} 内部
+  子串→双重包裹→3 errors；编译门拦下；守卫修复；测试 34/34。
+- **\ref 1→479**；残余裸 NXX 41 处全部无害（38 组装器注释＋3 结论散文账本命名）。
+- **剩学术编辑轮**：overfull 67（v1 为 58，refs 变长）；术语 7 处统一；结论散文 3 处
+  NXX 语义化（可选）。此后 G2 终验交 operator。
+
 —— 完 ——
