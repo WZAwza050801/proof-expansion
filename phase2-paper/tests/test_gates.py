@@ -274,6 +274,93 @@ def test_assemble_strips_stray_preamble():
         assert json.load(open(rep, encoding='utf-8'))['dropped_preamble']['N00']
 
 
+def test_assemble_applies_legacy_xref():
+    """修复回归：xrefs 字段此前被组装器静默丢弃。"""
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', FRAG_N00)
+        write_frag(fd, 'N01', 'By the conclusion of N00 we proceed to the main claim.')
+        i = instr()
+        i['xrefs'] = [{'at': 'N01', 'ref': 'N00', 'macro': '\\ref{lem:N00}'}]
+        ip = write_json(d, 'instr.json', i)
+        tex = os.path.join(d, 'p.tex'); rep = os.path.join(d, 'r.json')
+        rc, out = run(ASM, ip, fd, tree, tex, '--report', rep)
+        assert rc == 0, out
+        body = open(tex, encoding='utf-8').read()
+        assert 'conclusion of Lemma~\\ref{lem:N00}' in body
+        r = json.load(open(rep, encoding='utf-8'))
+        assert len(r['xrefs']['applied']) == 1 and not r['xrefs']['skipped']
+
+
+def test_assemble_xref_find_protocol_requires_unique():
+    """新协议（find/replace）：find 出现 2 次 → 报错拒换（不许盲换）。"""
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', FRAG_N00)
+        write_frag(fd, 'N01', 'Use the conclusion of N00 here. Again the conclusion of N00 there.')
+        i = instr()
+        i['xrefs'] = [{'at': 'N01', 'find': 'the conclusion of N00',
+                       'replace': 'the conclusion of Lemma~\\ref{lem:N00}'}]
+        ip = write_json(d, 'instr.json', i)
+        rc, out = run(ASM, ip, fd, tree, os.path.join(d, 'p.tex'))
+        assert rc == 1 and 'find 短语出现 2 次' in out, out
+
+
+def test_assemble_xref_unknown_prefix_skips_with_warning():
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', FRAG_N00)
+        write_frag(fd, 'N01', FRAG_N01 + '\nBy the conclusion of N00 we proceed.')
+        i = instr()
+        i['xrefs'] = [{'at': 'N01', 'ref': 'N00', 'macro': '\\ref{xxx:N00-weird}'}]
+        ip = write_json(d, 'instr.json', i)
+        tex = os.path.join(d, 'p.tex'); rep = os.path.join(d, 'r.json')
+        rc, out = run(ASM, ip, fd, tree, tex, '--report', rep)
+        assert rc == 0 and '前缀无法映射' in out, out
+        r = json.load(open(rep, encoding='utf-8'))
+        assert len(r['xrefs']['skipped']) == 1
+
+
+def test_assemble_resolves_nref():
+    """splicer v0.4 语义宏：有映射渲染 ref，无映射降级文本＋告警。"""
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', FRAG_N00)
+        write_frag(fd, 'N01', 'Compare with \\Nref{N00} and \\Nref{N02}.')
+        i = instr()
+        i['labels'] = {'N00': 'lem:N00'}
+        ip = write_json(d, 'instr.json', i)
+        tex = os.path.join(d, 'p.tex'); rep = os.path.join(d, 'r.json')
+        rc, out = run(ASM, ip, fd, tree, tex, '--report', rep)
+        assert rc == 0, out
+        body = open(tex, encoding='utf-8').read()
+        assert 'Lemma~\\ref{lem:N00}' in body and '\\texttt{N02}' in body
+        assert json.load(open(rep, encoding='utf-8'))['nrefs'] == {'resolved': 1, 'unresolved': 1}
+
+
+def test_assemble_renders_bibliography():
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', FRAG_N00)
+        write_frag(fd, 'N01', FRAG_N01)
+        i = instr()
+        i['bibliography'] = [
+            {'key': 'D4', 'text': 'Ganatra--Pardon--Shende, arXiv:1809.03427, Theorem 1.20.'},
+            {'key': 'D6', 'text': 'Jeffs--Yao--Zhao, arXiv:2307.08180.'}]
+        ip = write_json(d, 'instr.json', i)
+        tex = os.path.join(d, 'p.tex'); rep = os.path.join(d, 'r.json')
+        rc, out = run(ASM, ip, fd, tree, tex, '--report', rep)
+        assert rc == 0, out
+        body = open(tex, encoding='utf-8').read()
+        assert '\\begin{thebibliography}{99}' in body and '\\bibitem{D4}' in body
+        assert json.load(open(rep, encoding='utf-8'))['bibliography']['entries'] == 2
+
+
 # ── coverage_check.py ─────────────────────────────────────────────────
 
 def cov_files(d, in_body, out_body):
