@@ -71,16 +71,23 @@ headline N37 有效状态 BLOCKED（诚实传播，D6 缺稿为 charter 级外�
    I5 报 N20 未引用 N15、N37 未引用 N35/N36——引用只落在【依赖与未决】记账段，
    正文未实际调用前置结论（两块都在 5 块 C 重写轮内；此前"I5 全过"是重写前读数）。
    选项：(a) v3 微改在正文补显式引用句；(b) 接受并记档。属内容级改动，归 operator。
+7. **xref 断链（工程缺口，2026-08-21 归因分析发现→同日已修复）**：coordinator 按契约产出
+   10 条 xrefs，但 assemble.py 不消费 xrefs 字段——指令产出即被丢弃。**修复落地**：两协议
+   消费（find/replace 恰好一次定位拒盲换；legacy 自动短语定位）；草稿实测 9/10 命中、
+   \ref 1→10、0 errors（见 §8 第二批）；结构性补全＝splicer v0.4 `\Nref` 机制＋coordinator
+   v0.2 labels 全表（正文 676 处 NXX 的全量转换路径见 S3-RULING-SHEET）。
 
 ## 6. 给下一个会话的工程建议（本次实证支撑）
 
 1. 派发层是当前最薄弱环节（三起事故都在这层）：重试已有协议，下一步是**幂等落盘**
-   （内容寻址/临时名+原子改名），让"重复派发"从"需要小心"变成"无害"。
+   （内容寻址/临时名+原子改名），让"重复派发"从"需要小心"变成"无害"。（✅ 已落地：`tools/land.py`，见 §8）
 2. 闸门脚本（schedule/assemble/coverage_check/splice）目前**无自动化测试**， correctness
    靠手工负测试维持；coverage 盲区事故已实证风险。建议：金样快照＋最小 pytest，
-   与"管线不信任模型"的不信任度对齐——**对闸门代码也要不信任**。
+   与"管线不信任模型"的不信任度对齐——**对闸门代码也要不信任**。（✅ 已落地：25→30 例，见 §8）
 3. 状态进文档靠手工同步（本次 README/DIAGRAM 更新即例证）；建议 `status` 输出直接
-   生成 STATUS 段，文档只引用不抄写。
+   生成 STATUS 段，文档只引用不抄写。（✅ 已落地：STATUS.md）
+4. **重写/回块落盘后必须复跑 `status`（I3/I5）**——一行命令拦住 N20/N37 式引用漂移
+   （本 run 实证：C 重写轮引入漂移、末轮"I5 全过"是重写前读数，直到加固轮复跑才浮出）。
 
 ## 7. 重启步骤（照抄）
 
@@ -107,6 +114,19 @@ headline N37 有效状态 BLOCKED（诚实传播，D6 缺稿为 charter 级外�
 | 卫生 | ✅ `__pycache__` 退出 git 跟踪；assemble/coverage_check 补模块 docstring | `.gitignore` 增 Python 条目 |
 
 未做（留后续）：GUI 放行按钮（operator 想法池）；成本论断量化（按派发记账 token）；
-I5 漂移的内容级处置（§5.6，归 operator/S3）。
+I5 漂移的内容级处置（§5.6，归 operator/S3——裁决单已列为项 0）。
+
+## 9. 第二批加固（2026-08-21 同日，§6 四件编排债清偿）
+
+| 债 | 落地 | 证据 |
+|---|---|---|
+| xref 断链 | ✅ assemble.py 消费 xrefs（新 find/replace 协议＝恰好一次定位、旧协议自动短语定位）；失败拒绝/跳过均记账 | 草稿 9/10 命中、\ref 1→10、编译 0 errors（`drafts/asm-xref-bib-draft-report.json`）；新增测试 3 例 |
+| 引用替换的结构性方案 | ✅ `\Nref{NXX}` 语义宏：splicer v0.4 块内标注→assemble 按全表解析→wrapper fallback 保探针可编译 | labels-all 38/38 覆盖验证；测试 2 例 |
+| coordinator 契约过度承诺 | ✅ v0.2：职责 3 重写（labels 全表＋协议内 xref＋"不得假装全量转换"边界）；新增 bibliography 职责 | `prompts/coordinator.md` 版本注记 |
+| 参考文献无工位 | ✅ assemble 渲染 thebibliography＋S3 模板第 8 类目＋DESIGN S4 交付包清单 | 9 条 D1–D8＋Wu 草稿编译验证（D6 诚实口径） |
+| I5 复跑纪律 | ✅ 成文：重写落盘后必须复跑 status | seidel README 常用命令＋本文件 §6 |
+| S3 备料 | ✅ 裁决单一页纸（五族＋项 0＋全量转换路径，每项带推荐） | `runs/pretest/seidel/S3-RULING-SHEET.md` |
+
+测试 25→30 例全绿；RUN-LOG 第 2 批已记；manifest 再生成（含 drafts/）。
 
 —— 完 ——
