@@ -104,9 +104,11 @@
 | **S2** 串起来，符合命题图逻辑，角标前后恰当 | `coordinator.md` 装配指令＋`splice.py` 组装＋§4.3 六项检查 | G2b-1：指令合法（拓扑序/引用闭合/label 映射一致） |
 | **S3** 论文级格式审查、调整、输出 | 机械格式化（组装后处理）＋**格式审查报告**（清单制：只出清单不出正文；确定性编辑机械执行，涉内容的按清单路由回 S1 对应块） | G2b-2：报告零未决项 |
 | **S4** 编译审查、交付 | xelatex 门（exit=0 且 0 errors）＋交付包 | G2（人确认） |
+| **S5** 论文级审查轮（审成品，2026-08-21 设立） | 三件套：**G3a** `tools/paper_lint.py` 刚性自洽（E1–E7/W1–W5，零 LLM）→ **G3b** 节级内容审查（`prompts/paper-reviewer.md`，一节一 agent 并行，只出 FINDING 清单）→ **G3c** 全局对账（引言/结论承诺 vs 机械事实，不读全文） | G3：G3a 零 error＋G3b/G3c 零未决项；处置路由同 S3（机械修/回块/questions） |
 
 - **S3 与规则④的相容性**：格式审查者的产物是**报告**（编辑清单），不是论文正文——输出义务仍局部；涉数学内容的修改一律回块，不许在论文级直接改写。
-- **S4 交付包（固定清单，缺一不算交付）**：`paper.tex`＋`paper.pdf`；coverage 报告（块级＋全文两份）；装配指令 JSON；编辑与问题两本账；六态账本快照；编译日志；**参考文献表**（`thebibliography`，条目与 DOSSIERS 逐条一致）。
+- **S4 交付包（固定清单，缺一不算交付）**：`paper.tex`＋`paper.pdf`；coverage 报告（块级＋全文两份）；装配指令 JSON；编辑与问题两本账；六态账本快照；编译日志；**参考文献表**（`thebibliography`，条目与 DOSSIERS 逐条一致）；**lint 报告**（S5/G3a）。
+- **S5 设立依据（2026-08-21 operator 定调"审成品是重要技能块，从零做，插入工作流"）**：机械闸门审结构、盲审（块级）审孤立块、S3 裁决格式决定——**拼装后的整篇**（跨节一致性、承诺-兑现对账、arXiv 自洽标准）此前无工位。实证：paper-v3 首跑 lint 即抓出引言统计失真（声称 244 vs 实际 479）、133/170 label 无引用者、参考文献 8/9 列而未引、overfull>10pt 53 处（最大 238pt）。S5 = paper_lint（刚性）＋节级审查（内容）＋全局对账（账目）三件套；契约见 `prompts/paper-reviewer.md`；模型走 preset `role-paper-reviewer`（micu/gpt-5.6-sol）。
 - **状态词表单源（P0 试跑实证）**：块内实际使用 8 个状态——六态（FIXED/PROVED/CONDITIONAL/CANDIDATE/BLOCKED/UNVERIFIED）＋变体 PROVED-IN-PROJECT（12 处）与 IMPORTED-VERIFIED（11 处）；形态两种（`\tag{X}` 13 处＋圆括号 462 处）。各提示词与断言器以此为准；`coverage_check.py` 已改为词表无关计数（任意 `\tag{...}`/`[STATUS: ...]`），不会因变体漏数——新变体仍会不断出现，词表只作记录不作闸门。
 
 ### 4.5 与 gates 的关系

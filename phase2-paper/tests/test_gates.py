@@ -551,6 +551,83 @@ def test_splice_rejects_non_topological_order():
         assert rc == 1 and '非拓扑序' in out, out
 
 
+# ── paper_lint.py（S5/G3a 论文级自洽）────────────────────────────────
+
+LINT = os.path.join(ROOT, 'phase2-paper', 'tools', 'paper_lint.py')
+
+
+def lint_tex(d, body, name='p.tex'):
+    p = os.path.join(d, name)
+    with open(p, 'w', encoding='utf-8') as f:
+        f.write(body)
+    return p
+
+
+def test_lint_clean_paper_passes():
+    with tempfile.TemporaryDirectory() as d:
+        p = lint_tex(d, '\\begin{lemma}\\label{lem:a} $x$ holds. \\end{lemma}\n'
+                       'By \\ref{lem:a} and \\cite{D4} \\cite{D5}. [STATUS: BLOCKED]\n'
+                       '\\begin{thebibliography}{9}\\bibitem{D4} A. \\bibitem{D5} B.\n'
+                       '\\end{thebibliography}\n')
+        rc, out = run(LINT, p)
+        assert rc == 0, out
+
+
+def test_lint_catches_duplicate_label():
+    with tempfile.TemporaryDirectory() as d:
+        p = lint_tex(d, '\\label{eq:x}a\\label{eq:x}b\n')
+        rc, out = run(LINT, p)
+        assert rc == 1 and 'E1 label 重复' in out, out
+
+
+def test_lint_catches_broken_ref():
+    with tempfile.TemporaryDirectory() as d:
+        p = lint_tex(d, 'see \\ref{eq:ghost}.\n')
+        rc, out = run(LINT, p)
+        assert rc == 1 and 'E2' in out, out
+
+
+def test_lint_catches_cite_without_bibitem():
+    with tempfile.TemporaryDirectory() as d:
+        p = lint_tex(d, 'as in \\cite{D9}.\n')
+        rc, out = run(LINT, p)
+        assert rc == 1 and 'E3' in out, out
+
+
+def test_lint_catches_unbalanced_env_and_dollars():
+    with tempfile.TemporaryDirectory() as d:
+        p = lint_tex(d, '\\begin{lemma} $x \n')   # lemma 不闭合 + $ 奇数
+        rc, out = run(LINT, p)
+        assert rc == 1 and 'E4' in out and 'E5' in out, out
+
+
+def test_lint_catches_double_wrapped_nref():
+    with tempfile.TemporaryDirectory() as d:
+        p = lint_tex(d, 'see \\Nref{Lemma~\\ref{lem:a}}.\n')
+        rc, out = run(LINT, p)
+        assert rc == 1 and 'E6' in out and '双重包裹' in out, out
+
+
+def test_lint_catches_stale_intro_counts():
+    """E7（2026-08-21 实锤事故的闸门化）：引言统计 vs 全文 [STATUS:] 对账。"""
+    with tempfile.TemporaryDirectory() as d:
+        p = lint_tex(d, 'The ledger contains $5$ $\\mathrm{BLOCKED}$ entries '
+                        'and $2$ $\\mathrm{FIXED}$ entries.\n'
+                        '[STATUS: BLOCKED] [STATUS: BLOCKED] [STATUS: BLOCKED] [STATUS: FIXED]\n')
+        rc, out = run(LINT, p)
+        assert rc == 1 and 'E7' in out, out
+        assert '声称 BLOCKED 5，实际' in out and '声称 FIXED 2，实际' in out, out
+
+
+def test_lint_warns_on_uncited_bibitem_and_unused_eq_labels():
+    with tempfile.TemporaryDirectory() as d:
+        p = lint_tex(d, '\\begin{equation}\\label{eq:nobody} x \\end{equation}\n'
+                        '\\begin{thebibliography}{9}\\bibitem{D4} A.\\end{thebibliography}\n')
+        rc, out = run(LINT, p)
+        assert rc == 0, out                      # 仅 warning
+        assert 'W1' in out and 'W2' in out and 'W5' in out, out
+
+
 # ── runner ────────────────────────────────────────────────────────────
 
 def main():
