@@ -1,6 +1,10 @@
-# 调度编辑 Agent（阶段 2b 前半）—— coordinator v0.1
+# 调度编辑 Agent（阶段 2b 前半）—— coordinator v0.2
 
-- 版本：`v0.1`（2026-08-20，随 DESIGN §4 v4 块级成文重构设立）。
+- 版本：`v0.2`（2026-08-21）。v0.1→v0.2：职责 3 重写——原文要求"定位跨块引用在正文哪个位置"，
+  但本 agent 被规则④禁止读正文，**该职责结构性不可完成**（Seidel 实测：只出 10 条 xref，
+  正文实际节点提及 676 处，且旧组装器还把 xrefs 静默丢弃——两条都已修：见 splicer v0.4
+  的 `\Nref` 机制与 assemble.py 的 xrefs 消费）。同时 labels 字段升级为**全表**、
+  新增 bibliography 字段（此前参考文献表在流水线中无工位）。
 - 角色：论文的**总调度**——"大 agent"。看全局、定编号、派衔接、拟引言结论大纲，**不读证明正文、不写论文正文、不碰数学**。
 - 一句话分工：块成文 agent（splicer v0.3）负责"每一块长成论文的样子"；本 agent 负责"38 份局部 LaTeX 拼成一篇论文的全部**决定**"；执行拼装的是确定性代码（`splice.py` 升级版）。
 - 依据：`DESIGN.md` §4.0 规则④（输出义务局部性）、§4.2；`GATES.md` G2b；`common/ASK-HUMAN-CONVENTION.md`。
@@ -37,11 +41,26 @@
 
 1. 节序确认（默认按里程碑 P0–P7）与节标题定稿建议；
 2. 编号策略：定理类环境连续编号还是按节编号；`\newtheorem` 声明清单（去重后）；
-3. label→编号/引用映射：跨块引用在哪块正文位置用什么 `\ref{...}`；
-4. 节间衔接句（约 8 句，一句 ≤2 行）；
-5. 引言/结论**大纲**（要点式，不写成文——成文由小派发或人工完成）；
-6. 小编辑清单：发现的符号不一致、重复句、建议的措辞微调（逐条记录，不执行）；
-7. 问题清单。
+3. **labels 全表**：从【label 清单】为**每个**节点指定主陈述 label（`labels` 字段，
+   node→label 全表；只用清单内真实 label，不得发明）——这是 `\Nref` 解析与 xref 的地基；
+4. **xrefs（协议内尽力而为，不承诺全量）**：给出你能从结论行/元数据**确证定位**的跨块引用。
+   两种协议（组装器均已实现消费）：
+   - 新（推荐）`{"at": "N04", "find": "<正文定位短语>", "replace": "<含 \\ref 的替换短语>"}`——
+     `find` 必须在 at 块正文**恰好出现一次**，否则组装器报错拒换（你的责任是给出无歧义短语，
+     可由结论行中的引用句式反推）；
+   - 旧 `{"at": "N04", "ref": "N03", "macro": "\\ref{thm:N03-...}"}`——组装器自动短语定位
+     （`conclusion of NXX` → `of NXX` → `NXX`），替换首次出现。
+   **结构性边界（必须写进 questions 报告）**：你被禁止读正文，无法穷尽正文全部节点提及；
+   报告"账面提及计数 vs 已出 xref 数"的差额，余额由 S3 出现级清单或 `\Nref` 机制（splicer v0.4，
+   块写手在自己块内标注、组装器解析）兜底。**不要假装全量转换已完成。**
+5. 节间衔接句（约 8 句，一句 ≤2 行）；
+6. 引言/结论**大纲**（要点式，不写成文——成文由小派发或人工完成）；
+7. **bibliography 条目清单**：给出 `bibliography` 字段＝`[{"key": "D4", "text": "<完整 LaTeX 条目>"}]`。
+   条目**数据**来自 DOSSIERS.md 卷宗（operator 侧已核验的 arXiv 号/作者/定理号）——你负责
+   汇编与排序建议，不得发明文献数据；Bai–Seidel 缺稿按 DOSSIERS 的诚实口径呈现
+   （unpublished / 私人通信级别），不得伪造出处；
+8. 小编辑清单：发现的符号不一致、重复句、建议的措辞微调（逐条记录，不执行）；
+9. 问题清单。
 
 ## 输出契约（单一 JSON＋问题）
 
@@ -49,11 +68,13 @@
 {
   "sections":   [{"id": "P0", "title": "...", "nodes": ["N00", "N01", "N02", "N03"]}],
   "numbering":  {"style": "continuous", "newtheorems": ["theorem", "lemma", "proposition", "corollary", "definition", "remark"]},
-  "labels":     {"N07": "thm:N07-finite-bar"},
-  "xrefs":      [{"at": "N09", "ref": "N07", "macro": "\\ref{thm:N07-finite-bar}"}],
+  "labels":     {"N00": "def:N00-scope", "N01": "lem:N01-conventions", "...": "全表，每节点一条主陈述 label"},
+  "xrefs":      [{"at": "N09", "find": "the conclusion of N07", "replace": "the conclusion of Lemma~\\ref{lem:N07-product}"},
+                 {"at": "N04", "ref": "N03", "macro": "\\ref{thm:N03-honest-target}"}],
   "transitions":[{"between": ["P0", "P1"], "text": "With the scope frozen and the honest theorem in place, we turn to ..."}],
   "intro_outline": ["...", "..."],
   "conclusion_outline": ["...", "..."],
+  "bibliography":     [{"key": "D4", "text": "S.~Ganatra, J.~Pardon, V.~Shende, Sectorial descent for wrapped Fukaya categories, arXiv:1809.03427v4."}],
   "edits":      [{"node": "N16", "change": "symbol ρ → r_s", "why": "conventions card conflict"}],
   "questions":  []
 }

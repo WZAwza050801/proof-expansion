@@ -83,7 +83,7 @@
   - 输入全部为小体量元数据：段结构、节点元数据（id/标题/命题类型/有效六态/label/字数）、每块【结论】行（一句话×38）、账本统计、成文参数；
   - **禁读任何块【正文】，禁输出论文正文**；产出 = 装配指令 JSON（节序、编号策略、label→编号映射、跨块引用解析、节间衔接句、引言/结论大纲、小编辑清单、问题清单）；
   - 引言/结论正文由一次小派发生成（输入＝大纲＋账本统计，仍不接触证明正文），或人工模板。
-- **机械组装（`splice.py` 升级：消费 fragments＋装配指令 → `paper.tex`）**：`\newtheorem` 去重、统一编号与交叉引用、文本模式 `_` 转义、amscd 补齐（Seidel 已实证清单）。
+- **机械组装（`assemble.py`：消费 fragments＋装配指令 → `paper.tex`）**：`\newtheorem` 去重、统一编号与交叉引用、文本模式 `_` 转义、amscd 补齐（Seidel 已实证清单）；**xrefs 消费**（2026-08-21 补，此前字段被静默丢弃：新 `find/replace` 协议要求短语恰好出现一次，旧协议自动短语定位）；**`\Nref{NXX}` 解析**（splicer v0.4 语义宏→按 labels 全表渲染 `Theorem~\ref`）；**bibliography 渲染**（条目文本来自 DOSSIERS 汇编，coordinator v0.2 职责 7——此前参考文献表在流水线中无工位）。
 - **内容覆盖断言**：`coverage_check.py paper`——Σ fragments vs 机拼基准（`paper.md`）的公式/定理计数不得丢失。
 - **编译门**：英文版 `amsart + amsmath/amssymb/amsthm/amscd + xelatex`（纯英文后 ctex 非必需；中文回退绿灯配方 `ctexart` 同套宏包）；exit=0 且 0 errors 才过 G2。
 
@@ -106,7 +106,7 @@
 | **S4** 编译审查、交付 | xelatex 门（exit=0 且 0 errors）＋交付包 | G2（人确认） |
 
 - **S3 与规则④的相容性**：格式审查者的产物是**报告**（编辑清单），不是论文正文——输出义务仍局部；涉数学内容的修改一律回块，不许在论文级直接改写。
-- **S4 交付包（固定清单，缺一不算交付）**：`paper.tex`＋`paper.pdf`；coverage 报告（块级＋全文两份）；装配指令 JSON；编辑与问题两本账；六态账本快照；编译日志。
+- **S4 交付包（固定清单，缺一不算交付）**：`paper.tex`＋`paper.pdf`；coverage 报告（块级＋全文两份）；装配指令 JSON；编辑与问题两本账；六态账本快照；编译日志；**参考文献表**（`thebibliography`，条目与 DOSSIERS 逐条一致）。
 - **状态词表单源（P0 试跑实证）**：块内实际使用 8 个状态——六态（FIXED/PROVED/CONDITIONAL/CANDIDATE/BLOCKED/UNVERIFIED）＋变体 PROVED-IN-PROJECT（12 处）与 IMPORTED-VERIFIED（11 处）；形态两种（`\tag{X}` 13 处＋圆括号 462 处）。各提示词与断言器以此为准；`coverage_check.py` 已改为词表无关计数（任意 `\tag{...}`/`[STATUS: ...]`），不会因变体漏数——新变体仍会不断出现，词表只作记录不作闸门。
 
 ### 4.5 与 gates 的关系
