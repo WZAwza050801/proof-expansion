@@ -551,6 +551,43 @@ def test_splice_rejects_non_topological_order():
         assert rc == 1 and '非拓扑序' in out, out
 
 
+def test_assemble_template_layer_and_abstract():
+    """meta.template 配方注入 + author/abstract 可配置（视觉层工位回归锁）。"""
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', FRAG_N00)
+        write_frag(fd, 'N01', FRAG_N01)
+        i = instr()
+        i['meta']['template'] = 'amsart-arxiv'
+        i['meta']['author'] = 'Test Author'
+        i['meta']['abstract'] = 'An honest abstract.'
+        ip = write_json(d, 'instr.json', i)
+        tex = os.path.join(d, 'p.tex')
+        rc, out = run(ASM, ip, fd, tree, tex)
+        assert rc == 0, out
+        body = open(tex, encoding='utf-8').read()
+        assert '\\usepackage{microtype}' in body and 'hidelinks' in body
+        assert '\\author{Test Author}' in body and 'OPERATOR-FILL' not in body
+        assert '\\begin{abstract}' in body
+        # amsart 顺序：abstract 在 \maketitle 之前
+        assert body.index('\\begin{abstract}') < body.index('\\maketitle')
+        assert body.index('\\begin{document}') < body.index('\\begin{abstract}')
+
+
+def test_assemble_rejects_unknown_template():
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', FRAG_N00)
+        write_frag(fd, 'N01', FRAG_N01)
+        i = instr()
+        i['meta']['template'] = 'no-such-template'
+        ip = write_json(d, 'instr.json', i)
+        rc, out = run(ASM, ip, fd, tree, os.path.join(d, 'p.tex'))
+        assert rc == 1 and '未知配方' in out, out
+
+
 # ── paper_lint.py（S5/G3a 论文级自洽）────────────────────────────────
 
 LINT = os.path.join(ROOT, 'phase2-paper', 'tools', 'paper_lint.py')

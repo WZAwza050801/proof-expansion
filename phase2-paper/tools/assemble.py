@@ -242,10 +242,31 @@ def main():
 
     # 3. 组装
     num = instr.get('numbering', {})
-    docclass = instr.get('meta', {}).get('docclass', 'amsart')
-    lang_note = instr.get('meta', {}).get('language', 'English')
+    meta = instr.get('meta', {})
+    docclass = meta.get('docclass', 'amsart')
+    lang_note = meta.get('language', 'English')
     pre = [f'\\documentclass{{{docclass}}}', '\\usepackage{amsmath,amssymb,amsthm,amscd}']
     if lang_note == 'Chinese': pre.insert(1, '\\usepackage{ctex}')  # 中文回退才引 ctex
+    # 模板层（2026-08-21 补——回溯证实：视觉/排版职责在 v0.3 拆分后无工位，preamble
+    # 曾是六行裸奔版）。meta.template 预置配方 + meta.preamble_extra 自由追加。
+    TEMPLATES = {
+        # xelatex/pdflatex 通用：LM 已是 xelatex 默认；microtype 在 xelatex 下自动降级
+        # 为 protrusion（expansion 不可用，打印 warning 但合法）；
+        'amsart-arxiv': ['\\usepackage{lmodern}', '\\usepackage{microtype}',
+                         '\\usepackage[hidelinks]{hyperref}'],
+        'article-arxiv': ['\\usepackage[T1]{fontenc}', '\\usepackage{lmodern}',
+                          '\\usepackage{microtype}', '\\usepackage{mathtools}',
+                          '\\usepackage{booktabs}', '\\usepackage{url}',
+                          '\\usepackage[hidelinks]{hyperref}'],
+    }
+    tpl = meta.get('template')
+    if tpl:
+        if tpl not in TEMPLATES:
+            err.append(f'meta.template 未知配方: {tpl}（可用: {sorted(TEMPLATES)}）')
+        else:
+            pre = [pre[0]] + TEMPLATES[tpl] + pre[1:]
+    for line in meta.get('preamble_extra', []):
+        pre.append(line)
     declared = []
     for env in num.get('newtheorems', ['theorem','lemma','proposition','corollary','conjecture','definition','example','remark']):
         pre.append(f'\\newtheorem{{{env}}}{{{env.capitalize()}}}' if env not in ('definition','example') else f'\\theoremstyle{{definition}}\n\\newtheorem{{{env}}}{{{env.capitalize()}}}')
@@ -319,9 +340,18 @@ def main():
             parts.append(e)
         appendix_tex = '\n\n'.join(parts) + '\n'
 
-    meta = instr.get('meta', {})
     front = [f"\\title{{{meta.get('title', 'Untitled')}}}",
-             '\\author{OPERATOR-FILL}', '\\begin{document}\\maketitle']
+             f"\\author{{{meta.get('author', 'OPERATOR-FILL')}}}"]
+    if meta.get('date') is not None:
+        front.append(f"\\date{{{meta['date']}}}")
+    abstract = str(meta.get('abstract') or '').strip()
+    if abstract:
+        front.append('\\begin{document}')
+        front.append('\\begin{abstract}\n' + abstract + '\n\\end{abstract}')
+        front.append('\\maketitle')
+        rep['abstract'] = {'rendered': True, 'chars': len(abstract)}
+    else:
+        front.append('\\begin{document}\\maketitle')
     bib_tex, bib_n = render_bibliography(instr)
     rep['bibliography'] = {'entries': bib_n}
     tex = ('\n'.join(pre) + '\n' + '\n'.join(front) + '\n' + head_comment + '\n'
