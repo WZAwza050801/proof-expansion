@@ -751,13 +751,15 @@ def test_lint_arxiv_readiness_grading():
               os.path.join(ROOT, 'phase2-paper', 'tools', 'paper_lint.py'))
     pl = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(pl)
-    # 坏例：tex 有 E3（cite 无条目）→ D FAIL；无 log/PDF → A/B 为 ADVISORY（不冒装已检）
+    # 坏例：tex 有 E3（cite 无条目）→ A FAIL（静态错误在场）且 D FAIL
     bad = {'errors': ['E3 \\cite 键无对应 \\bibitem: [D9]'], 'warnings': [], 'review': [],
            'stats': {}, 'battery_pdf': {}}
     r = pl.arxiv_readiness(bad)
-    assert r['A_arxiv_compilable']['status'] == 'ADVISORY'   # 未跑 log，不装懂
+    assert r['A_arxiv_compilable']['status'] == 'FAIL'
     assert r['D_citations']['status'] == 'FAIL'
-    # 好例：log 干净＋PDF 干净 → A PASS（除两个 CI 占位 unverified 项不降级）＋B PASS
+    # 好例：log 干净＋PDF 干净 → B PASS（全项已检）；A/C/D 为 ADVISORY——
+    # 未检项（干净环境编译/视觉版式/角标重叠）如实降级，不冒装已检（operator 原则：
+    # C/D 语义部分仍需人工）
     good = {'errors': [], 'warnings': [], 'review': [],
             'stats': {'log_metrics': pl.parse_log_metrics('clean log'),
                       'high_risk': {'commands': {}, 'geometry_tamper': []}},
@@ -766,10 +768,10 @@ def test_lint_arxiv_readiness_grading():
                             'geometry': {'page_sizes': [[595, 842]], 'blank_pages': []},
                             'images': {'low_res': []}}}
     r2 = pl.arxiv_readiness(good)
-    assert r2['A_arxiv_compilable']['status'] == 'PASS'
     assert r2['B_pdf_technical']['status'] == 'PASS'
-    assert r2['C_typography']['status'] == 'PASS'
-    assert r2['D_citations']['status'] == 'PASS'
+    for k in ('A_arxiv_compilable', 'C_typography', 'D_citations'):
+        assert r2[k]['status'] == 'ADVISORY', (k, r2[k])
+        assert not r2[k]['failed'], (k, r2[k])   # 无失败项，只有未检项
 
 
 # ── runner ────────────────────────────────────────────────────────────

@@ -487,9 +487,9 @@ def arxiv_readiness(rep):
     tex_errs = len(rep['errors'])
 
     def sec(items):
-        fails = [i for i, ok in items if not ok]
+        fails = [i for i, ok in items if ok is False]
         skipped = [i for i, ok in items if ok is None]
-        st = 'PASS' if not fails else ('ADVISORY' if all(ok is not False for _, ok in items) else 'FAIL')
+        st = 'FAIL' if fails else ('ADVISORY' if skipped else 'PASS')
         return {'status': st, 'failed': fails, 'unverified': skipped,
                 'items': {i: ('PASS' if ok else ('SKIP' if ok is None else 'FAIL')) for i, ok in items}}
 
