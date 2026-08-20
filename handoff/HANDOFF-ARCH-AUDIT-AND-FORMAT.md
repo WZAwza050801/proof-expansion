@@ -1,5 +1,15 @@
 # 交接文档：agent 架构审计 ＋ 论文格式调整（新会话入口）
 
+> ✅ **2026-08-21 深夜续会已办结**（见 RUN-LOG 末两节＋gate-ledger #19）：
+> 审计三缝全部坐实（结论与收缝建议记录在案，未动架构）；格式工单 1/2/4/5 完成
+> ——overfull **65→0**、文献 9 键全挂 cite、术语 4 族统一（D1 引文保留）、
+> 编译 exit=0/0 errors/74 页；工单 3（author）待 operator、工单 4（abstract）
+> 已呈 operator 过目。工具面新增 assemble `meta.short_title`（页眉短题根因修复）。
+> 下一步待办：R2 审查轮（先重刷 lint 定快照、挂 preset 会话最小探针）、
+> coordinator 下次运行前落实 xref∈deps 机械检查建议。
+> **风险登记册：`handoff/RISK-REGISTER.md`**（三缝＋两元风险，含销账栏）。
+> 以下为原始工单存档。
+
 > 写于 2026-08-21。上一会话（14 commits，`8c3bb84`→`db72527`）完成了 S3 定稿、S5 审查
 > 技能块、模板层与工程加固。**operator 本轮指令：先重新审计 agent 架构，然后重新调整
 > 论文格式即可，不用 verify**（不跑测试/manifest/lint 复验轮，除非临时要求）。
