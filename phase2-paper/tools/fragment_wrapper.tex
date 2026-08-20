@@ -1,0 +1,20 @@
+% 编译探针包装（DESIGN.md §4.1 阶段 2a / G2a 过门条件）
+% 用法：把被测 fragment 放到同目录 fragment.tex，然后 xelatex wrapper.tex
+% 判定：exit=0 且 0 errors 才算该块 LaTeX 纪律合格（LaTeX 错误在块级拦截，不许攒到组装后）
+% 配方：amsart + amsmath/amssymb/amsthm/amscd（英文版绿灯配方，DESIGN §4.2）
+\documentclass{amsart}
+\usepackage{amsmath,amssymb,amsthm,amscd}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{comparisonlemma}[theorem]{Comparison Lemma}
+\begin{document}
+\input{fragment.tex}
+\end{document}
