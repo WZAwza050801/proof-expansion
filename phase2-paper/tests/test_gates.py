@@ -744,6 +744,34 @@ def test_lint_high_risk_scan_and_template_compliance():
     assert any('abstract' in i for i in tc)
 
 
+def test_lint_arxiv_readiness_grading():
+    """A/B/C/D 四级评级（operator 判据框架）：坏输入必须 FAIL，干净输入 B 应 PASS。"""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('paper_lint',
+              os.path.join(ROOT, 'phase2-paper', 'tools', 'paper_lint.py'))
+    pl = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(pl)
+    # 坏例：tex 有 E3（cite 无条目）→ D FAIL；无 log/PDF → A/B 为 ADVISORY（不冒装已检）
+    bad = {'errors': ['E3 \\cite 键无对应 \\bibitem: [D9]'], 'warnings': [], 'review': [],
+           'stats': {}, 'battery_pdf': {}}
+    r = pl.arxiv_readiness(bad)
+    assert r['A_arxiv_compilable']['status'] == 'ADVISORY'   # 未跑 log，不装懂
+    assert r['D_citations']['status'] == 'FAIL'
+    # 好例：log 干净＋PDF 干净 → A PASS（除两个 CI 占位 unverified 项不降级）＋B PASS
+    good = {'errors': [], 'warnings': [], 'review': [],
+            'stats': {'log_metrics': pl.parse_log_metrics('clean log'),
+                      'high_risk': {'commands': {}, 'geometry_tamper': []}},
+            'battery_pdf': {'fonts': {'unembedded': [], 'type3': [], 'total': 5},
+                            'structure': {'status': 'ok'},
+                            'geometry': {'page_sizes': [[595, 842]], 'blank_pages': []},
+                            'images': {'low_res': []}}}
+    r2 = pl.arxiv_readiness(good)
+    assert r2['A_arxiv_compilable']['status'] == 'PASS'
+    assert r2['B_pdf_technical']['status'] == 'PASS'
+    assert r2['C_typography']['status'] == 'PASS'
+    assert r2['D_citations']['status'] == 'PASS'
+
+
 # ── runner ────────────────────────────────────────────────────────────
 
 def main():

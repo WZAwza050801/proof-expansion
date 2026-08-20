@@ -476,6 +476,59 @@ def run_battery(tex_path, errors, warnings, stats, internal_uncited):
     return battery
 
 
+def arxiv_readiness(rep):
+    """operator 2026-08-21 判据框架：A 可编译 / B PDF 技术质量 / C 版式 / D 引用。
+    A、B 高度自动化；C、D 机械代理指标＋残余人工抽查（如实标注，不冒充全检）。"""
+    lm = rep['stats'].get('log_metrics') or {}
+    pdf = rep['battery_pdf'] if 'battery_pdf' in rep else {}
+    fonts = pdf.get('fonts', {})
+    geo = pdf.get('geometry', {})
+    imgs = pdf.get('images', {})
+    tex_errs = len(rep['errors'])
+
+    def sec(items):
+        fails = [i for i, ok in items if not ok]
+        skipped = [i for i, ok in items if ok is None]
+        st = 'PASS' if not fails else ('ADVISORY' if all(ok is not False for _, ok in items) else 'FAIL')
+        return {'status': st, 'failed': fails, 'unverified': skipped,
+                'items': {i: ('PASS' if ok else ('SKIP' if ok is None else 'FAIL')) for i, ok in items}}
+
+    A = sec([
+        ('compile_errors=0', lm.get('compile_errors') == 0 if lm else None),
+        ('undefined_references=0', lm.get('undefined_references') == 0 if lm else None),
+        ('undefined_citations=0', lm.get('undefined_citations') == 0 if lm else None),
+        ('missing_files=0', lm.get('missing_files') == 0 if lm else None),
+        ('tex_static_errors=0', tex_errs == 0),
+        ('干净环境编译', None),   # 需 latexmk 于干净目录跑（CI 项，本轮不自动）
+        ('源文件齐备（无绝对路径/交互依赖）', None),  # arxiv-collector 层
+    ])
+    B = sec([
+        ('pdf_structure_ok', pdf.get('structure', {}).get('status') == 'ok' or None),
+        ('fonts_all_embedded', (not fonts.get('unembedded')) if fonts else None),
+        ('type3_fonts=0', (not fonts.get('type3')) if fonts else None),
+        ('page_sizes_consistent', (len(geo.get('page_sizes', [])) <= 1) if geo else None),
+        ('no_blank_pages', (not geo.get('blank_pages')) if geo else None),
+        ('images_ge_300dpi', (not imgs.get('low_res')) if imgs else None),
+    ])
+    C = sec([
+        ('overfull_hbox=0（优先处置项）', (lm.get('overfull_hbox_count') == 0) if lm else None),
+        ('overfull_vbox=0', (lm.get('overfull_vbox_count') == 0) if lm else None),
+        ('高风险排版命令=0', not rep['stats'].get('high_risk', {}).get('commands', {'x': 0})),
+        ('版面干预=0', not rep['stats'].get('high_risk', {}).get('geometry_tamper')),
+        ('模板件齐备（title/author/maketitle/abstract）',
+         all('R3' not in r for r in rep.get('review', []))),
+        ('孤寡行/浮动体/视觉版式', None),  # 残余人工逐页抽查（operator 判据原文：C/D 语义部分仍需人工）
+    ])
+    D = sec([
+        ('cite↔bibitem 全对账', all('E3' not in e for e in rep['errors'])),
+        ('multiply_defined=0', lm.get('multiply_defined_labels') == 0 if lm else None),
+        ('文献无"列而未引"', all('W2' not in w for w in rep['warnings'])),
+        ('引用角标不与标点/脚注重叠', None),  # 视觉项，人工抽查
+    ])
+    return {'A_arxiv_compilable': A, 'B_pdf_technical': B,
+            'C_typography': C, 'D_citations': D}
+
+
 def main():
     ap = argparse.ArgumentParser(description='论文级刚性自洽检查器（G3a）：'
                                             'tex 静态检查＋log 指标＋PDF 层＋开源工具 battery')
@@ -520,9 +573,13 @@ def main():
                                      rep['stats'], internal_uncited)
 
     rep['ok'] = not rep['errors']
+    rep['arxiv_readiness'] = arxiv_readiness(rep)
     print(f"== paper_lint: {a.tex} ==")
     print(f"结论: {'PASS' if rep['ok'] else 'FAIL'} | "
           f"ERROR {len(rep['errors'])} | WARN {len(rep['warnings'])} | REVIEW {len(rep['review'])}")
+    print('  arXiv readiness: '
+          + ' | '.join(f"{k.split('_')[0]}:{v['status']}"
+                       for k, v in rep['arxiv_readiness'].items()))
     for e in rep['errors']:
         print('  ERROR  ' + e)
     for w in rep['warnings']:

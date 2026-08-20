@@ -1,0 +1,51 @@
+% arxiv-base.tex — 无目标模板时的保守 arXiv 基础配置（operator 2026-08-21 定稿）
+% 原则：标准文档类 + Latin Modern + 默认版心；不压缩页边距、不缩小公式表格、不手写引用角标。
+% 引擎：pdflatex（英文数学论文首选；中文/复杂 Unicode 才用 xelatex+fontspec，见 README）。
+% 编译：latexmk -pdf -interaction=nonstopmode -file-line-error -halt-on-error main.tex
+% 验收：python3 ../tools/paper_lint.py main.tex --log main.log --pdf main.pdf
+%       （A 可编译 / B PDF 技术 / C 版式 / D 引用 四级评级；A、B 应 PASS）
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}          % Latin Modern：CM 风格 + T1 完整嵌入（pdffonts 应全 emb=yes、0 Type 3）
+\usepackage{microtype}        % 字距/突出/断行改善（pdfTeX 下全效）
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}        % amsmath 补充（带号公式的缩放/证明裁剪等）
+\usepackage{amsthm}           % 定理环境（数学论文常规）
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+
+% ── 定理环境（按需增删；沿用项目白名单风格）────────────────────────
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\begin{document}
+
+\title{Your Paper Title}
+\author{Author Name}
+\date{}
+\maketitle
+
+\begin{abstract}
+Your abstract.
+\end{abstract}
+
+\section{Introduction}
+Your text and citation \cite{example2024}.
+
+% 参考文献：正式投稿建议 BibTeX 流（pdflatex→bibtex→pdflatex×2）；
+% 条目少于 10 且无样式要求时 thebibliography 亦可（paper_lint E3/W2 会做对账）。
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
