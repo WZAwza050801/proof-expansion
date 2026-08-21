@@ -20,7 +20,7 @@
 
 1. 【块原文】：该块的【正文】＋【结论】，**逐字节**（含全部证明步骤、计算、反例讨论、六态标注）；
 2. 【全局约定卡】：符号/术语的唯一权威；
-3. 【成文参数】：`language: English|Chinese`、`docclass: amsart`、本块 label 前缀（如 `eq:N07-`）、前块结论行（一句话）。
+3. 【成文参数】：`language: English|Chinese`、`docclass`（如 `article`——**视觉配方（字体/版心/红框/链接色）不关你的事**：那是调度编辑选配方、组装器机械渲染的层；你产出纯内容级 LaTeX）、本块 label 前缀（如 `eq:N07-`）、前块结论行（一句话）。
 
 若【块原文】缺失、明显是被摘要/缩写/改写过的版本（判据：证明步骤不完整、没有六态标注、段落像提纲），或【成文参数】缺 `language` —— **不开工**，按 `ASK-HUMAN-CONVENTION.md` 用大白话问人。**接受摘要输入 = 本 agent 最严重事故**。
 
@@ -66,7 +66,7 @@
 node: N07
 section: P2 几何实现
 language: English
-docclass: amsart
+docclass: article
 label_prefix: "thm:N07-"
 prev_conclusion: <前块【结论】一行>
 

@@ -21,12 +21,14 @@
 
 ## 本项目（Seidel 预试）现状对照
 
-- 现行配方：`amsart + amsmath/amssymb/amsthm/amscd + xelatex`——amsart 是 **AMS 官方文档类**
-  （数学论文的"官方模板"分支），符合上述原则，**不迁移**；
-- B 层 PDF 技术质量已验证 PASS（paper_lint 2026-08-21：30 字体全嵌入、0 Type 3、
-  单一页面尺寸、0 空白页）；
-- 与 arxiv-base 的差异（article vs amsart、lmodern/microtype/hyperref 未用）是**风格选择**
-  而非合规缺口；若导师无期刊指定，维持 amsart。
+- 现行配方（2026-08-21 起迁）：**`sibling-wu`**＝article 11pt＋geometry margin=1in＋
+  lmodern/microtype＋colorlinks 蓝链＋tcolorbox 红框（UNPROVED INPUT G#）＋状态字形＋
+  目录＋按节定理编号，xelatex 编译；参照系＝Gao–Lou–Wu–Zhang 2026-08-19（operator
+  实地对比拍板：原版"综合下来丑"，三真凶＝灰弹幕状态标注/窄版心小字号/隐形链接）；
+- 历史：08-20 曾定"amsart＝AMS 官方类不迁移"——当时**无参照物**；08-21 参照物到位后
+  推翻。`amsart-arxiv` 保留于 assemble `TEMPLATES` 作保守回退；
+- B 层 PDF 技术质量已验证 PASS（paper_lint 2026-08-21：字体全嵌入、0 Type 3、
+  单一页面尺寸、0 空白页；sibling-wu 迁移后复验保持 PASS）。
 
 ## 提交前最低流程（paper_lint 已内建 A/B/C/D 评级）
 

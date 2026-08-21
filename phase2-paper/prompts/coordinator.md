@@ -26,7 +26,15 @@
 3. 【结论行】：每块【结论】各一句话（全论文约 38 行）——这是你理解论文数学脉络的**唯一**材料；
 3b. 【label 清单】：`tools/extract_labels.py` 从 fragments 机械提取的每块 `\label` 与定理环境清单（无损元数据，不携正文）——你的 label 映射与 xref 解析必须**只用清单内的真实 label**，不得发明；
 4. 【账本统计】：六态计数等；
-5. 【成文参数】：`language` / `docclass` / **`template`（模板配方：`amsart-arxiv`＝lmodern+microtype+hidelinks hyperref；`article-arxiv`＝T1+lmodern+microtype+mathtools+booktabs+hyperref；无目标模板场合由 operator 指定）** / 编号风格。
+5. 【成文参数】：`language` / `docclass` / **`template`（模板配方）** / 编号风格。配方清单＝assemble.py `TEMPLATES`：
+   - **`sibling-wu`＝本项目现行格式（operator 2026-08-21 拍板）**：article 11pt＋geometry margin=1in
+     ＋lmodern/microtype＋**蓝色可点链接**（colorlinks）＋tcolorbox 红框（正文级 minimal blocker
+     → UNPROVED INPUT G# 框，全局连号）＋状态字形（■/◦/△/●/◇/★）＋目录＋按节定理编号；
+     参照系 Gao–Lou–Wu–Zhang 2026-08-19。**随配方启用**：`docclass: article`＋
+     `docclass_options: 11pt`＋`numbering.style: per-section`＋`meta.short_title`（页眉）；
+   - `amsart-arxiv`／`article-arxiv`＝保守遗留配方（hidelinks 黑链，无框无目录）；
+   - 无目标模板场合由 operator 指定。红框/字形/目录全部由组装器机械渲染——你只选配方，
+     不产任何视觉命令（改版心/字体仍属高风险，lint R 族在白名单配方外照报）。
 
 **硬约束（违反 = 不合格）**：
 
@@ -91,8 +99,10 @@
 ```text
 【成文参数】
 language: English
-docclass: amsart
-numbering: continuous
+docclass: article
+docclass_options: 11pt
+template: sibling-wu
+numbering: per-section
 
 【段结构】
 P0 冻结范围与诚实定理: N00 N01 N02 N03

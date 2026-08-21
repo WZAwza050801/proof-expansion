@@ -111,8 +111,11 @@ CANDIDATE=候选陈述 / BLOCKED=精确定位的缺口（附最小blocker） / U
 - v1.0（2026-08-21）：随 paper_lint.py（G3a）设立；首次完整轮（R2）待跑——
   R2 的输入快照 = paper-v3.tex @ lint PASS 版。
 - **v1.1 同日增补（operator 调研清单落地）**：G3a 扩为五检查族三级报告
-  （E/L/P/W/R＋battery）；R3 模板合规——字体与排版以**官方模板为准**（本项目=amsart
-  官方文档类；不自造"通用 arXiv 样式"），paper_lint 查占位符/缺失件/版面干预。
+  （E/L/P/W/R＋battery）；R3 模板合规——以**本项目现行配方**（`sibling-wu`：article 11pt
+  ＋geometry 1in＋colorlinks 蓝链＋tcolorbox 红框＋状态字形，operator 2026-08-21 拍板，
+  参照 Gao–Lou–Wu–Zhang）为基线：配方内的 geometry/colorlinks/scriptsize（状态字形）
+  **不是**版面干预；配方外的 \vspace{-}/\resizebox/私改版心才报。paper_lint 查占位符/
+  缺失件；R1 对 scriptsize 的计数在 sibling-wu 下属预期（字形渲染），REVIEW 级不阻断。
 - **路线图（operator 定调，未实现）**：①内容审查的远期形态——证明义务**机器可检验化**
   （Lean 编译出口：把块级 completion test 逐步转写为 Lean 定理，审查=编译）；
   ②审查器独立产品化——paper_lint.py＋vendor/ 自包含，可脱离本仓库部署；
