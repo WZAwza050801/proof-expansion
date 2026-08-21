@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>证明扩写 · 实验进度汇报（吴老师）· 30min</title>
+<style>
+  :root{
+    --bg:#f7f5f0; --ink:#232c38; --muted:#707a88;
+    --primary:#14406b; --primary-soft:#e8eef6; --primary-line:#b9cbe0;
+    --accent:#b5432a; --accent-soft:#f8eae5;
+    --ok:#2e6e4e; --ok-soft:#e7f1eb;
+    --warn:#9a6b1f; --warn-soft:#f7efdd;
+    --line:#ddd6c9; --card:#fffdf8;
+    --s:1;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--bg)}
+  body{font-family:"PingFang SC","Hiragino Sans GB","Source Han Sans SC","Microsoft YaHei",sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+  .serif{font-family:"Songti SC","STSong","Noto Serif CJK SC","SimSun",serif}
+  .slide{
+    width:1280px;height:720px;position:absolute;left:50%;top:50%;
+    transform:translate(-50%,-50%) scale(var(--s));
+    padding:54px 76px 64px;background:var(--bg);
+    display:none;overflow:hidden;
+  }
+  .slide.active{display:block}
+  .kicker{display:flex;align-items:center;gap:12px;color:var(--primary);font-size:15.5px;letter-spacing:.22em;font-weight:600;margin-bottom:12px}
+  .kicker::before{content:"";width:34px;height:3px;background:var(--primary)}
+  h1.t{font-size:37px;line-height:1.28;font-weight:700;color:var(--ink);margin-bottom:22px}
+  h1.t small{display:block;font-size:18px;color:var(--muted);font-weight:400;margin-top:9px;letter-spacing:.02em}
+  .foot{position:absolute;left:76px;right:76px;bottom:24px;display:flex;justify-content:space-between;color:var(--muted);font-size:12.5px;letter-spacing:.08em;border-top:1px solid var(--line);padding-top:9px}
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px}
+  .card h3{font-size:18.5px;color:var(--primary);margin-bottom:9px;font-weight:700}
+  .card p,.card li{font-size:15.5px;line-height:1.6;color:#3a434f}
+  ul.list{padding-left:0;list-style:none}
+  ul.list li{font-size:16.5px;line-height:1.64;padding-left:21px;position:relative;margin-bottom:8px;color:#333d49}
+  ul.list li::before{content:"";position:absolute;left:2px;top:11px;width:8px;height:8px;border-radius:2px;background:var(--primary)}
+  ul.list li b{color:var(--ink)}
+  table.tbl{width:100%;border-collapse:collapse;background:var(--card);font-size:15px}
+  table.tbl th{background:var(--primary);color:#fff;font-weight:600;padding:9px 12px;text-align:left;font-size:14.5px;letter-spacing:.03em}
+  table.tbl td{padding:8px 13px;border-bottom:1px solid var(--line);line-height:1.52;color:#39424e;vertical-align:top}
+  table.tbl tr:last-child td{border-bottom:none}
+  table.tbl td.em{color:var(--accent);font-weight:600}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .stat{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--primary);border-radius:10px;padding:15px 14px 12px;text-align:center}
+  .stat .n{font-size:37px;font-weight:800;color:var(--primary);line-height:1.1;font-variant-numeric:tabular-nums}
+  .stat .n small{font-size:19px;font-weight:700}
+  .stat .d{font-size:13.5px;color:var(--muted);margin-top:6px;line-height:1.42}
+  .chip{display:inline-block;padding:2px 10px;border-radius:20px;font-size:13px;font-weight:600;white-space:nowrap}
+  .c-fixed{background:var(--ok-soft);color:var(--ok)}
+  .c-block{background:var(--accent-soft);color:var(--accent)}
+  .c-cond{background:var(--warn-soft);color:var(--warn)}
+  .c-cand{background:var(--primary-soft);color:var(--primary)}
+  .tl{position:relative;padding-left:25px}
+  .tl::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:var(--primary-line)}
+  .tl .ev{position:relative;margin-bottom:11px}
+  .tl .ev::before{content:"";position:absolute;left:-23px;top:7px;width:11px;height:11px;border-radius:50%;background:var(--bg);border:3px solid var(--primary)}
+  .tl .ev .d{font-size:14.5px;font-weight:700;color:var(--primary);letter-spacing:.04em}
+  .tl .ev .x{font-size:15px;line-height:1.5;color:#39424e}
+  .note{background:var(--primary-soft);border-left:4px solid var(--primary);padding:11px 17px;border-radius:0 8px 8px 0;font-size:15.5px;line-height:1.58;color:#2c3e57}
+  .note.red{background:var(--accent-soft);border-left-color:var(--accent);color:#6e3225}
+  .note b{font-weight:700}
+  .quote{font-size:23px;line-height:1.65;color:var(--primary);font-weight:600;text-align:center}
+  .cover{display:flex;flex-direction:column;justify-content:center;height:100%}
+  .cover .k{color:var(--primary);letter-spacing:.3em;font-size:16.5px;font-weight:600;margin-bottom:24px}
+  .cover h1{font-size:54px;line-height:1.3;font-weight:800;margin-bottom:8px}
+  .cover .sub{font-size:22px;color:#435062;margin-top:13px;line-height:1.6}
+  .cover .meta{margin-top:50px;color:var(--muted);font-size:16px;letter-spacing:.06em;line-height:2}
+  .cover .rule{width:88px;height:5px;background:var(--accent);margin-bottom:28px}
+  .hint{position:absolute;right:76px;bottom:24px;color:#a49c8d;font-size:12.5px}
+  .cols{display:flex;gap:22px}
+  .cols>div{flex:1}
+  .dagwrap{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px 10px}
+  .legend{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:8px;font-size:13.5px;color:#4a5361}
+  .legend .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .pipe{display:flex;align-items:stretch;gap:0;margin:4px 0}
+  .pipe .st{flex:1;background:var(--card);border:1.4px solid var(--primary-line);border-radius:9px;padding:10px 8px;text-align:center;margin-right:30px;position:relative}
+  .pipe .st:last-child{margin-right:0}
+  .pipe .st::after{content:"▸";position:absolute;right:-22px;top:50%;transform:translateY(-50%);color:var(--primary);font-size:15px}
+  .pipe .st:last-child::after{content:""}
+  .pipe .st .h{font-size:14.5px;font-weight:700;color:var(--ink);margin-bottom:3px}
+  .pipe .st .s{font-size:11.8px;color:var(--muted);line-height:1.42}
+  .pipe .gate{flex:0 0 92px;background:var(--accent-soft);border:1.4px solid var(--accent);border-radius:9px;padding:10px 6px;text-align:center;margin-right:30px;position:relative;display:flex;flex-direction:column;justify-content:center}
+  .pipe .gate::after{content:"▸";position:absolute;right:-22px;top:50%;transform:translateY(-50%);color:var(--accent);font-size:15px}
+  .pipe .gate .h{font-size:13.5px;font-weight:800;color:var(--accent)}
+  .pipe .gate .s{font-size:11.3px;color:#8a5344;line-height:1.38}
+  .apx{font-size:14.5px}
+  #hud{position:fixed;left:0;right:0;bottom:0;pointer-events:none;z-index:9}
+  #bar{height:3px;background:var(--primary);width:0;transition:width .15s}
+  #cnt{position:fixed;right:14px;bottom:10px;color:#9a927f;font-size:12px;letter-spacing:.1em}
+  @media print{
+    :root{--s:1}
+    body{background:#fff}
+    #hud,#cnt,.hint{display:none!important}
+    .slide{position:relative;left:0;top:0;transform:none;display:block!important;page-break-after:always;margin:0 auto}
+    @page{size:1280px 720px;margin:0}
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- 1 封面 -->
+<section class="slide cover">
+  <div class="k">数学科研实践 · PROOF-EXPANSION · 组会汇报</div>
+  <div class="rule"></div>
+  <h1 class="serif">证明扩写：实验进度汇报</h1>
+  <div class="sub">Seidel 猜想论文管线：从研究章程到 68 页可审计底稿<br>—— 一个数学进展、一套方法、一份请求</div>
+  <div class="meta">汇报人：〔填写姓名〕　|　指导教师：吴老师<br>2026 年 8 月 21 日（周五）下午 · 约 30 分钟</div>
+  <div class="hint">← → 翻页 · F 全屏 · ⌘P 打印为 PDF</div>
+</section>
+
+<!-- 2 总览 -->
+<section class="slide">
+  <div class="kicker">TL;DR · 一页总览</div>
+  <h1 class="t">三句话讲完，再展开三十分钟</h1>
+  <div class="grid g3">
+    <div class="card">
+      <h3>① 进展：管线首次全绿</h3>
+      <p>Seidel 任务从章程到论文<b>首次端到端跑通</b>：38/38 证明块 → 盲审＋重写闭环 → 机械组装 → <b>68 页论文底稿</b>，编译 0 错误，版式已对齐您的主文。</p>
+    </div>
+    <div class="card">
+      <h3>② 现状：正文完成 ≠ 证完</h3>
+      <p>headline 定理被诚实账本标记 <span class="chip c-block">BLOCKED</span>：正文在、结构闭合，但<b>源门无法核实</b>——根因是 D6（Bai–Seidel 稿）公开渠道不存在。<b>这是今天请求您的核心。</b></p>
+    </div>
+    <div class="card">
+      <h3>③ 方法：闸门＞自律</h3>
+      <p>三天里四起事故全部被<b>机械闸门或账本</b>拦截（无一靠 agent 自觉）。沉淀出一套可复现的工程：<b>53 例测试、214 条哈希、22 条人门账</b>。</p>
+    </div>
+  </div>
+  <div style="height:18px"></div>
+  <div class="note"><b>结构预告</b>：§1 数学对象与进展 → §2 方法与工程（怎么防错）→ §3 成果清单 → §4 需要您的三件事 → §5 下一步。一期（A/B 实验）本轮不展开，状态一句话：设计冻结、等题池，附录备查。</div>
+</section>
+
+<!-- 3 定位 -->
+<section class="slide">
+  <div class="kicker">§1.0 · 项目定位</div>
+  <h1 class="t">研究问题：不是「能不能写」，是「流程是否更可审计」<small>proof-expansion 的任务定义与成功标准（口径对齐）</small></h1>
+  <div class="cols">
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <h3>任务：证明扩写</h3>
+        <p>输入 = 定理陈述 ＋ <b>证明骨架</b> ＋ 允许依赖 ＋ 写作要求；<br>输出 = 结构完整、步骤可审阅、<b>依赖可追踪</b>的证明 ＋ 缺口记录。<br><span style="color:var(--muted);font-size:14.5px">不追求自动发现定理；模型输出永远不直接标记为 proved。</span></p>
+      </div>
+      <div class="card">
+        <h3>与纯「让 AI 写数学」的区别</h3>
+        <ul class="list">
+          <li>模型能力（推导、找引理）与<b>流程能力</b>（拆步、管依赖、报缺口）分开评测；</li>
+          <li>核心主张：<b>缺口诚实性</b>——缺信息时报告，而不是编造。</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="height:100%">
+        <h3>预注册的成功标准</h3>
+        <p>相对 Baseline 至少显著改善以下两项、且不损害正确性，流程才算有效：</p>
+        <ul class="list" style="margin-top:8px">
+          <li>缺口识别与诚实报告</li>
+          <li>证明步骤可审阅性</li>
+          <li>假设与依赖的显式管理</li>
+          <li>研究者风格的稳定控制</li>
+          <li>研究者最终修订时间</li>
+        </ul>
+        <p style="margin-top:6px;color:var(--muted);font-size:14.5px">只增加篇幅/模板/形式标记而无错误率与修订成本改善的，判无效——这条对今天的 Seidel 结果同样适用。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 两期 -->
+<section class="slide">
+  <div class="kicker">§1.1 · 总体设计</div>
+  <h1 class="t">两期分工：一条能力，两种问法<small>本轮汇报以二期为主体；一期一行带过（附录 C 备查）</small></h1>
+  <table class="tbl">
+    <tr><th style="width:12%"></th><th>一期 phase1-ab-eval</th><th>二期 phase2-paper（本轮主体）</th></tr>
+    <tr><td><b>问</b></td><td>精细化提示词（B）是否优于普通提示词（A）？</td><td>一篇长证明能否<b>分块写出</b>并机械拼装成论文？</td></tr>
+    <tr><td><b>判分</b></td><td>C 门槛＋G/R/L，匿名盲评＋bootstrap</td><td><b>确定性检查</b>（引用/闭合/覆盖/编译）＋盲审＋审查轮</td></tr>
+    <tr><td><b>产物</b></td><td>aggregate.data.json（统计结论）</td><td>blocks 38 块 · fragments · <b>paper-v3.pdf 68 页</b></td></tr>
+    <tr><td><b>状态</b></td><td>预注册冻结 · 预检发现经典题无区分度 → 等 Terra 二轮题池（数天内可开跑）</td><td class="em">首次 E2E 全绿 · 待 D6 解锁 headline</td></tr>
+  </table>
+  <div style="height:14px"></div>
+  <div class="note">两期<b>不共享判分口径、不互相阻塞</b>。今天 95% 的篇幅讲二期：先看数学对象（§2），再看方法怎么保证它可信（§3），最后看实物（§4）。</div>
+</section>
+
+<!-- 5 charter -->
+<section class="slide">
+  <div class="kicker">§2.1 · 本轮输入</div>
+  <h1 class="t">Seidel 固定点 Floer–Hochschild 项目<small>输入不是一道题，是一份「研究章程」——它规定了目标、门与账本</small></h1>
+  <div class="cols">
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <h3>数学目标（三级阶梯，只声明证到的最强级）</h3>
+        <p style="text-align:center;margin:6px 0"><i>CO</i><sub>φ,δ,ε</sub> : <i>HF</i><sup>*</sup>(φ; δ, ε) ⟶ <i>HH</i><sup>*</sup>(<i>A</i>, 𝒫<sub>φ</sub>) 为拟同构</p>
+        <p style="font-size:14.5px">阶梯：① 全局单项独同构 ν（含 ν<sup>k</sup>）→ ② 迭代可容许类 → ③ 一般自同构（需 φ-适应 stop 定理）。<b>一份「全局 monodromy ＋ 可复用机器」的首篇论文即合格。</b></p>
+      </div>
+      <div class="card">
+        <h3>章程的四道阶段门</h3>
+        <p style="font-size:15px">Ⅰ 定理与可行性审计 → Ⅱ 有界证明模块 → Ⅲ 独立盲审 → Ⅳ 成文。<b>禁止一口气写论文</b>；八条不可协商的数学承诺（有限阶结论、方差正确、识别 Seidel 真映射…）全程约束。</p>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="height:100%">
+        <h3>六态账本：每条断言必须带状态</h3>
+        <div style="line-height:2.3;margin:6px 0">
+          <span class="chip c-fixed">FIXED 已定约定</span>
+          <span class="chip c-fixed">IMPORTED-VERIFIED 已核文献</span>
+          <span class="chip c-fixed">PROVED-IN-PROJECT 本项目证明</span><br>
+          <span class="chip c-cond">CONDITIONAL 有条件</span>
+          <span class="chip c-cand">CANDIDATE 候选构造</span>
+          <span class="chip c-block">BLOCKED 精确阻塞</span>
+        </div>
+        <p style="font-size:15px;margin-top:6px">这是整个体系的基石：agent 不许把「看起来对」写成「已证」。<b>有效状态按 worst(自身, 全部前置) 沿 DAG 传播</b>——一个上游阻塞会诚实地污染整条下游链，包括 headline。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 DAG -->
+<section class="slide">
+  <div class="kicker">§2.2 · 拆题结果</div>
+  <h1 class="t">章程 → 38 个证明义务的依赖 DAG<small>节点 = 自足小引理，边 = 真实依赖；经独立审图（v1→v3），机械 validate 无环/无悬空/无孤儿</small></h1>
+  <div class="dagwrap">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1174 232" style="width:100%;height:auto;font-family:inherit">
+<path d="M47.0,52.0 C61.0,52.0 61.0,52.0 59.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M47.0,180.0 C61.0,180.0 61.0,52.0 59.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M47.0,52.0 C84.0,52.0 84.0,52.0 105.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M47.0,180.0 C84.0,180.0 84.0,52.0 105.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M93.0,52.0 C107.0,52.0 107.0,52.0 105.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M47.0,180.0 C107.0,180.0 107.0,52.0 151.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M139.0,52.0 C153.0,52.0 153.0,52.0 151.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M185.0,52.0 C199.0,52.0 199.0,52.0 197.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M231.0,52.0 C245.0,52.0 245.0,52.0 243.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M139.0,52.0 C153.0,52.0 153.0,180.0 151.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M185.0,180.0 C199.0,180.0 199.0,116.0 197.0,116.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M185.0,180.0 C199.0,180.0 199.0,180.0 197.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M139.0,52.0 C199.0,52.0 199.0,180.0 243.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M185.0,180.0 C222.0,180.0 222.0,180.0 243.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M231.0,180.0 C245.0,180.0 245.0,180.0 243.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M185.0,180.0 C245.0,180.0 245.0,52.0 289.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M277.0,180.0 C291.0,180.0 291.0,52.0 289.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M323.0,52.0 C337.0,52.0 337.0,52.0 335.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M231.0,180.0 C291.0,180.0 291.0,52.0 335.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M231.0,180.0 C314.0,180.0 314.0,52.0 381.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M369.0,52.0 C383.0,52.0 383.0,52.0 381.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M277.0,52.0 C360.0,52.0 360.0,52.0 427.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M231.0,116.0 C337.0,116.0 337.0,52.0 427.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M323.0,52.0 C383.0,52.0 383.0,52.0 427.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M231.0,180.0 C337.0,180.0 337.0,52.0 427.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M415.0,52.0 C429.0,52.0 429.0,52.0 427.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M277.0,180.0 C291.0,180.0 291.0,180.0 289.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M323.0,180.0 C337.0,180.0 337.0,116.0 335.0,116.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M369.0,116.0 C383.0,116.0 383.0,116.0 381.0,116.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M323.0,180.0 C383.0,180.0 383.0,180.0 427.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M369.0,116.0 C406.0,116.0 406.0,180.0 427.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M415.0,116.0 C429.0,116.0 429.0,180.0 427.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M231.0,116.0 C291.0,116.0 291.0,180.0 335.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M323.0,52.0 C337.0,52.0 337.0,180.0 335.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M277.0,180.0 C314.0,180.0 314.0,180.0 335.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M323.0,180.0 C360.0,180.0 360.0,180.0 381.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M369.0,180.0 C383.0,180.0 383.0,180.0 381.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M461.0,180.0 C475.0,180.0 475.0,52.0 473.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M415.0,180.0 C452.0,180.0 452.0,52.0 473.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M507.0,52.0 C521.0,52.0 521.0,52.0 519.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M369.0,116.0 C475.0,116.0 475.0,52.0 565.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M415.0,116.0 C498.0,116.0 498.0,52.0 565.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M553.0,52.0 C567.0,52.0 567.0,52.0 565.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M461.0,52.0 C475.0,52.0 475.0,180.0 473.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M461.0,180.0 C475.0,180.0 475.0,180.0 473.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M369.0,116.0 C498.0,116.0 498.0,52.0 611.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M415.0,116.0 C521.0,116.0 521.0,52.0 611.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M507.0,52.0 C567.0,52.0 567.0,52.0 611.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M553.0,52.0 C590.0,52.0 590.0,52.0 611.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M599.0,52.0 C613.0,52.0 613.0,52.0 611.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M507.0,180.0 C567.0,180.0 567.0,52.0 611.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M461.0,180.0 C567.0,180.0 567.0,52.0 657.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M599.0,52.0 C636.0,52.0 636.0,52.0 657.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M645.0,52.0 C659.0,52.0 659.0,52.0 657.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M461.0,180.0 C590.0,180.0 590.0,52.0 703.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M691.0,52.0 C705.0,52.0 705.0,52.0 703.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M645.0,52.0 C705.0,52.0 705.0,52.0 749.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M691.0,52.0 C728.0,52.0 728.0,52.0 749.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M737.0,52.0 C751.0,52.0 751.0,52.0 749.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M277.0,52.0 C544.0,52.0 544.0,52.0 795.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M461.0,52.0 C636.0,52.0 636.0,52.0 795.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M553.0,52.0 C682.0,52.0 682.0,52.0 795.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M783.0,52.0 C797.0,52.0 797.0,52.0 795.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M553.0,52.0 C705.0,52.0 705.0,52.0 841.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M829.0,52.0 C843.0,52.0 843.0,52.0 841.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M783.0,52.0 C843.0,52.0 843.0,52.0 887.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M829.0,52.0 C866.0,52.0 866.0,52.0 887.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M875.0,52.0 C889.0,52.0 889.0,52.0 887.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M369.0,52.0 C659.0,52.0 659.0,52.0 933.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M461.0,180.0 C705.0,180.0 705.0,52.0 933.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M783.0,52.0 C866.0,52.0 866.0,52.0 933.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M829.0,52.0 C889.0,52.0 889.0,52.0 933.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M875.0,52.0 C912.0,52.0 912.0,52.0 933.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M921.0,52.0 C935.0,52.0 935.0,52.0 933.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M461.0,180.0 C705.0,180.0 705.0,116.0 933.0,116.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M783.0,52.0 C866.0,52.0 866.0,116.0 933.0,116.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M829.0,52.0 C889.0,52.0 889.0,116.0 933.0,116.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M875.0,52.0 C912.0,52.0 912.0,116.0 933.0,116.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M921.0,52.0 C935.0,52.0 935.0,116.0 933.0,116.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M231.0,180.0 C590.0,180.0 590.0,180.0 933.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M369.0,52.0 C659.0,52.0 659.0,180.0 933.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M277.0,180.0 C613.0,180.0 613.0,180.0 933.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M323.0,180.0 C636.0,180.0 636.0,180.0 933.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M369.0,116.0 C659.0,116.0 659.0,180.0 933.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M415.0,116.0 C682.0,116.0 682.0,180.0 933.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M461.0,180.0 C705.0,180.0 705.0,180.0 933.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M783.0,52.0 C866.0,52.0 866.0,180.0 933.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M921.0,52.0 C935.0,52.0 935.0,180.0 933.0,180.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M829.0,52.0 C912.0,52.0 912.0,52.0 979.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M875.0,52.0 C935.0,52.0 935.0,52.0 979.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M967.0,52.0 C981.0,52.0 981.0,52.0 979.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M967.0,116.0 C981.0,116.0 981.0,52.0 979.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M967.0,180.0 C981.0,180.0 981.0,52.0 979.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M93.0,52.0 C567.0,52.0 567.0,52.0 1025.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M1013.0,52.0 C1027.0,52.0 1027.0,52.0 1025.0,52.0" fill="none" stroke="#c5bfb2" stroke-width="1.1" opacity="0.55"/>
+<path d="M139.0,52.0 C613.0,52.0 613.0,52.0 1071.0,52.0" fill="none" stroke="#b5432a" stroke-width="2" opacity="0.95"/>
+<path d="M1013.0,52.0 C1050.0,52.0 1050.0,52.0 1071.0,52.0" fill="none" stroke="#b5432a" stroke-width="2" opacity="0.95"/>
+<path d="M1059.0,52.0 C1073.0,52.0 1073.0,52.0 1071.0,52.0" fill="none" stroke="#b5432a" stroke-width="2" opacity="0.95"/>
+<circle cx="30.0" cy="52.0" r="15" fill="#e7f1eb" stroke="#2e6e4e" stroke-width="1.6"/>
+<text x="30.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#2e6e4e">N00</text>
+<circle cx="30.0" cy="180.0" r="15" fill="#e7f1eb" stroke="#2e6e4e" stroke-width="1.6"/>
+<text x="30.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#2e6e4e">N01</text>
+<circle cx="76.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="76.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N02</text>
+<circle cx="122.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="122.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N03</text>
+<circle cx="168.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="168.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N04</text>
+<circle cx="168.0" cy="180.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="168.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N07</text>
+<circle cx="214.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="214.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N05</text>
+<circle cx="214.0" cy="116.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="214.0" y="120.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N08</text>
+<circle cx="214.0" cy="180.0" r="15" fill="#f7efdd" stroke="#9a6b1f" stroke-width="1.6"/>
+<text x="214.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#9a6b1f">N10</text>
+<circle cx="260.0" cy="52.0" r="15" fill="#f7efdd" stroke="#9a6b1f" stroke-width="1.6"/>
+<text x="260.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#9a6b1f">N06</text>
+<circle cx="260.0" cy="180.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="260.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N14</text>
+<circle cx="306.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="306.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N09</text>
+<circle cx="306.0" cy="180.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="306.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N15</text>
+<circle cx="352.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="352.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N11</text>
+<circle cx="352.0" cy="116.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="352.0" y="120.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N16</text>
+<circle cx="352.0" cy="180.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="352.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N19</text>
+<circle cx="398.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="398.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N12</text>
+<circle cx="398.0" cy="116.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="398.0" y="120.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N17</text>
+<circle cx="398.0" cy="180.0" r="15" fill="#f7efdd" stroke="#9a6b1f" stroke-width="1.6"/>
+<text x="398.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#9a6b1f">N20</text>
+<circle cx="444.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="444.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N13</text>
+<circle cx="444.0" cy="180.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="444.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N18</text>
+<circle cx="490.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="490.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N21</text>
+<circle cx="490.0" cy="180.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="490.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N24</text>
+<circle cx="536.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="536.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N22</text>
+<circle cx="582.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="582.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N23</text>
+<circle cx="628.0" cy="52.0" r="15" fill="#f7efdd" stroke="#9a6b1f" stroke-width="1.6"/>
+<text x="628.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#9a6b1f">N25</text>
+<circle cx="674.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="674.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N26</text>
+<circle cx="720.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="720.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N27</text>
+<circle cx="766.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="766.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N28</text>
+<circle cx="812.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="812.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N29</text>
+<circle cx="858.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="858.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N30</text>
+<circle cx="904.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="904.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N31</text>
+<circle cx="950.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="950.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N32</text>
+<circle cx="950.0" cy="116.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="950.0" y="120.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N33</text>
+<circle cx="950.0" cy="180.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="950.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N34</text>
+<circle cx="996.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="996.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N35</text>
+<circle cx="1042.0" cy="52.0" r="15" fill="#f8eae5" stroke="#b5432a" stroke-width="1.6"/>
+<text x="1042.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#b5432a">N36</text>
+<circle cx="1088.0" cy="52.0" r="19" fill="#e8eef6" stroke="#14406b" stroke-width="2.5"/>
+<text x="1088.0" y="56.0" text-anchor="middle" font-size="12.5" font-weight="800" fill="#14406b">N37</text>
+</svg>
+    <div class="legend">
+      <span><span class="sw" style="background:#e7f1eb;border:2px solid #2e6e4e"></span>FIXED ×2（约定/源单）</span>
+      <span><span class="sw" style="background:#f7efdd;border:2px solid #9a6b1f"></span>CONDITIONAL ×4</span>
+      <span><span class="sw" style="background:#e8eef6;border:2px solid #14406b"></span>CANDIDATE ×1（N37 headline）</span>
+      <span><span class="sw" style="background:#f8eae5;border:2px solid #b5432a"></span>BLOCKED ×31（声明状态）</span>
+      <span style="color:var(--muted)">着色 = 各块<b>声明</b>状态；有效状态经 worst 传播后：除 N00/N01 外全链 BLOCKED（§4.2 详述）</span>
+    </div>
+  </div>
+  <div style="height:14px"></div>
+  <div class="stats">
+    <div class="stat"><div class="n">38</div><div class="d">节点（N00–N37）</div></div>
+    <div class="stat"><div class="n">98</div><div class="d">依赖边</div></div>
+    <div class="stat"><div class="n">24<small> 层</small></div><div class="d">串行深度 / 最宽 3</div></div>
+    <div class="stat"><div class="n">1.58<small>×</small></div><div class="d">理论最优加速比 → 正确性优先</div></div>
+  </div>
+</section>
+
+<!-- 7 调度含义 -->
+<section class="slide">
+  <div class="kicker">§2.3 · 这个形状意味着什么</div>
+  <h1 class="t">DAG 的形状直接决定了流水线的策略</h1>
+  <div class="grid g3">
+    <div class="card">
+      <h3>深而窄 ⇒ 并行无利可图</h3>
+      <p>24 层串行深度、最宽 3，理论最优加速比仅 <b>1.58×</b>。结论：吞吐不是目标，<b>每一步的正确性传播</b>才是——错一块，污染半径最大的可达 36/38 个节点。</p>
+    </div>
+    <div class="card">
+      <h3>复用多 ⇒ 必须统一供给</h3>
+      <p><b>25 个节点被 ≥2 个下游引用</b>（引理复用）。任何一处「自己重推一遍」都是漂移风险 → 前置结论只允许来自<b>上游块已落盘的原文</b>，由调度器统一拼进任务书。</p>
+    </div>
+    <div class="card">
+      <h3>污染半径 ⇒ 人工放在刀刃上</h3>
+      <p>半径 top：N00/N01=36、N02=35 → <b>前 7 层全部 manual 人门</b>（人工介入产出比最高的位置），深层批量放行。有限的人工时间用在结构性节点上。</p>
+    </div>
+  </div>
+  <div style="height:16px"></div>
+  <div class="note">这套「形状 → 策略」的对应关系全部由调度器 <b>schedule.py 的五个机械不变量</b>强制（I1 前置未落盘拒发 / I2 状态单调传播 / I3 引用必须真实 / I4 污染半径定门档 / I5 正文必须实际引用前置）——写在代码里，不靠提醒。</div>
+</section>
+
+<!-- 8 流水线 -->
+<section class="slide">
+  <div class="kicker">§3.1 · 方法</div>
+  <h1 class="t">端到端流水线：五段工艺，四道人门，闸门全程<small>每一站只做一件事；红色 = 人门（放行/打回，全部记账）</small></h1>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
+    <div class="pipe">
+      <div class="st"><div class="h">章程 charter</div><div class="s">目标＋P0–P7 脊柱＋阶段门</div></div>
+      <div class="st"><div class="h">① 拆题 splitter</div><div class="s">节点=自足小引理</div></div>
+      <div class="st"><div class="h">② 独立审图</div><div class="s">漏边/假边/粒度复核</div></div>
+      <div class="gate"><div class="h">G0 人门</div><div class="s">树形复核<br/>不通过→改树</div></div>
+      <div class="st"><div class="h">③ 调度器</div><div class="s">plan/next/taskbook<br/>五不变量强制</div></div>
+    </div>
+    <div class="pipe">
+      <div class="st"><div class="h">④ 块写手 ×38</div><div class="s">零工具·闭卷·单上下文<br/>只回文本，人负责落盘</div></div>
+      <div class="st"><div class="h">blocks/N*.md</div><div class="s">三段式：正文/结论/依赖与未决</div></div>
+      <div class="st"><div class="h">匿名盲审</div><div class="s">独立 agent·匿名编号<br/>C 级→带反馈重写</div></div>
+      <div class="gate"><div class="h">G1 人门</div><div class="s">每块证明正确严谨<br/>不通过→重扩</div></div>
+      <div class="st"><div class="h">⑤a 逐段成文 splicer</div><div class="s">逐字节输入契约<br/>语言字段·禁摘要</div></div>
+    </div>
+    <div class="pipe">
+      <div class="gate"><div class="h">G2a 闸</div><div class="s">coverage≥阈值<br/>编译探针 0 err</div></div>
+      <div class="st"><div class="h">⑤b 调度编辑 coordinator</div><div class="s">只出装配指令 JSON<br/>禁读正文禁出正文</div></div>
+      <div class="st"><div class="h">⑤c 机械组装 assemble</div><div class="s">DAG 序·xref∈闭包校验<br/>Nref 解析·文献渲染</div></div>
+      <div class="st"><div class="h">编译门</div><div class="s">xelatex×2<br/>exit=0·零 undefined</div></div>
+      <div class="gate"><div class="h">G2→G3</div><div class="s">终验→全局审读<br/>定稿</div></div>
+    </div>
+  </div>
+  <div style="height:12px"></div>
+  <div class="note"><b>设计原则</b>：agent 之间不直接对话，一切经落盘资产＋机械脚本；人只在红门出現。本轮 22 次放行全部在 gate-ledger 留痕（§4.3）。</div>
+</section>
+
+<!-- 9 时间线 -->
+<section class="slide">
+  <div class="kicker">§3.2 · 执行时间线</div>
+  <h1 class="t">8/17 → 8/21：四天走完一个完整周期</h1>
+  <div class="cols">
+    <div>
+      <div class="tl">
+        <div class="ev"><div class="d">08/17 周一</div><div class="x">一期冒烟：残缺变体显示 A/B 区分力；写手预检 3 模型×5 题 15/15 全对 → 判「经典题无区分度」（附录 C）。</div></div>
+        <div class="ev"><div class="d">08/19 周三 夜</div><div class="x">Seidel <b>章程冻结</b> → 拆题 v1 → 独立审图 → DAG v3（38 节点定档）。</div></div>
+        <div class="ev"><div class="d">08/20 周四</div><div class="x">38/38 块落盘（前 7 层 manual）；四组匿名盲审 <b>6A / 24B / 5C</b>；5 个 C 级块带反馈重写 <b>5/5 修正命中</b>；机械拼接 31 页底稿＋七份文献卷宗锚定。</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="tl">
+        <div class="ev"><div class="d">08/20 周四 夜</div><div class="x"><b>事故</b>：编辑轮 1423 行拼接稿被摘要后喂 agent → 7 页骨架稿。决策：<b>重构后半段</b>（逐段成文＋机械组装＋覆盖断言）。</div></div>
+        <div class="ev"><div class="d">08/21 周五 凌晨</div><div class="x">重构后 E2E <b>首次全绿</b>（70 页 0 错误）→ 工程加固（53 测试/幂等落盘/manifest）→ S3 五族裁决 → paper-v3。</div></div>
+        <div class="ev"><div class="d">08/21 周五 早</div><div class="x">版式对齐参照（您的主文）→ <b>68 页定稿版</b>；架构审计＋三缝机械收口（53/53 绿）。</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 成果A 论文 -->
+<section class="slide">
+  <div class="kicker">§4.1 · 成果清单（一）论文侧</div>
+  <h1 class="t">paper-v3：68 页，可编译、可审计、版式对齐<small>现场可翻阅 runs/pretest/seidel/paper-v3.pdf</small></h1>
+  <div class="stats">
+    <div class="stat"><div class="n">68<small> 页</small></div><div class="d">xelatex 编译<br/><b>0 errors / 0 undefined</b></div></div>
+    <div class="stat"><div class="n">38<small>/38</small></div><div class="d">块正文全部落盘<br/>I5 引用核对全过</div></div>
+    <div class="stat"><div class="n">469<small>/469</small></div><div class="d">\Nref 跨块引用<br/>全部解析·零断链</div></div>
+    <div class="stat"><div class="n">3.36<small>×</small></div><div class="d">覆盖率断言<br/>公式·定理计数零丢失</div></div>
+  </div>
+  <div style="height:16px"></div>
+  <div class="grid g2">
+    <div class="card">
+      <h3>版式：按您主文的「格式 DNA」对齐</h3>
+      <p>article 11pt · 1in 边距 · 蓝色链接 · 按节定理编号 · 目录 · markboth 页眉；正文级 minimal blocker 用<b>红框 G1–G5</b> 标出，状态字形（■◦△●◇★）在引言有图例。overfull 65→0，文献 9 键全部挂 cite。</p>
+    </div>
+    <div class="card">
+      <h3>内容完整性由断言保证</h3>
+      <p>每个 fragment 过「长度 ≥ 输入×阈值」＋「公式计数不降」双断言；全文模式重算一遍（3.36×，零丢失）。<b>7 页降质事故在这套断言下不可能再发生。</b></p>
+    </div>
+  </div>
+</section>
+
+<!-- 11 成果B 工程 -->
+<section class="slide">
+  <div class="kicker">§4.2 · 成果清单（二）工程与账本</div>
+  <h1 class="t">论文之外的交付：一套可复现的验证体系</h1>
+  <div class="grid g3">
+    <div class="card"><h3>测试</h3><p><b>53/53</b> 回归测试（CLI 级，负测试必红）守全部闸门脚本；首跑即抓出 status 空目录 bug 与 I5 漂移。</p></div>
+    <div class="card"><h3>幂等落盘</h3><p><b>land.py</b> 四态（created/unchanged/refused/replace）＋ JSONL 账本——重复派发从「危险」变「无害」。</p></div>
+    <div class="card"><h3>可复现</h3><p><b>manifest 214 条</b>产物哈希（scheduler/tools/prompts 逐文件 sha256），verify 干净；任何产物可追溯。</p></div>
+    <div class="card"><h3>人门账</h3><p><b>gate-ledger 22 条</b>：谁/何时/凭什么放行，追加式 JSONL；配合 STATUS.md（机器生成快照）。</p></div>
+    <div class="card"><h3>盲审记录</h3><p>四组独立审查＋5 块带反馈重写全部留痕；「BLOCKED 文化可靠」由四组盲审独立背书。</p></div>
+    <div class="card"><h3>文献卷宗</h3><p>D1–D8 七份 PDF 锚定记录（DOSSIERS.md）；每条外部定理钉到来源与页码，D6 例外（§5 详述）。</p></div>
+  </div>
+</section>
+
+<!-- 12 事故 -->
+<section class="slide">
+  <div class="kicker">§3.3 · 事故实录</div>
+  <h1 class="t">四起事故，零一起靠 agent 自觉发现<small>这是「闸门＞自律」最硬的证据</small></h1>
+  <table class="tbl">
+    <tr><th style="width:30%">事故</th><th style="width:36%">暴露方式</th><th>沉淀</th></tr>
+    <tr><td><b>① 摘要降质</b>：1423 行稿被「好心」摘要后喂编辑 agent → 7 页骨架稿，读起来完全像论文</td><td>对照原稿发现细节全无</td><td>逐字节输入契约；覆盖率机械断言；<b>人不得在 agent 与资产间加中间层</b></td></tr>
+    <tr><td><b>② 子代理三连败</b>：3 个块写手派发失败，主 agent 以同契约代写</td><td>账本如实记录来源；产物照过同门</td><td>幂等落盘＋「卡顿后先核对再重派」协议</td></tr>
+    <tr><td><b>③ 计数盲区</b>：coverage 脚本只数 $…$ 漏 \(…\)</td><td>守规矩的块写手主动<b>报备</b>触发排查，顺带抓出 1 例假回归</td><td>双定界符计数＋负测试——<b>闸门自己也要被测试</b></td></tr>
+    <tr><td><b>④ xref 断链</b>：coordinator 产出 10 条交叉引用，组装器不消费，产出即丢弃</td><td>架构审计归因发现</td><td>消费协议＋<b>引用 ∈ 依赖闭包否则拒装</b>＋回归锁定</td></tr>
+  </table>
+  <div style="height:14px"></div>
+  <div class="note red"><b>方法论</b>：四条缝的关闭方式是同一个动作——<b>把纪律从提示词层下沉到代码层</b>。写在 prompt 里的纪律会漂移；跑在脚本里、被测试锁定的纪律不会。</div>
+</section>
+
+<!-- 13 诚实账本 -->
+<section class="slide">
+  <div class="kicker">§4.3 · 诚实账本</div>
+  <h1 class="t">正文写完了，账本拒绝说「证完了」<small>缺口诚实性——本项目核心主张的第一次大规模实证</small></h1>
+  <div class="cols">
+    <div>
+      <div class="card">
+        <h3>传播链（STATUS.md 机器快照）</h3>
+        <p style="line-height:2.1">
+          <span class="chip c-fixed">N00/N01 FIXED</span>（约定·文献源单）<br>
+          <span class="chip c-block">N02 源门 BLOCKED</span>（D6 缺失 → P0 无法核实）<br>
+          <span class="chip c-cond">N10/N06/N20/N25 CONDITIONAL</span> <span style="color:var(--muted)">→ 有效状态降级</span><br>
+          <span class="chip c-block">下游 31 块</span> worst 传播全部 BLOCKED<br>
+          <span class="chip c-cand">N37 CANDIDATE</span>（声明）→ <b style="color:var(--accent)">有效 BLOCKED</b>
+        </p>
+      </div>
+      <div style="height:14px"></div>
+      <div class="note" style="font-size:14.5px">同时：38/38 块<b>正文完整</b>、I5 引用核对全过、盲审确认零编造。正文完整与账本 BLOCKED <b>并存</b>，这正是设计的意图。</div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <h3>为什么源门过不去</h3>
+        <p>① <b>D6（Bai–Seidel 稿）公开渠道不存在</b>——P5 与 headline 的根本依赖，导师侧材料；② 章程输入端缺少端点模型/stop/ν 的具体作用方式（charter 输入简略所致）。两者都属<b>外部缺料</b>，非管线缺陷。</p>
+      </div>
+      <div class="card">
+        <h3>管线宁可交付什么</h3>
+        <p>一份「正文完整＋阻塞点精确到节点＋依赖文献全部锚定」的底稿——D6 一到，从源门开始逐块解锁，<b>不需要重写任何一块</b>。<br><span style="color:var(--muted);font-size:14.5px">对项目主张的意义：诚实账本在 38 块规模上经受住了传播测试——它没有为了好看谎报一个 proved。</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 14 D6 -->
+<section class="slide">
+  <div class="kicker">§5.1 · 核心请求</div>
+  <h1 class="t">D6 · Bai–Seidel 稿件：唯一的根本阻塞<small>我确认过公开渠道（arXiv/期刊页/搜索），不存在；猜测在您或合作者手里</small></h1>
+  <div class="cols">
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <h3>它在依赖图上的位置</h3>
+        <ul class="list">
+          <li>P5（与 Seidel 扭曲 closed–open 映射的识别）的<b>直接输入</b>；</li>
+          <li>headline N37 的最终前置——<b>不在图上，图就闭不上</b>；</li>
+          <li>卷宗 D1–D8 其余七份已全部锚定，<b>只缺这一份</b>。</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>拿到之后的管线动作（已备好）</h3>
+        <p style="font-size:15px">入卷宗 → N02 源门复核（引理核对＋假设检查）→ 账本沿 DAG 逐块解锁 → headline 重定档 → v4 重排＋复跑全部门。<b>缺的只是输入，不是流程。</b></p>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <h3>同时确认两件小事</h3>
+        <ul class="list">
+          <li><b>author 署名</b>：当前占位符，等您拍板；</li>
+          <li><b>abstract</b>：草稿（约 1200 字符）在 instructions-v3.json，请您过目。</li>
+        </ul>
+      </div>
+      <div class="note red"><b>如果您那边也没有 D6</b>：备选方案是按章程的保守回退——定理范围收窄到「全局 monodromy ν<sup>k</sup>＋可复用形式机器」，用 D1–D5/D7/D8 支撑的子图先闭合一篇。这个分叉想听您的意见。</div>
+    </div>
+  </div>
+</section>
+
+<!-- 15 请求汇总 -->
+<section class="slide">
+  <div class="kicker">§5.2 · 请求汇总</div>
+  <h1 class="t">今天带走的三件事</h1>
+  <div class="grid" style="gap:15px">
+    <div class="card" style="border-left:5px solid var(--accent)">
+      <h3>① D6 稿件（根本阻塞 · 仅导师侧可得）</h3>
+      <p>Bai–Seidel 稿或其替代源（哪怕部分/手稿版）。拿到即解锁 headline 链；若不存在，请对「保守回退收窄范围」拍板。</p>
+    </div>
+    <div class="card" style="border-left:5px solid var(--primary)">
+      <h3>② author / abstract 定稿（分钟级）</h3>
+      <p>署名与单位；abstract 草稿过目。两项定稿即可进 G2 终验。</p>
+    </div>
+    <div class="card" style="border-left:5px solid var(--primary)">
+      <h3>③ G2 抽审（小时级）</h3>
+      <p>建议优先抽：headline N37 ＋ 任选两个盲审 A 级块（共 6 个 A 级，清单现场可给）。您的时间花在刀刃上，其余交给闸门。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 16 下一步 -->
+<section class="slide">
+  <div class="kicker">§6 · 下一步（两周）</div>
+  <h1 class="t">四条线并行，一条等您</h1>
+  <table class="tbl">
+    <tr><th style="width:27%">事项</th><th style="width:47%">内容</th><th>状态 / 依赖</th></tr>
+    <tr><td><b>R2 内容审查轮首跑</b></td><td>paper-reviewer v1.2 契约就绪；重刷 lint 定快照 → 最小探针验角色 → 派 8×G3b＋1×G3c，走完 G3 正式过门</td><td>本周 · 零外部依赖</td></tr>
+    <tr><td><b>D6 解锁链</b></td><td>源门复核 → 账本逐块解锁 → v4 重排（兼作 coordinator v0.2.1 复岗考试）</td><td class="em">等 D6（请求①）</td></tr>
+    <tr><td><b>学术编辑轮工位化＋G2 终验</b></td><td>给编辑轮最小工位定义（允许改什么/必须记什么账），消除「编外模式」结构风险</td><td>本周 · 依赖请求③</td></tr>
+    <tr><td><b>一期 Terra 二轮出题 → 正式预测试</b></td><td>难题池（IMO P3+/Putnam/Schweitzer/论文引理片段）→ 筛中段带模型 → dev pilot → 入统数据</td><td>出题后数天</td></tr>
+  </table>
+  <div style="height:14px"></div>
+  <div class="note">远期：验证有效的流程沉淀为写作系统候选需求（proof expansion / dependency ledger / gap-aware drafting / review checkpoints）——以实验数据说话，不提前立项。</div>
+</section>
+
+<!-- 17 总结 -->
+<section class="slide">
+  <div class="kicker">§7 · 小结</div>
+  <h1 class="t">一句话汇报</h1>
+  <div style="padding:26px 10px">
+    <div class="quote serif">「分块扩写 ＋ 机械闸门 ＋ 诚实账本」<br>把一篇长证明的写作，变成一条<b>可审计、可复现</b>的流水线——<br>包括诚实地报告它自己还没证完。</div>
+  </div>
+  <div class="grid g3" style="margin-top:22px">
+    <div class="card"><h3>已交付</h3><p>68 页底稿（0 错误·版式对齐）· 38 块正文＋盲审＋重写全套记录</p></div>
+    <div class="card"><h3>可复现</h3><p>53 测试 · 214 哈希 manifest verify 干净 · 22 条人门账</p></div>
+    <div class="card"><h3>待您拍板</h3><p>D6（根本阻塞）· author/abstract · 抽审</p></div>
+  </div>
+  <div style="text-align:center;margin-top:30px;color:var(--muted);font-size:17px;letter-spacing:.1em">谢谢吴老师 · 欢迎提问（附录 A–D 备查）</div>
+</section>
+
+<!-- A1 版式 -->
+<section class="slide">
+  <div class="kicker">附录 A · 版式对齐明细</div>
+  <h1 class="t">paper-v3 对参照主文的格式测量</h1>
+  <table class="tbl">
+    <tr><th>项</th><th>参照（您的主文）</th><th>paper-v3</th><th>核对</th></tr>
+    <tr><td>正文字号</td><td>10.95pt（11pt 文档类）</td><td>article 11pt</td><td>✓</td></tr>
+    <tr><td>边距</td><td>≈81pt（1in）</td><td>71/70pt ≈ 1in</td><td>✓</td></tr>
+    <tr><td>链接色</td><td>深蓝 ×403 / 深红 ×178</td><td>colorlinks 蓝</td><td>✓</td></tr>
+    <tr><td>blocker 标注</td><td>淡红底框 ×9</td><td>正文级红框 5（G1–G5）＋附录 1</td><td>✓（克制原则）</td></tr>
+    <tr><td>定理编号</td><td>按节</td><td>per-section</td><td>✓</td></tr>
+    <tr><td>页眉/目录</td><td>markboth ＋ Contents</td><td>同</td><td>✓</td></tr>
+    <tr><td>overfull</td><td>自身尚有 41 处 ≤3pt</td><td>65→0，余 2 处 &lt;3pt</td><td>✓</td></tr>
+  </table>
+  <div style="height:14px"></div>
+  <div class="note">环境注记：~/texmf 的 array.sty v2.7b 与 TeX Live 2026basic 内核冲突（最小复现 26 errors）→ 配方不载 array（内置环境已够）。这段经历本身进入了 templates/README.md 迁移记录。</div>
+</section>
+
+<!-- A2 工程加固 -->
+<section class="slide">
+  <div class="kicker">附录 B · 工程加固总账</div>
+  <h1 class="t">「对闸门代码也要不信任」的落地清单</h1>
+  <table class="tbl">
+    <tr><th style="width:30%">项</th><th>内容</th><th>证据</th></tr>
+    <tr><td>闸门测试</td><td>CLI 级集成 53 例，负测试必红</td><td>phase2-paper/tests/test_gates.py</td></tr>
+    <tr><td>幂等落盘</td><td>land.py created/unchanged/refused/replace 四态＋JSONL</td><td>runs/…/land-ledger.jsonl</td></tr>
+    <tr><td>可复现</td><td>run_manifest.py gen/verify，产物＋脚本逐文件 sha256</td><td>manifest.json 214 条 · verify 干净</td></tr>
+    <tr><td>状态进文档</td><td>status 输出直接生成快照，文档只引用不抄写</td><td>STATUS.md（头部带再生命令）</td></tr>
+    <tr><td>人门账本</td><td>gate_log.py add/list，追加式</td><td>gate-ledger.jsonl 22 条</td></tr>
+    <tr><td>缝 2 收口</td><td>xref ∈ 依赖闭包拒装；传递闭包 warn；labels 缺口 warn</td><td>回归 3 例 · 前科 N19→N18 复现必拦</td></tr>
+    <tr><td>缝 3 收口</td><td>paper-reviewer v1.2 职责5收窄（lint 不可见成因）</td><td>契约 v1.2</td></tr>
+  </table>
+</section>
+
+<!-- A3 一期 -->
+<section class="slide">
+  <div class="kicker">附录 C · 一期状态（备查）</div>
+  <h1 class="t">A/B 对照实验：设计冻结，等题池</h1>
+  <div class="cols">
+    <div>
+      <div class="card">
+        <h3>就绪</h3>
+        <ul class="list">
+          <li>预注册设计冻结：C 门槛＋G40/R30/L30；窄缝题唯一进结论；</li>
+          <li>入统七条件（配对唯一/manifest/匿名化/零工具盲评/证据锁/包校验/bootstrap），缺一不可；</li>
+          <li>路由角色行齐备：terra/writer/judge/analyst。</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h3>预检结论（8/17）</h3>
+        <p>3 模型 × 5 经典题 = <b>15/15 全对</b> → 按冻结规则：经典题全对＝无区分度＝不能当判别题（P002–P006 出局）。残缺变体（删引理/删假设/错跳步）在冒烟轮已显 A/B 区分力。</p>
+      </div>
+      <div style="height:14px"></div>
+      <div class="note">等待：Terra 二轮出题（奥赛 P3+/Putnam/Schweitzer/论文引理片段）→ 重跑预检筛「中段带」模型 → 正式开跑。<b>卡在出题，不卡在设施。</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- A4 口径 -->
+<section class="slide">
+  <div class="kicker">附录 D · 数字口径对照</div>
+  <h1 class="t">每个数字的出处（被追问时指路）</h1>
+  <table class="tbl">
+    <tr><th style="width:34%">数字</th><th>出处</th></tr>
+    <tr><td>38/38 落盘 · I5 全过 · 全链 BLOCKED</td><td>runs/pretest/seidel/STATUS.md（机器生成快照）</td></tr>
+    <tr><td>68 页 · 0 errors · overfull 2（&lt;3pt）· 版式对齐明细</td><td>runs/pretest/seidel/RUN-LOG.md「版式对齐轮」节</td></tr>
+    <tr><td>盲审 6A/24B/5C → 重写 5/5</td><td>RUN-LOG.md 盲审节 · reviews/GROUP1-REVIEW.md</td></tr>
+    <tr><td>覆盖率 3.36× · 469/469 Nref</td><td>coverage-v3-paper.json · asm-v3-report.json</td></tr>
+    <tr><td>D6 阻塞定性与复岗方案</td><td>handoff/HANDOFF-2026-08-20-REBUILD-BACKEND.md §2</td></tr>
+    <tr><td>53 测试 · land/manifest/gate_ledger</td><td>phase2-paper/tests/ · tools/ · gate-ledger.jsonl</td></tr>
+    <tr><td>98 边 · 24 层 · 加速比 1.58× · 污染半径</td><td>phase2-paper/WORKFLOW-DIAGRAM.md §实测形状</td></tr>
+    <tr><td>一期预检 15/15 无区分度</td><td>runs/archive/precheck-D2-20260817/PRECHECK_REPORT.md</td></tr>
+  </table>
+</section>
+
+</div>
+<div id="hud"><div id="bar"></div></div><div id="cnt"></div>
+<script>
+const slides=[...document.querySelectorAll('.slide')];let cur=0;
+function show(n){cur=Math.max(0,Math.min(slides.length-1,n));
+ slides.forEach((s,k)=>s.classList.toggle('active',k===cur));
+ document.getElementById('bar').style.width=((cur+1)/slides.length*100)+'%';
+ document.getElementById('cnt').textContent=(cur+1)+' / '+slides.length;}
+function fit(){const s=Math.min(innerWidth/1280,innerHeight/720);document.documentElement.style.setProperty('--s',s);}
+addEventListener('resize',fit);
+addEventListener('keydown',e=>{
+ if(e.key==='f'||e.key==='F'){document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();}
+ if(['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();show(cur+1);}
+ else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(cur-1);}
+ else if(e.key==='Home')show(0); else if(e.key==='End')show(slides.length-1);});
+slides.forEach((s,k)=>{const f=document.createElement('div');f.className='foot';
+ f.innerHTML='<span>proof-expansion · 组会汇报 · 2026-08-21</span><span>'+(k+1)+' / '+slides.length+'</span>';s.appendChild(f);});
+fit();show(0);
+</script>
+</body>
+</html>

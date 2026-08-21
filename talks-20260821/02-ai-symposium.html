@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>让 AI 写了 68 页数学论文之后 · AI 使用心得</title>
+<style>
+  :root{
+    --bg0:#0d1321;--bg1:#131b2e;--ink:#e9edf5;--muted:#93a0b4;
+    --amber:#f5b942;--cyan:#57c8e8;--rose:#f28b6b;--green:#6fd39a;
+    --card:#1a2338;--line:#2a3550;
+    --s:1;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--bg0)}
+  body{font-family:"PingFang SC","Hiragino Sans GB","Source Han Sans SC","Microsoft YaHei",sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+  .serif{font-family:"Songti SC","STSong","Noto Serif CJK SC","SimSun",serif}
+  .slide{width:1280px;height:720px;position:absolute;left:50%;top:50%;
+    transform:translate(-50%,-50%) scale(var(--s));
+    padding:54px 76px 62px;display:none;overflow:hidden;
+    background:linear-gradient(160deg,var(--bg0) 0%,var(--bg1) 100%);}
+  .slide.active{display:block}
+  .kicker{display:flex;align-items:center;gap:12px;color:var(--cyan);font-size:15px;letter-spacing:.24em;font-weight:600;margin-bottom:12px}
+  .kicker::before{content:"";width:30px;height:3px;background:var(--amber)}
+  h1.t{font-size:36px;line-height:1.3;font-weight:800;color:#fff;margin-bottom:22px}
+  h1.t small{display:block;font-size:17.5px;color:var(--muted);font-weight:400;margin-top:8px}
+  .foot{position:absolute;left:76px;right:76px;bottom:22px;display:flex;justify-content:space-between;color:#5f6c84;font-size:12.5px;letter-spacing:.08em;border-top:1px solid var(--line);padding-top:9px}
+  .grid{display:grid;gap:15px}
+  .g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:17px 19px}
+  .card h3{font-size:17.5px;color:var(--amber);margin-bottom:8px;font-weight:700}
+  .card p,.card li{font-size:15px;line-height:1.58;color:#c6cede}
+  .card p b,.card li b{color:#fff}
+  ul.list{list-style:none}
+  ul.list li{font-size:15.8px;line-height:1.6;padding-left:19px;position:relative;margin-bottom:7px;color:#ccd4e2}
+  ul.list li::before{content:"";position:absolute;left:0;top:10px;width:7px;height:7px;border-radius:50%;background:var(--cyan)}
+  ul.list li b{color:#fff}
+  .num{display:inline-flex;align-items:center;justify-content:center;width:33px;height:33px;border-radius:50%;background:var(--amber);color:#151b2a;font-weight:800;font-size:17px;margin-right:13px;flex:none}
+  .lesson{display:flex;align-items:flex-start;margin-bottom:15px}
+  table.tbl{width:100%;border-collapse:collapse;font-size:14.5px}
+  table.tbl th{background:#233052;color:var(--cyan);font-weight:700;padding:8px 12px;text-align:left;font-size:14px}
+  table.tbl td{padding:8px 12px;border-bottom:1px solid var(--line);line-height:1.5;color:#c6cede;vertical-align:top}
+  table.tbl tr:last-child td{border-bottom:none}
+  table.tbl td b{color:#fff}
+  .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:13px}
+  .stat{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--amber);border-radius:12px;padding:15px 9px 11px;text-align:center}
+  .stat .n{font-size:36px;font-weight:800;color:#fff;line-height:1.1}
+  .stat .n small{font-size:18px}
+  .stat .d{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.4}
+  .quote{font-size:23px;line-height:1.7;color:#fff;font-weight:700;text-align:center}
+  .quote em{color:var(--amber);font-style:normal}
+  .note{background:#202c4c;border-left:4px solid var(--cyan);padding:11px 17px;border-radius:0 10px 10px 0;font-size:15.5px;line-height:1.58;color:#d4dcec}
+  .note.warn{border-left-color:var(--rose);background:#2a1f2e;color:#e9d9dc}
+  .note b{color:#fff}
+  .cover{display:flex;flex-direction:column;justify-content:center;height:100%}
+  .cover .k{color:var(--cyan);letter-spacing:.3em;font-size:15.5px;font-weight:600;margin-bottom:22px}
+  .cover h1{font-size:56px;line-height:1.32;font-weight:800;color:#fff}
+  .cover h1 em{color:var(--amber);font-style:normal}
+  .cover .sub{font-size:21px;color:#aab6ca;margin-top:16px;line-height:1.6}
+  .cover .meta{margin-top:46px;color:var(--muted);font-size:15.5px;letter-spacing:.08em;line-height:2}
+  .cover .rule{width:88px;height:5px;background:var(--amber);margin-bottom:26px}
+  .hint{position:absolute;right:76px;bottom:22px;color:#4e5a75;font-size:12.5px}
+  .cols{display:flex;gap:22px}.cols>div{flex:1}
+  .pipe{display:flex;align-items:stretch;gap:0;margin:4px 0}
+  .pipe .st{flex:1;background:var(--card);border:1.3px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center;margin-right:28px;position:relative}
+  .pipe .st:last-child{margin-right:0}
+  .pipe .st::after{content:"▸";position:absolute;right:-20px;top:50%;transform:translateY(-50%);color:var(--amber);font-size:14px}
+  .pipe .st:last-child::after{content:""}
+  .pipe .st .h{font-size:14px;font-weight:700;color:#fff;margin-bottom:3px}
+  .pipe .st .s{font-size:11.5px;color:var(--muted);line-height:1.4}
+  .pipe .gate{flex:0 0 86px;background:#33202a;border:1.3px solid var(--rose);border-radius:10px;padding:10px 6px;text-align:center;margin-right:28px;position:relative;display:flex;flex-direction:column;justify-content:center}
+  .pipe .gate::after{content:"▸";position:absolute;right:-20px;top:50%;transform:translateY(-50%);color:var(--rose);font-size:14px}
+  .pipe .gate .h{font-size:13px;font-weight:800;color:var(--rose)}
+  .pipe .gate .s{font-size:11px;color:#c98d7d;line-height:1.35}
+  .dagwrap{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px 8px}
+  .legend{display:flex;gap:13px;justify-content:center;flex-wrap:wrap;margin-top:8px;font-size:13px;color:#93a0b4}
+  .legend .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .tag{display:inline-block;background:#23304e;color:var(--cyan);border-radius:6px;padding:2px 9px;font-size:12.5px;margin:2px 3px 2px 0}
+  #hud{position:fixed;left:0;right:0;bottom:0;pointer-events:none;z-index:9}
+  #bar{height:3px;background:var(--amber);width:0;transition:width .15s}
+  #cnt{position:fixed;right:14px;bottom:10px;color:#5a6680;font-size:12px;letter-spacing:.1em}
+  @media print{
+    :root{--s:1}
+    body{background:#fff}
+    #hud,#cnt,.hint{display:none!important}
+    .slide{position:relative;left:0;top:0;transform:none;display:block!important;page-break-after:always;margin:0 auto}
+    @page{size:1280px 720px;margin:0}
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- 1 封面 -->
+<section class="slide cover">
+  <div class="k">AI 座谈会 · 使用经验分享 · 2026-08-21</div>
+  <div class="rule"></div>
+  <h1 class="serif">让 AI 写了 <em>68 页</em>数学论文之后<br>我的 AI 使用心得</h1>
+  <div class="sub">三天 · 一条多 agent 流水线 · 38 个证明块 · 一份诚实的论文底稿<br>以及四起被机械闸门拦下的工程事故</div>
+  <div class="meta">分享人：〔填写姓名〕<br>数学科研实践 · proof-expansion 项目</div>
+  <div class="hint">← → 翻页 · F 全屏 · ⌘P 打印为 PDF</div>
+</section>
+
+<!-- 2 三天干了什么：架构 -->
+<section class="slide">
+  <div class="kicker">背景 · 这三天我在用 AI 做什么</div>
+  <h1 class="t">不是聊天框——是一条多 agent 流水线<small>任务：把一个数学研究纲领（Seidel 猜想相关）扩写成完整论文</small></h1>
+  <div style="display:flex;flex-direction:column;gap:9px;margin-top:4px">
+    <div class="pipe">
+      <div class="st"><div class="h">研究章程</div><div class="s">P0–P7 证明脊柱</div></div>
+      <div class="st"><div class="h">拆题</div><div class="s">→ 38 个证明义务的依赖 DAG</div></div>
+      <div class="gate"><div class="h">G0 人门</div><div class="s">树形复核</div></div>
+      <div class="st"><div class="h">调度器</div><div class="s">脚本按 DAG 发任务书</div></div>
+    </div>
+    <div class="pipe">
+      <div class="st"><div class="h">块写手 ×38</div><div class="s">零工具·闭卷·互相隔离</div></div>
+      <div class="st"><div class="h">匿名盲审</div><div class="s">独立 agent 打分＋反馈</div></div>
+      <div class="gate"><div class="h">G1 人门</div><div class="s">不通过→重写</div></div>
+      <div class="st"><div class="h">逐段成文</div><div class="s">逐字节契约·禁摘要</div></div>
+    </div>
+    <div class="pipe">
+      <div class="gate"><div class="h">G2a 闸</div><div class="s">覆盖率断言</div></div>
+      <div class="st"><div class="h">机械组装</div><div class="s">DAG 校验·引用闭包</div></div>
+      <div class="st"><div class="h">编译门</div><div class="s">xelatex·0 错误</div></div>
+      <div class="st"><div class="h">我</div><div class="s">只在红门拍板 ×22 次</div></div>
+    </div>
+  </div>
+  <div style="height:13px"></div>
+  <div class="grid g3">
+    <div class="card"><h3>角色隔离</h3><p>写手不查资料、审者不看署名、组装器是纯代码——<b>agent 之间不对话，一切经落盘资产。</b></p></div>
+    <div class="card"><h3>六态记账</h3><p>每条断言必须标 FIXED / CONDITIONAL / CANDIDATE / <b style="color:var(--rose)">BLOCKED</b>——「大概对」不是合法状态。</p></div>
+    <div class="card"><h3>人的位置</h3><p>22 次放行全部记账。人不搬运内容、不当传话筒——<b>每次好心搬运都是降质点</b>（后面有故事）。</p></div>
+  </div>
+</section>
+
+<!-- 3 DAG -->
+<section class="slide">
+  <div class="kicker">背景 · 任务长什么样</div>
+  <h1 class="t">38 个证明义务的依赖图：AI 从不「整篇写」<small>每个小引理在一个干净上下文里闭卷扩写，再由代码拼装</small></h1>
+  <div class="dagwrap">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1174 232" style="width:100%;height:auto;font-family:inherit">
+<path d="M47.0,52.0 C61.0,52.0 61.0,52.0 59.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M47.0,180.0 C61.0,180.0 61.0,52.0 59.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M47.0,52.0 C84.0,52.0 84.0,52.0 105.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M47.0,180.0 C84.0,180.0 84.0,52.0 105.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M93.0,52.0 C107.0,52.0 107.0,52.0 105.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M47.0,180.0 C107.0,180.0 107.0,52.0 151.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M139.0,52.0 C153.0,52.0 153.0,52.0 151.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M185.0,52.0 C199.0,52.0 199.0,52.0 197.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M231.0,52.0 C245.0,52.0 245.0,52.0 243.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M139.0,52.0 C153.0,52.0 153.0,180.0 151.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M185.0,180.0 C199.0,180.0 199.0,116.0 197.0,116.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M185.0,180.0 C199.0,180.0 199.0,180.0 197.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M139.0,52.0 C199.0,52.0 199.0,180.0 243.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M185.0,180.0 C222.0,180.0 222.0,180.0 243.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M231.0,180.0 C245.0,180.0 245.0,180.0 243.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M185.0,180.0 C245.0,180.0 245.0,52.0 289.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M277.0,180.0 C291.0,180.0 291.0,52.0 289.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M323.0,52.0 C337.0,52.0 337.0,52.0 335.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M231.0,180.0 C291.0,180.0 291.0,52.0 335.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M231.0,180.0 C314.0,180.0 314.0,52.0 381.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M369.0,52.0 C383.0,52.0 383.0,52.0 381.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M277.0,52.0 C360.0,52.0 360.0,52.0 427.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M231.0,116.0 C337.0,116.0 337.0,52.0 427.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M323.0,52.0 C383.0,52.0 383.0,52.0 427.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M231.0,180.0 C337.0,180.0 337.0,52.0 427.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M415.0,52.0 C429.0,52.0 429.0,52.0 427.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M277.0,180.0 C291.0,180.0 291.0,180.0 289.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M323.0,180.0 C337.0,180.0 337.0,116.0 335.0,116.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M369.0,116.0 C383.0,116.0 383.0,116.0 381.0,116.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M323.0,180.0 C383.0,180.0 383.0,180.0 427.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M369.0,116.0 C406.0,116.0 406.0,180.0 427.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M415.0,116.0 C429.0,116.0 429.0,180.0 427.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M231.0,116.0 C291.0,116.0 291.0,180.0 335.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M323.0,52.0 C337.0,52.0 337.0,180.0 335.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M277.0,180.0 C314.0,180.0 314.0,180.0 335.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M323.0,180.0 C360.0,180.0 360.0,180.0 381.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M369.0,180.0 C383.0,180.0 383.0,180.0 381.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M461.0,180.0 C475.0,180.0 475.0,52.0 473.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M415.0,180.0 C452.0,180.0 452.0,52.0 473.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M507.0,52.0 C521.0,52.0 521.0,52.0 519.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M369.0,116.0 C475.0,116.0 475.0,52.0 565.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M415.0,116.0 C498.0,116.0 498.0,52.0 565.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M553.0,52.0 C567.0,52.0 567.0,52.0 565.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M461.0,52.0 C475.0,52.0 475.0,180.0 473.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M461.0,180.0 C475.0,180.0 475.0,180.0 473.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M369.0,116.0 C498.0,116.0 498.0,52.0 611.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M415.0,116.0 C521.0,116.0 521.0,52.0 611.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M507.0,52.0 C567.0,52.0 567.0,52.0 611.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M553.0,52.0 C590.0,52.0 590.0,52.0 611.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M599.0,52.0 C613.0,52.0 613.0,52.0 611.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M507.0,180.0 C567.0,180.0 567.0,52.0 611.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M461.0,180.0 C567.0,180.0 567.0,52.0 657.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M599.0,52.0 C636.0,52.0 636.0,52.0 657.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M645.0,52.0 C659.0,52.0 659.0,52.0 657.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M461.0,180.0 C590.0,180.0 590.0,52.0 703.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M691.0,52.0 C705.0,52.0 705.0,52.0 703.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M645.0,52.0 C705.0,52.0 705.0,52.0 749.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M691.0,52.0 C728.0,52.0 728.0,52.0 749.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M737.0,52.0 C751.0,52.0 751.0,52.0 749.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M277.0,52.0 C544.0,52.0 544.0,52.0 795.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M461.0,52.0 C636.0,52.0 636.0,52.0 795.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M553.0,52.0 C682.0,52.0 682.0,52.0 795.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M783.0,52.0 C797.0,52.0 797.0,52.0 795.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M553.0,52.0 C705.0,52.0 705.0,52.0 841.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M829.0,52.0 C843.0,52.0 843.0,52.0 841.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M783.0,52.0 C843.0,52.0 843.0,52.0 887.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M829.0,52.0 C866.0,52.0 866.0,52.0 887.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M875.0,52.0 C889.0,52.0 889.0,52.0 887.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M369.0,52.0 C659.0,52.0 659.0,52.0 933.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M461.0,180.0 C705.0,180.0 705.0,52.0 933.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M783.0,52.0 C866.0,52.0 866.0,52.0 933.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M829.0,52.0 C889.0,52.0 889.0,52.0 933.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M875.0,52.0 C912.0,52.0 912.0,52.0 933.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M921.0,52.0 C935.0,52.0 935.0,52.0 933.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M461.0,180.0 C705.0,180.0 705.0,116.0 933.0,116.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M783.0,52.0 C866.0,52.0 866.0,116.0 933.0,116.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M829.0,52.0 C889.0,52.0 889.0,116.0 933.0,116.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M875.0,52.0 C912.0,52.0 912.0,116.0 933.0,116.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M921.0,52.0 C935.0,52.0 935.0,116.0 933.0,116.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M231.0,180.0 C590.0,180.0 590.0,180.0 933.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M369.0,52.0 C659.0,52.0 659.0,180.0 933.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M277.0,180.0 C613.0,180.0 613.0,180.0 933.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M323.0,180.0 C636.0,180.0 636.0,180.0 933.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M369.0,116.0 C659.0,116.0 659.0,180.0 933.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M415.0,116.0 C682.0,116.0 682.0,180.0 933.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M461.0,180.0 C705.0,180.0 705.0,180.0 933.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M783.0,52.0 C866.0,52.0 866.0,180.0 933.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M921.0,52.0 C935.0,52.0 935.0,180.0 933.0,180.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M829.0,52.0 C912.0,52.0 912.0,52.0 979.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M875.0,52.0 C935.0,52.0 935.0,52.0 979.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M967.0,52.0 C981.0,52.0 981.0,52.0 979.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M967.0,116.0 C981.0,116.0 981.0,52.0 979.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M967.0,180.0 C981.0,180.0 981.0,52.0 979.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M93.0,52.0 C567.0,52.0 567.0,52.0 1025.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M1013.0,52.0 C1027.0,52.0 1027.0,52.0 1025.0,52.0" fill="none" stroke="#3d4a68" stroke-width="1.1" opacity="0.55"/>
+<path d="M139.0,52.0 C613.0,52.0 613.0,52.0 1071.0,52.0" fill="none" stroke="#f28b6b" stroke-width="2" opacity="0.95"/>
+<path d="M1013.0,52.0 C1050.0,52.0 1050.0,52.0 1071.0,52.0" fill="none" stroke="#f28b6b" stroke-width="2" opacity="0.95"/>
+<path d="M1059.0,52.0 C1073.0,52.0 1073.0,52.0 1071.0,52.0" fill="none" stroke="#f28b6b" stroke-width="2" opacity="0.95"/>
+<circle cx="30.0" cy="52.0" r="15" fill="#1e3229" stroke="#2e6e4e" stroke-width="1.6"/>
+<text x="30.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#2e6e4e">N00</text>
+<circle cx="30.0" cy="180.0" r="15" fill="#1e3229" stroke="#2e6e4e" stroke-width="1.6"/>
+<text x="30.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#2e6e4e">N01</text>
+<circle cx="76.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="76.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N02</text>
+<circle cx="122.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="122.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N03</text>
+<circle cx="168.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="168.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N04</text>
+<circle cx="168.0" cy="180.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="168.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N07</text>
+<circle cx="214.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="214.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N05</text>
+<circle cx="214.0" cy="116.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="214.0" y="120.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N08</text>
+<circle cx="214.0" cy="180.0" r="15" fill="#3a2f1a" stroke="#9a6b1f" stroke-width="1.6"/>
+<text x="214.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#9a6b1f">N10</text>
+<circle cx="260.0" cy="52.0" r="15" fill="#3a2f1a" stroke="#9a6b1f" stroke-width="1.6"/>
+<text x="260.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#9a6b1f">N06</text>
+<circle cx="260.0" cy="180.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="260.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N14</text>
+<circle cx="306.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="306.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N09</text>
+<circle cx="306.0" cy="180.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="306.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N15</text>
+<circle cx="352.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="352.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N11</text>
+<circle cx="352.0" cy="116.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="352.0" y="120.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N16</text>
+<circle cx="352.0" cy="180.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="352.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N19</text>
+<circle cx="398.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="398.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N12</text>
+<circle cx="398.0" cy="116.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="398.0" y="120.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N17</text>
+<circle cx="398.0" cy="180.0" r="15" fill="#3a2f1a" stroke="#9a6b1f" stroke-width="1.6"/>
+<text x="398.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#9a6b1f">N20</text>
+<circle cx="444.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="444.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N13</text>
+<circle cx="444.0" cy="180.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="444.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N18</text>
+<circle cx="490.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="490.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N21</text>
+<circle cx="490.0" cy="180.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="490.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N24</text>
+<circle cx="536.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="536.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N22</text>
+<circle cx="582.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="582.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N23</text>
+<circle cx="628.0" cy="52.0" r="15" fill="#3a2f1a" stroke="#9a6b1f" stroke-width="1.6"/>
+<text x="628.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#9a6b1f">N25</text>
+<circle cx="674.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="674.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N26</text>
+<circle cx="720.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="720.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N27</text>
+<circle cx="766.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="766.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N28</text>
+<circle cx="812.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="812.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N29</text>
+<circle cx="858.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="858.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N30</text>
+<circle cx="904.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="904.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N31</text>
+<circle cx="950.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="950.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N32</text>
+<circle cx="950.0" cy="116.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="950.0" y="120.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N33</text>
+<circle cx="950.0" cy="180.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="950.0" y="184.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N34</text>
+<circle cx="996.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="996.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N35</text>
+<circle cx="1042.0" cy="52.0" r="15" fill="#3a2230" stroke="#f28b6b" stroke-width="1.6"/>
+<text x="1042.0" y="56.0" text-anchor="middle" font-size="11" font-weight="600" fill="#f28b6b">N36</text>
+<circle cx="1088.0" cy="52.0" r="19" fill="#1c2b47" stroke="#14406b" stroke-width="2.5"/>
+<text x="1088.0" y="56.0" text-anchor="middle" font-size="12.5" font-weight="800" fill="#14406b">N37</text>
+</svg>
+    <div class="legend">
+      <span><span class="sw" style="background:#1e3229;border:2px solid #6fd39a"></span>FIXED ×2</span>
+      <span><span class="sw" style="background:#3a2f1a;border:2px solid #f5b942"></span>CONDITIONAL ×4</span>
+      <span><span class="sw" style="background:#1c2b47;border:2px solid #57c8e8"></span>CANDIDATE ×1（headline）</span>
+      <span><span class="sw" style="background:#3a2230;border:2px solid #f28b6b"></span>BLOCKED ×31（诚实标记）</span>
+      <span style="color:#6b7890">为什么分块：24 层串行深度、25 个引理被多处复用——一次成型会在长上下文里稀释注意力、到处复述上游</span>
+    </div>
+  </div>
+  <div style="height:13px"></div>
+  <div class="grid g2">
+    <div class="card"><h3>写之前先想形状</h3><p>38 节点 / 98 边 / 24 层深、最宽 3 —— 理论并行加速比只有 <b>1.58×</b>。所以设计目标不是快，是<b>错误不传播</b>：污染半径最大的节点，人工介入产出比最高。</p></div>
+    <div class="card"><h3>结论复用靠调度器</h3><p>25 个节点被两个以上下游引用——前置结论一律取<b>上游落盘原文</b>，脚本拼进任务书。任何「自己再推一遍」都是漂移风险，直接被机械规则禁止。</p></div>
+  </div>
+</section>
+
+<!-- 4 数字 -->
+<section class="slide">
+  <div class="kicker">背景 · 结果先看账面</div>
+  <h1 class="t">三天的数字</h1>
+  <div class="stats">
+    <div class="stat"><div class="n">38</div><div class="d">证明块<br>全部落盘</div></div>
+    <div class="stat"><div class="n">68<small>页</small></div><div class="d">论文底稿<br>编译 0 错误</div></div>
+    <div class="stat"><div class="n">4</div><div class="d">严重事故<br>全部拦截闭环</div></div>
+    <div class="stat"><div class="n">53</div><div class="d">回归测试<br>守着所有闸门</div></div>
+    <div class="stat"><div class="n">22</div><div class="d">次人工放行<br>每条都有账</div></div>
+    <div class="stat"><div class="n">1</div><div class="d">诚实上报的<br>致命阻塞</div></div>
+  </div>
+  <div style="height:18px"></div>
+  <div class="note warn">最后一个数字最值钱：headline 定理依赖一份公开渠道拿不到的文献，<b>AI 自己把它标成了 BLOCKED</b>——它没有假装证完，我也就没有拿着一份「看起来完整」的假证明去见导师。</div>
+</section>
+
+<!-- 5 故事一 -->
+<section class="slide">
+  <div class="kicker">故事一 · 我最贵的一次学费</div>
+  <h1 class="t">「好心总结一下」，差点交付一份假论文</h1>
+  <div class="card" style="margin-bottom:13px;border-left:4px solid var(--rose)">
+    <h3>事故还原（8/20 深夜）</h3>
+    <p>38 块拼出 1423 行底稿。我「体贴」地写了个摘要再喂给编辑 agent——它端回一份 <b>7 页的「论文」</b>：结构齐全、语气专业、目录漂亮。<b>证明细节全没了。</b>最可怕的是它读起来完全像一篇论文，我差点直接当成品。</p>
+  </div>
+  <div class="grid g3">
+    <div class="card"><h3>规则① 物化输入</h3><p>喂之前先把「要喂的」落盘成文件，diff 一遍「想喂的 vs 实际喂的」。</p></div>
+    <div class="card"><h3>规则② 机械断言</h3><p>产出长度 ≥ 输入×0.8；公式/定理计数不得丢失。<b>脚本说了算，不问 agent。</b></p></div>
+    <div class="card"><h3>规则③ 人退出去</h3><p>人在 agent 与资产之间做的每次「贴心转换」，都是一个降质点。调度、落盘、检查之外，人不动数据。</p></div>
+  </div>
+  <div style="height:13px"></div>
+  <div class="note">这条规则现在是管线的<b>硬约束</b>：覆盖率断言之后，同样的事故在机械上不可能再发生——不是靠我记性好。</div>
+</section>
+
+<!-- 6 故事二 -->
+<section class="slide">
+  <div class="kicker">故事二 · 会说「不会」的 AI</div>
+  <h1 class="t">它把 headline 定理标成了 BLOCKED</h1>
+  <div class="cols">
+    <div>
+      <div class="card" style="margin-bottom:13px">
+        <h3>发生了什么</h3>
+        <p>38 块正文全部写完、结构闭合、盲审确认零编造——但账本上，headline 定理的有效状态是 <b style="color:var(--rose)">BLOCKED</b>：它依赖的一份关键文献（导师侧未公开稿）拿不到，源门无法核实。<b>状态沿依赖图传播：一个上游阻塞，诚实污染整条下游链。</b></p>
+      </div>
+      <div class="card">
+        <h3>它救了我什么</h3>
+        <p>如果它硬写——以这批模型的文采，产出会是一份<b>读起来无懈可击的完整证明</b>，而我会在导师面前翻车。它说「做不了」，反而说明它说的「做得了」更可信。</p>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="height:100%">
+        <h3>怎么训练出「会说不」</h3>
+        <ul class="list">
+          <li>开工前给一张<b>状态词表</b>：做了 / 查了 / 有条件 / 候选 / <b>做不了</b>——没有「大概」档；</li>
+          <li>缺料必须写到<b>节点级</b>：哪个假设、缺哪份文献、影响哪些下游；</li>
+          <li>报告缺口不计入「失败」——agent 不会被惩罚诚实；</li>
+          <li>四个独立盲审 agent 都确认了这套「BLOCKED 文化」执行可靠。</li>
+        </ul>
+        <p style="margin-top:8px;color:var(--muted)">心得：<b style="color:#fff">AI 的诚实是可以被流程设计出来的</b>，不是抽卡抽出来的。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 故事三 -->
+<section class="slide">
+  <div class="kicker">故事三 · 闸门拦人（包括拦我）</div>
+  <h1 class="t">AI 的每一句承诺，都要机器验收</h1>
+  <table class="tbl">
+    <tr><th style="width:33%">谁说的</th><th style="width:33%">机器怎么验收</th><th>结果</th></tr>
+    <tr><td>调度 agent：「装配指令没问题」</td><td>引用目标 ∉ 依赖闭包 → <b>拒装</b></td><td>当场拦下指令里的真实拓扑违规</td></tr>
+    <tr><td>编辑 agent：「内容没丢」</td><td>覆盖率断言：长度比＋公式计数 diff</td><td>7 页降质在这之后不可能再发生</td></tr>
+    <tr><td>写手 agent：「前置结论都用了」</td><td>I5 核对：每个前置被正文实际引用</td><td>重写轮揪出 2 处引用漂移</td></tr>
+    <tr><td>闸门脚本自己：「计数没问题」</td><td>负测试＋53 例回归</td><td>抓出它漏数 \(…\) 的盲区——<b>检查工具也要被检查</b></td></tr>
+  </table>
+  <div style="height:14px"></div>
+  <div class="note"><b>「我确认没问题」不可信，「脚本 PASS」可信。</b>凡是重要的性质，就该存在一个不讲情面的脚本——而且这个脚本自己也要有测试盯着。这是我这套系统里最反直觉、也最值钱的一条。</div>
+</section>
+
+<!-- 8 方法论 -->
+<section class="slide">
+  <div class="kicker">沉淀 · 一条方法论</div>
+  <h1 class="t">所有纪律，最终都要「下沉到代码层」</h1>
+  <div style="display:flex;align-items:center;gap:18px;margin:10px 0 20px">
+    <div class="card" style="flex:1;text-align:center;padding:20px"><h3 style="color:var(--muted)">提示词层</h3><p>写在 prompt 里的纪律<br>「请务必检查引用」</p></div>
+    <div style="font-size:30px;color:var(--amber)">→</div>
+    <div class="card" style="flex:1;text-align:center;padding:20px;border-color:var(--amber)"><h3>契约层</h3><p>写进角色契约与状态词表<br>「引用必须真实，否则 BLOCKED」</p></div>
+    <div style="font-size:30px;color:var(--amber)">→</div>
+    <div class="card" style="flex:1;text-align:center;padding:20px;border:2px solid var(--amber)"><h3>代码层</h3><p style="color:#fff">闸门脚本＋回归测试锁定<br>「引用 ∉ 依赖闭包 ⇒ 拒装」</p></div>
+  </div>
+  <div class="grid g2">
+    <div class="card"><h3>为什么必须下沉</h3><p>提示词会漂移（模型换版本、上下文变长、措辞被稀释）；代码不会。四起事故的修复<b>全部</b>以下沉告终——这不是巧合，是本项目验证次数最多的结论。</p></div>
+    <div class="card"><h3>事故是资产</h3><p>每踩一次坑 = 免费得到一条功能清单：摘要降质→覆盖率断言；派发失败→幂等落盘；计数盲区→负测试；xref 丢弃→闭包校验。<b>不复盘才是白踩。</b></p></div>
+  </div>
+</section>
+
+<!-- 9 好用/小心 -->
+<section class="slide">
+  <div class="kicker">工具观</div>
+  <h1 class="t">什么真好用，什么要小心</h1>
+  <div class="cols">
+    <div class="card" style="border-top:4px solid var(--green)">
+      <h3 style="color:var(--green)">✓ 真好用的</h3>
+      <ul class="list">
+        <li><b>长文量产</b>：38 块并行，写作成本从「周」压到「天」；</li>
+        <li><b>机械检查</b>：编译、引用闭合、格式 lint——零失误任劳任怨；</li>
+        <li><b>照样式复刻</b>：给参照论文，格式 DNA 一晚对齐；</li>
+        <li><b>文献锚定</b>：外部定理钉到来源与页码，杜绝张嘴就来；</li>
+        <li><b>诚实汇报</b>：流程设计得当，它比人更愿意承认「这步不会」。</li>
+      </ul>
+    </div>
+    <div class="card" style="border-top:4px solid var(--rose)">
+      <h3 style="color:var(--rose)">△ 要小心的</h3>
+      <ul class="list">
+        <li><b>数学正确性</b>：再流畅也要独立盲审＋人工抽验；</li>
+        <li><b>AI 自评</b>：问「你写得对吗」没有意义，要外部程序验收；</li>
+        <li><b>「读起来像对的」</b>：7 页事故就是这句话的实体；</li>
+        <li><b>经典题测不出水平</b>：预检 15/15 全对 → 全部无区分度；</li>
+        <li><b>长上下文一次成文</b>：几万字一次喂必分块，否则注意力稀释。</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 10 上手建议 -->
+<section class="slide">
+  <div class="kicker">带走的</div>
+  <h1 class="t">给同学的三条上手建议<small>不需要流水线也能用的版本</small></h1>
+  <div class="lesson"><span class="num">1</span><div><p style="font-size:17.5px;line-height:1.62;color:#dde4f0"><b style="color:#fff">要产物，不要「感觉」。</b>让 AI 把结果落成文件/代码/表格，而不是一段对话。产物才能被检查、被复用、被追问——对话只能被点赞。</p></div></div>
+  <div class="lesson"><span class="num">2</span><div><p style="font-size:17.5px;line-height:1.62;color:#dde4f0"><b style="color:#fff">给契约，不给客套。</b>把「输入清单＋禁区＋输出模板」写清楚再开工。一句「帮我写好一点」换不来稳定质量，一份两页的契约可以。</p></div></div>
+  <div class="lesson"><span class="num">3</span><div><p style="font-size:17.5px;line-height:1.62;color:#dde4f0"><b style="color:#fff">先搭检查，再跑量产。</b>哪怕只是「编译一下」「跑下测试」「数一下条目」。检查先于生成，你才有资格让 AI 替你干活。</p></div></div>
+  <div style="height:8px"></div>
+  <div class="note">这三条就是那条方法论的个人版：<b>把对 AI 的期待，变成可以机器验证的期待。</b></div>
+</section>
+
+<!-- 11 总结 -->
+<section class="slide">
+  <div class="kicker">一句话总结</div>
+  <h1 class="t">所以，AI 能写数学论文吗？</h1>
+  <div style="padding:40px 20px">
+    <div class="quote serif">我不问 AI 会不会写论文。<br>我问：<em>它写的每一步，我能不能在五分钟内验证。</em></div>
+  </div>
+  <div class="grid g3" style="margin-top:18px">
+    <div class="card"><h3>能验证 → 放心用</h3><p>编译门、覆盖率、引用闭包把住关，AI 就是任劳任怨的量产工人。</p></div>
+    <div class="card"><h3>不能验证 → 别上瘾</h3><p>读起来越像「对的」，越要停下来问：谁来验收它？</p></div>
+    <div class="card"><h3>缺东西 → 让它说实话</h3><p>给它一张状态词表，它会把你最需要的信息——「哪一步做不了」——按时交上来。</p></div>
+  </div>
+  <div style="text-align:center;margin-top:26px;color:var(--muted);font-size:16.5px;letter-spacing:.12em">谢谢大家 · 欢迎交流</div>
+</section>
+
+<!-- 12 附录 -->
+<section class="slide">
+  <div class="kicker">附录</div>
+  <h1 class="t">工具栈与账本（会后细聊）</h1>
+  <div class="grid g2">
+    <div class="card">
+      <h3>骨架</h3>
+      <p><span class="tag">Claude Code / 自建 agent harness</span><span class="tag">多角色 preset（写手/盲审/审查员）</span><span class="tag">git 全程版本管理</span><br><br>每个角色一份契约提示词：职责、禁区、输出模板、记账格式。角色间不越界、不通气（盲审隔离）。</p>
+    </div>
+    <div class="card">
+      <h3>模型</h3>
+      <p><span class="tag">GPT-5.6 级（数学生产/审查）</span><span class="tag">DeepSeek v4</span><span class="tag">Kimi K3</span><span class="tag">Qwen 3.7</span><br><br>选型靠预检数据说话：经典题 15/15 全对 → 全部出局（无区分度）；残缺变体才显区分力。</p>
+    </div>
+    <div class="card">
+      <h3>机械层（零 LLM）</h3>
+      <p><span class="tag">Python 调度器</span><span class="tag">组装器</span><span class="tag">覆盖率/引用检查</span><span class="tag">paper lint</span><span class="tag">xelatex 编译门</span><span class="tag">53 例回归测试</span><br><br>所有「不信任」都住在这一层。</p>
+    </div>
+    <div class="card">
+      <h3>账本</h3>
+      <p><span class="tag">六态状态账（每块）</span><span class="tag">gate-ledger 22 条</span><span class="tag">manifest 214 条哈希</span><span class="tag">STATUS 机器生成</span><br><br>凡走过必留痕迹——今天每个数字都能翻出出处。</p>
+    </div>
+  </div>
+</section>
+
+</div>
+<div id="hud"><div id="bar"></div></div><div id="cnt"></div>
+<script>
+const slides=[...document.querySelectorAll('.slide')];let cur=0;
+function show(n){cur=Math.max(0,Math.min(slides.length-1,n));
+ slides.forEach((s,k)=>s.classList.toggle('active',k===cur));
+ document.getElementById('bar').style.width=((cur+1)/slides.length*100)+'%';
+ document.getElementById('cnt').textContent=(cur+1)+' / '+slides.length;}
+function fit(){const s=Math.min(innerWidth/1280,innerHeight/720);document.documentElement.style.setProperty('--s',s);}
+addEventListener('resize',fit);
+addEventListener('keydown',e=>{
+ if(e.key==='f'||e.key==='F'){document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();}
+ if(['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();show(cur+1);}
+ else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(cur-1);}
+ else if(e.key==='Home')show(0); else if(e.key==='End')show(slides.length-1);});
+slides.forEach((s,k)=>{const f=document.createElement('div');f.className='foot';
+ f.innerHTML='<span>让 AI 写了 68 页数学论文之后 · AI 使用心得 · 2026-08-21</span><span>'+(k+1)+' / '+slides.length+'</span>';s.appendChild(f);});
+fit();show(0);
+</script>
+</body>
+</html>
