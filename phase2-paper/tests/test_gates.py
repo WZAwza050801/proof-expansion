@@ -293,6 +293,61 @@ def test_assemble_applies_legacy_xref():
         assert len(r['xrefs']['applied']) == 1 and not r['xrefs']['skipped']
 
 
+def test_assemble_xref_dep_violation_rejected():
+    """缝2 机械收口回归：xref 引用 at 证明不依赖的节点 → 拒装（实证前科 N19→N18 类）。
+    夹具：N00 与 N01 互不依赖（N01 deps=[N00]，N00 deps=[]）——
+    在 N00 里 xref 引用 N01＝引用了后代而非前置，闭包外 → error。"""
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', 'By the conclusion of N01 this leaf proceeds.')  # N00 无 deps 却引 N01
+        write_frag(fd, 'N01', 'Top.')
+        i = instr()
+        i['xrefs'] = [{'at': 'N00', 'ref': 'N01', 'macro': '\\ref{thm:N01-main}'}]
+        ip = write_json(d, 'instr.json', i)
+        rc, out = run(ASM, ip, fd, tree, os.path.join(d, 'p.tex'))
+        assert rc == 1 and '语义越权' in out, out
+
+
+def test_assemble_xref_transitive_dep_warns_but_assembles():
+    """传递闭包内但非直接 deps：warn 不拒装（引用祖先合法，提示核对）。"""
+    with tempfile.TemporaryDirectory() as d:
+        # 链 N02 → N01 → N00；N02 直接 deps=[N01]，xref 引 N00（传递合法）
+        tree = make_tree(d)
+        t = json.load(open(tree, encoding='utf-8'))
+        t['nodes'][0]['deps'] = []
+        t['nodes'][1]['deps'] = ['N00']
+        t['nodes'].append({'id': 'N02', 'title': 'child', 'statement': 'Z。',
+                           'completion_test': 'Z。', 'deps': ['N01']})
+        json.dump(t, open(tree, 'w', encoding='utf-8'), ensure_ascii=False)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', FRAG_N00)
+        write_frag(fd, 'N01', 'Middle.')
+        write_frag(fd, 'N02', 'By the conclusion of N00 (via N01) we finish.')
+        i = instr(('N00', 'N01', 'N02'))
+        i['xrefs'] = [{'at': 'N02', 'ref': 'N00', 'macro': '\\ref{lem:N00}'}]
+        ip = write_json(d, 'instr.json', i)
+        rep = os.path.join(d, 'r.json')
+        rc, out = run(ASM, ip, fd, tree, os.path.join(d, 'p.tex'), '--report', rep)
+        assert rc == 0, out
+        assert '非直接 deps' in out, out
+
+
+def test_assemble_labels_gap_warned():
+    """labels 全表缺口（coordinator 职责3）→ warn 记账（fail-open 不拒装）。"""
+    with tempfile.TemporaryDirectory() as d:
+        tree = make_tree(d)
+        fd = os.path.join(d, 'frag'); os.makedirs(fd)
+        write_frag(fd, 'N00', FRAG_N00)
+        write_frag(fd, 'N01', 'By the conclusion of N00 we proceed to the main claim.')
+        i = instr()
+        # 不给 labels，也不给 --labels 清单 → 两节点都在缺口
+        ip = write_json(d, 'instr.json', i)
+        rc, out = run(ASM, ip, fd, tree, os.path.join(d, 'p.tex'))
+        assert rc == 0, out
+        assert 'labels 全表缺口' in out, out
+
+
 def test_assemble_xref_find_protocol_requires_unique():
     """新协议（find/replace）：find 出现 2 次 → 报错拒换（不许盲换）。"""
     with tempfile.TemporaryDirectory() as d:

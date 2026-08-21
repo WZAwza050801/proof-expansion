@@ -68,8 +68,25 @@ def render_ref(label):
     return f'{env}~\\ref{{{label}}}' if env else None
 
 
-def apply_xrefs(bodies, instr, err, warn, rep):
-    """消费装配指令 xrefs（修复：此前字段被组装器静默丢弃）。"""
+def deps_closure(nodes, nid):
+    """nid 的传递依赖闭包（DAG）；nodes={id:node}。"""
+    seen, stack = set(), list(nodes.get(nid, {}).get('deps', []))
+    while stack:
+        d = stack.pop()
+        if d in seen or d not in nodes:
+            continue
+        seen.add(d)
+        stack.extend(nodes[d].get('deps', []))
+    return seen
+
+
+def apply_xrefs(bodies, instr, err, warn, rep, nodes=None):
+    """消费装配指令 xrefs（修复：此前字段被组装器静默丢弃）。
+
+    语义合法性检查（2026-08-21 缝2 机械收口，审计建议落地）：legacy 协议 ref（或新协议
+    find 内提及的 NXX）必须 ∈ at 的依赖闭包——引用一个 at 证明并不依赖的节点＝语义越权
+    （实证前科：coordinator v0.1 的 N19→N18，N19 deps 无 N18，当时穿过全部格式闸门）。
+    传递闭包内＝warn（直接 deps 外但确属祖先，提示核对）；闭包外＝error 拒装。"""
     applied, skipped = [], []
     for x in instr.get('xrefs', []):
         at = str(x.get('at', ''))
@@ -77,6 +94,16 @@ def apply_xrefs(bodies, instr, err, warn, rep):
             skipped.append({'xref': x, 'reason': f'at 块 {at} 不在装配范围'})
             warn.append(f'xref(at {at}) 跳过：块不在装配范围')
             continue
+        # 语义合法性（两协议统一：legacy 取 ref 字段；新协议从 find 短语抽 NXX）
+        if nodes:
+            _m = re.search(r'N\d\d', str(x.get('find', '')))
+            ref_chk = str(x.get('ref', '')) or (_m.group(0) if _m else None)
+            if ref_chk and ref_chk in nodes and at in nodes:
+                if ref_chk not in nodes[at].get('deps', []):
+                    if ref_chk in deps_closure(nodes, at):
+                        warn.append(f'xref(at {at}, ref {ref_chk})：非直接 deps（传递闭包内）——请核对引用是否成立')
+                    else:
+                        err.append(f'xref 语义越权: {ref_chk} 不在 {at} 的依赖闭包内（引用了证明不依赖的节点）')
         body = bodies[at]
         if x.get('find') is not None and x.get('replace') is not None:
             n = body.count(x['find'])
@@ -407,7 +434,12 @@ def main():
         inv = json.load(open(labels_path, encoding='utf-8'))
         for k, v in primary_labels_from_inventory(inv).items():
             labels_map.setdefault(k, v)
-    apply_xrefs(bodies, instr, err, warn, rep)
+    # labels 完备性核销（缝2 第二件）：装配范围内每节点都须有主陈述 label——
+    # coordinator 契约职责 3（全表）的机械对账；缺失只 warn（\Nref 已有 fail-open 降级），但记账可见。
+    missing_labels = [nid for _s, nid in order if nid in bodies and nid not in labels_map]
+    if missing_labels:
+        warn.append(f'labels 全表缺口（coordinator 职责3 未覆盖，靠 extract_labels 兜底或 Nref 降级）: {missing_labels}')
+    apply_xrefs(bodies, instr, err, warn, rep, nodes=nodes)
     if instr.get('nref_wrap'):
         wrap_raw_mentions(bodies, warn, rep)
     deps_entries = extract_deps_appendix(bodies, warn, rep) if instr.get('deps_appendix') else []
